@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, Check, Download, Link2, Loader2, Pencil, Trash2 } from "lucide-react";
+import { Boxes, Check, Download, Loader2, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ShareButtons } from "@/components/ShareButtons";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -193,19 +194,6 @@ function EstimatePage() {
               </p>
             </div>
             <div className="no-print flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  navigator.clipboard.writeText(
-                    `${window.location.origin}/estimate/${estimate.id}`,
-                  );
-                  toast.success(t("res.copied"));
-                }}
-              >
-                <Link2 className="size-4" />
-                {t("res.share")}
-              </Button>
               <Button variant="outline" size="sm" onClick={() => window.print()}>
                 <Download className="size-4" />
                 {t("res.pdf")}
@@ -218,6 +206,11 @@ function EstimatePage() {
               )}
             </div>
           </div>
+
+          <ShareButtons
+            title={`${t("res.title")} — VolumCalc`}
+            text={`${t("res.title")}: ${m3(total)} · ${items.length} ${t("res.items")}`}
+          />
 
           <div className="card-soft mt-8 grid gap-6 p-6 sm:grid-cols-3">
             <div>
