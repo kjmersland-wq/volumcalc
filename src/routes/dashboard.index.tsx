@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowUpRight, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/dashboard/")({
 
 function DashboardHome() {
   const { t, lang } = useI18n();
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["estimates"],
@@ -37,6 +38,28 @@ function DashboardHome() {
       return data;
     },
   });
+
+  const { data: quotes } = useQuery({
+    queryKey: ["quote-requests"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quote_requests")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const markHandled = useMutation({
+    mutationFn: async (quoteId: string) => {
+      const { error } = await supabase.from("quote_requests").update({ handled: true }).eq("id", quoteId);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["quote-requests"] }),
+  });
+
 
   if (isLoading) {
     return (
@@ -96,6 +119,43 @@ function DashboardHome() {
           </ul>
         </div>
       )}
+
+      <h2 className="mt-12 text-xl font-bold">{t("dash.quotes")}</h2>
+      {(quotes ?? []).length === 0 ? (
+        <div className="card-soft mt-4 p-8 text-center text-muted-foreground">{t("dash.quotesEmpty")}</div>
+      ) : (
+        <ul className="card-soft mt-4 divide-y divide-border">
+          {(quotes ?? []).map((q) => (
+            <li key={q.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+              <div className="min-w-0">
+                <p className="font-medium">{q.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {[q.phone, q.email].filter(Boolean).join(" · ")} · {shortDate(q.created_at, lang)}
+                </p>
+                {q.message && <p className="mt-1 text-sm text-muted-foreground">{q.message}</p>}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button asChild size="sm" variant="ghost">
+                  <Link to="/estimate/$id" params={{ id: q.estimate_id }}>
+                    {t("dash.open")}
+                    <ArrowUpRight className="size-4" />
+                  </Link>
+                </Button>
+                {q.handled ? (
+                  <Badge variant="secondary" className="bg-success/15 text-success">
+                    {t("dash.handled")}
+                  </Badge>
+                ) : (
+                  <Button size="sm" variant="outline" onClick={() => markHandled.mutate(q.id)}>
+                    {t("dash.markHandled")}
+                  </Button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
     </div>
   );
 }

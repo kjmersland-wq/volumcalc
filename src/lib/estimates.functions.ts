@@ -114,7 +114,9 @@ export const getSharedEstimate = createServerFn({ method: "POST" })
 
     const { data: estimate } = await supabaseAdmin
       .from("estimates")
-      .select("id,customer_name,address,customer_phone,status,total_volume_m3,photo_urls,created_at,share_token")
+      .select(
+        "id,customer_name,address,customer_phone,status,total_volume_m3,photo_urls,created_at,share_token,company_id,access_floor,has_elevator,carry_distance_m,access_notes",
+      )
       .eq("id", data.id)
       .maybeSingle();
 
@@ -123,8 +125,11 @@ export const getSharedEstimate = createServerFn({ method: "POST" })
     const [{ data: items }, { data: rooms }] = await Promise.all([
       supabaseAdmin
         .from("estimate_items")
-        .select("id,name,name_no,quantity,length_cm,width_cm,height_cm,volume_m3,confidence,photo_url,room_id")
+        .select(
+          "id,name,name_no,quantity,length_cm,width_cm,height_cm,volume_m3,confidence,photo_url,room_id,notes,tags,is_included,deleted_at",
+        )
         .eq("estimate_id", data.id)
+        .is("deleted_at", null)
         .order("volume_m3", { ascending: false }),
       supabaseAdmin
         .from("estimate_rooms")
@@ -133,7 +138,49 @@ export const getSharedEstimate = createServerFn({ method: "POST" })
         .order("sort_order"),
     ]);
 
-    const { share_token: _token, ...safeEstimate } = estimate;
+    const { share_token: _token, company_id: _companyId, ...safeEstimate } = estimate;
 
     return { estimate: safeEstimate, items: items ?? [], rooms: rooms ?? [] };
   });
+
+const quoteSchema = z.object({
+  id: z.string().uuid(),
+  token: z.string().trim().min(8).max(64).regex(/^[a-f0-9]+$/i),
+  name: z.string().trim().min(1).max(120),
+  phone: z.string().trim().max(40).optional(),
+  email: z.string().trim().email().max(160).optional(),
+  message: z.string().trim().max(2000).optional(),
+});
+
+/**
+ * A customer holding the share link can ask the owning company for a quote.
+ * The token is validated server-side before anything is written.
+ */
+export const requestQuote = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => quoteSchema.parse(data))
+  .handler(async ({ data }) => {
+    if (!data.phone && !data.email) throw new Error("A phone number or email is required");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: estimate } = await supabaseAdmin
+      .from("estimates")
+      .select("id,share_token,company_id")
+      .eq("id", data.id)
+      .maybeSingle();
+
+    if (!estimate || estimate.share_token !== data.token) throw new Error("Estimate not found");
+
+    const { error } = await supabaseAdmin.from("quote_requests").insert({
+      estimate_id: estimate.id,
+      company_id: estimate.company_id,
+      name: data.name,
+      phone: data.phone || null,
+      email: data.email || null,
+      message: data.message || null,
+    });
+    if (error) throw new Error("Could not send the request");
+
+    return { ok: true };
+  });
+
