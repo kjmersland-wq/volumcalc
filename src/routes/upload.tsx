@@ -115,7 +115,14 @@ function UploadPage() {
     } catch (error) {
       console.error(error);
       setStage("idle");
-      toast.error(t("upload.failed"));
+      const message = error instanceof Error ? error.message : "";
+      if (message.includes("payment_required")) {
+        toast.error(t("upload.aiCredits"));
+      } else if (message.includes("rate_limited")) {
+        toast.error(t("upload.aiBusy"));
+      } else {
+        toast.error(t("upload.failed"));
+      }
     }
   }
 
