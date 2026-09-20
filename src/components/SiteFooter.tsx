@@ -3,7 +3,7 @@ import { useI18n } from "@/lib/i18n";
 import { VolumCalcLogo } from "@/components/VolumCalcLogo";
 
 export function SiteFooter() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
 
   return (
     <footer className="no-print border-t border-border bg-muted/40">
@@ -29,12 +29,12 @@ export function SiteFooter() {
               </li>
               <li>
                 <Link to="/moving-inventory-list" className="transition-colors hover:text-foreground">
-                  Inventory guide
+                  {lang === "no" ? "Inventarliste-guide" : "Inventory guide"}
                 </Link>
               </li>
               <li>
-                <Link to="/en/moving-van-calculator" className="transition-colors hover:text-foreground">
-                  Van calculator
+                <Link to={lang === "no" ? "/flyttebil-kalkulator" : "/en/moving-van-calculator"} className="transition-colors hover:text-foreground">
+                  {lang === "no" ? "Flyttebil-kalkulator" : "Van calculator"}
                 </Link>
               </li>
             </ul>
