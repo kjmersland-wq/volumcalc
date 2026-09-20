@@ -71,74 +71,22 @@ function UploadPage() {
 
     try {
       setStage("uploading");
-      const { data: estimate, error: insertError } = await supabase
-        .from("estimates")
-        .insert({
-          customer_name: form.name || null,
-          customer_phone: form.phone || null,
-          move_date: form.date || null,
-          address: form.address || null,
-        })
-        .select()
-        .single();
-      if (insertError || !estimate) throw insertError ?? new Error("insert_failed");
-
       const compressed = await Promise.all(files.map((f) => compressImage(f)));
-      const paths: string[] = [];
-      for (let i = 0; i < compressed.length; i++) {
-        const image = compressed[i];
-        if (!image) continue;
-        const path = `${estimate.id}/${i}.jpg`;
-        const { error } = await supabase.storage
-          .from("estimate-photos")
-          .upload(path, image, { contentType: "image/jpeg", upsert: true });
-        if (error) throw error;
-        paths.push(path);
-      }
-
-      const { data: signed } = await supabase.storage
-        .from("estimate-photos")
-        .createSignedUrls(paths, 60 * 60 * 24 * 365);
-      const photoUrls = (signed ?? []).map((s) => s.signedUrl).filter(Boolean) as string[];
+      const images = await Promise.all(compressed.map((b) => blobToDataUrl(b)));
 
       setStage("analysing");
-      const dataUrls = await Promise.all(compressed.map((b) => blobToDataUrl(b)));
-      const result = await analyze({ data: { images: dataUrls } });
+      const created = await submitEstimate({
+        data: {
+          images,
+          ...(form.name.trim() ? { customer_name: form.name.trim() } : {}),
+          ...(form.phone.trim() ? { customer_phone: form.phone.trim() } : {}),
+          ...(form.date ? { move_date: form.date } : {}),
+          ...(form.address.trim() ? { address: form.address.trim() } : {}),
+        },
+      });
 
       setStage("saving");
-      if (result.items.length) {
-        const roomNames = Array.from(new Set(result.items.map((item) => item.room || "Other")));
-        const { data: rooms, error: roomsError } = await supabase
-          .from("estimate_rooms")
-          .insert(roomNames.map((name, sortOrder) => ({ estimate_id: estimate.id, name, sort_order: sortOrder })))
-          .select("id,name");
-        if (roomsError) throw roomsError;
-        const roomIds = new Map((rooms ?? []).map((room) => [room.name, room.id]));
-        const { error: itemsError } = await supabase.from("estimate_items").insert(
-          result.items.map((item) => ({
-            estimate_id: estimate.id,
-            name: item.name,
-            name_no: item.name_no,
-            category: item.category,
-            quantity: item.quantity,
-            length_cm: item.length_cm,
-            width_cm: item.width_cm,
-            height_cm: item.height_cm,
-            volume_m3: item.volume_m3,
-            confidence: item.confidence,
-            photo_url: photoUrls[item.photo_index] ?? photoUrls[0] ?? null,
-            room_id: roomIds.get(item.room || "Other") ?? null,
-          })),
-        );
-        if (itemsError) throw itemsError;
-      }
-
-      await supabase
-        .from("estimates")
-        .update({ photo_urls: photoUrls, total_volume_m3: result.total })
-        .eq("id", estimate.id);
-
-      navigate({ to: "/estimate/$id", params: { id: estimate.id } });
+      navigate({ to: "/estimate/$id", params: { id: created.id }, search: { token: created.share_token } });
     } catch (error) {
       console.error(error);
       setStage("idle");
