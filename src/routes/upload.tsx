@@ -9,8 +9,7 @@ import { Label } from "@/components/ui/label";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useI18n } from "@/lib/i18n";
-import { supabase } from "@/integrations/supabase/client";
-import { analyzePhotos } from "@/lib/analyze.functions";
+import { createEstimate } from "@/lib/estimates.functions";
 import { blobToDataUrl, compressImage } from "@/lib/images";
 
 export const Route = createFileRoute("/upload")({
