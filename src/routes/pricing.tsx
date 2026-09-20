@@ -115,7 +115,7 @@ function Pricing() {
             <span className="flex size-10 items-center justify-center rounded-lg bg-primary-soft text-primary"><Building2 className="size-5" /></span>
             <h2 className="text-2xl font-bold">{t("price.business")}</h2>
           </div>
-          <div className="mt-7 grid gap-6 md:grid-cols-3">
+          <div className="mt-7 grid gap-6 md:grid-cols-2">
           {plans.map((plan) => (
             <div
               key={plan.name}
@@ -154,7 +154,7 @@ function Pricing() {
                   {t("payment.subscribe")}
                 </Button>
               ) : (
-                <Button asChild className="mt-8" variant="outline"><Link to={plan.price === "0" ? "/upload" : "/auth"}>{t("price.cta")}</Link></Button>
+                <Button asChild className="mt-8" variant="outline"><Link to="/auth">{t("price.cta")}</Link></Button>
               )}
             </div>
           ))}
