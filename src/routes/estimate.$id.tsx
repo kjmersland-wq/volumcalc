@@ -1,20 +1,39 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, Check, Download, Loader2, Pencil, Trash2 } from "lucide-react";
+import {
+  Boxes,
+  Check,
+  Download,
+  Link2,
+  Loader2,
+  Minus,
+  Package,
+  Pencil,
+  Plus,
+  Trash2,
+  Truck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ShareButtons } from "@/components/ShareButtons";
+import { QuoteRequestDialog } from "@/components/QuoteRequestDialog";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { getSharedEstimate } from "@/lib/estimates.functions";
 import { m3, money, shortDate } from "@/lib/format";
+import { recommendVehicle, recommendedVolume, storageUnitM2 } from "@/lib/volume";
 
 export const Route = createFileRoute("/estimate/$id")({
   validateSearch: (search: Record<string, unknown>): { token?: string } => {
@@ -23,10 +42,10 @@ export const Route = createFileRoute("/estimate/$id")({
   },
   head: () => ({
     meta: [
-      { title: "Volume estimate — VolumCalc" },
-      { name: "description", content: "Itemised cubic metre estimate generated from customer photos." },
-      { property: "og:title", content: "Volume estimate — VolumCalc" },
-      { property: "og:description", content: "Itemised cubic metre estimate generated from photos." },
+      { title: "Estimate report — VolumCalc" },
+      { name: "description", content: "Itemised cubic metre estimate and inventory review generated from photos." },
+      { property: "og:title", content: "Estimate report — VolumCalc" },
+      { property: "og:description", content: "Itemised cubic metre estimate and inventory review." },
       { name: "robots", content: "noindex" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -47,9 +66,29 @@ type Item = {
   confidence: number;
   photo_url: string | null;
   room_id: string | null;
+  notes: string | null;
+  tags: string[];
+  is_included: boolean;
 };
 
 type Room = { id: string; name: string; sort_order: number };
+
+const TAGS = [
+  { value: "disassemble", key: "rep.tag.disassemble" },
+  { value: "fragile", key: "rep.tag.fragile" },
+  { value: "heavy", key: "rep.tag.heavy" },
+  { value: "discard", key: "rep.tag.discard" },
+] as const;
+
+const CHECKLIST = ["rep.check1", "rep.check2", "rep.check3", "rep.check4"] as const;
+
+function itemVolume(item: Item, patch: Partial<Item> = {}) {
+  const l = Number(patch.length_cm ?? item.length_cm);
+  const w = Number(patch.width_cm ?? item.width_cm);
+  const h = Number(patch.height_cm ?? item.height_cm);
+  const q = Number(patch.quantity ?? item.quantity);
+  return Math.round(((l * w * h * q) / 1_000_000) * 100) / 100;
+}
 
 function EstimatePage() {
   const { id } = Route.useParams();
@@ -58,9 +97,21 @@ function EstimatePage() {
   const { session, loading: authLoading } = useAuth();
   const loadShared = useServerFn(getSharedEstimate);
   const queryClient = useQueryClient();
-  const [editing, setEditing] = useState<Record<string, Partial<Item>>>({});
+
   const [renamingRoom, setRenamingRoom] = useState<string | null>(null);
   const [roomName, setRoomName] = useState("");
+  const [view, setView] = useState<"customer" | "business">("customer");
+  const [noteDraft, setNoteDraft] = useState<Record<string, string>>({});
+  const [access, setAccess] = useState<{
+    access_floor: string;
+    has_elevator: boolean;
+    carry_distance_m: string;
+    access_notes: string;
+  } | null>(null);
+  const [internalNotes, setInternalNotes] = useState<string | null>(null);
+  const [hourly, setHourly] = useState("1200");
+  const [hours, setHours] = useState("5");
+  const [checked, setChecked] = useState<Record<string, boolean>>({});
 
   const { data, isLoading } = useQuery({
     queryKey: ["estimate", id, session?.user.id ?? "guest"],
@@ -72,48 +123,108 @@ function EstimatePage() {
         if (!shared) return { estimate: null, items: [] as Item[], rooms: [] as Room[], company: null };
         return {
           estimate: shared.estimate,
-          items: shared.items as Item[],
+          items: shared.items as unknown as Item[],
           rooms: shared.rooms as Room[],
           company: null,
         };
       }
       const [{ data: estimate }, { data: items }, { data: rooms }, { data: company }] = await Promise.all([
         supabase.from("estimates").select("*").eq("id", id).maybeSingle(),
-        supabase.from("estimate_items").select("*").eq("estimate_id", id).order("volume_m3", { ascending: false }),
+        supabase
+          .from("estimate_items")
+          .select("*")
+          .eq("estimate_id", id)
+          .is("deleted_at", null)
+          .order("volume_m3", { ascending: false }),
         supabase.from("estimate_rooms").select("id,name,sort_order").eq("estimate_id", id).order("sort_order"),
         supabase.from("companies").select("*").eq("id", session.user.id).maybeSingle(),
       ]);
-      return { estimate, items: (items ?? []) as Item[], rooms: (rooms ?? []) as Room[], company };
+      return { estimate, items: (items ?? []) as unknown as Item[], rooms: (rooms ?? []) as Room[], company };
     },
   });
 
-  const saveItem = useMutation({
+  const estimate = data?.estimate as
+    | (Record<string, unknown> & {
+        id: string;
+        status: string;
+        created_at: string;
+        customer_name: string | null;
+        customer_phone: string | null;
+        address: string | null;
+        photo_urls: string[] | null;
+        access_floor: number | null;
+        has_elevator: boolean | null;
+        carry_distance_m: number | null;
+        access_notes: string | null;
+        internal_notes?: string | null;
+        share_token?: string;
+      })
+    | null
+    | undefined;
+
+  useEffect(() => {
+    if (!estimate) return;
+    setAccess((prev) =>
+      prev ?? {
+        access_floor: estimate.access_floor != null ? String(estimate.access_floor) : "",
+        has_elevator: Boolean(estimate.has_elevator),
+        carry_distance_m: estimate.carry_distance_m != null ? String(estimate.carry_distance_m) : "",
+        access_notes: estimate.access_notes ?? "",
+      },
+    );
+    setInternalNotes((prev) => prev ?? estimate.internal_notes ?? "");
+  }, [estimate]);
+
+  useEffect(() => {
+    if (session) setView("business");
+  }, [session]);
+
+  async function recalcTotal() {
+    const { data: rows } = await supabase
+      .from("estimate_items")
+      .select("volume_m3,is_included")
+      .eq("estimate_id", id)
+      .is("deleted_at", null);
+    const total =
+      Math.round(
+        (rows ?? [])
+          .filter((r) => (r as { is_included?: boolean }).is_included !== false)
+          .reduce((sum, r) => sum + Number(r.volume_m3), 0) * 100,
+      ) / 100;
+    await supabase.from("estimates").update({ total_volume_m3: total }).eq("id", id);
+  }
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["estimate", id] });
+
+  const patchItem = useMutation({
     mutationFn: async ({ item, patch }: { item: Item; patch: Partial<Item> }) => {
-      const l = Number(patch.length_cm ?? item.length_cm);
-      const w = Number(patch.width_cm ?? item.width_cm);
-      const h = Number(patch.height_cm ?? item.height_cm);
-      const q = Number(patch.quantity ?? item.quantity);
-      const volume = Math.round(((l * w * h * q) / 1_000_000) * 100) / 100;
+      const payload: Record<string, unknown> = { ...patch };
+      if (
+        patch.length_cm !== undefined ||
+        patch.width_cm !== undefined ||
+        patch.height_cm !== undefined ||
+        patch.quantity !== undefined
+      ) {
+        payload['volume_m3'] = itemVolume(item, patch);
+      }
+      const { error } = await supabase.from("estimate_items").update(payload).eq("id", item.id);
+      if (error) throw error;
+      await recalcTotal();
+    },
+    onSuccess: invalidate,
+    onError: () => toast.error(t("upload.failed")),
+  });
+
+  const softDelete = useMutation({
+    mutationFn: async ({ itemId, restore }: { itemId: string; restore?: boolean }) => {
       const { error } = await supabase
         .from("estimate_items")
-        .update({ length_cm: l, width_cm: w, height_cm: h, quantity: q, volume_m3: volume })
-        .eq("id", item.id);
+        .update({ deleted_at: restore ? null : new Date().toISOString() })
+        .eq("id", itemId);
       if (error) throw error;
       await recalcTotal();
     },
-    onSuccess: () => {
-      setEditing({});
-      queryClient.invalidateQueries({ queryKey: ["estimate", id] });
-    },
-  });
-
-  const deleteItem = useMutation({
-    mutationFn: async (itemId: string) => {
-      const { error } = await supabase.from("estimate_items").delete().eq("id", itemId);
-      if (error) throw error;
-      await recalcTotal();
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["estimate", id] }),
+    onSuccess: invalidate,
   });
 
   const approve = useMutation({
@@ -126,7 +237,7 @@ function EstimatePage() {
     },
     onSuccess: () => {
       toast.success(t("dash.approved"));
-      queryClient.invalidateQueries({ queryKey: ["estimate", id] });
+      invalidate();
       queryClient.invalidateQueries({ queryKey: ["estimates"] });
     },
   });
@@ -134,13 +245,13 @@ function EstimatePage() {
   const renameRoom = useMutation({
     mutationFn: async ({ roomId, name }: { roomId: string; name: string }) => {
       const cleanName = name.trim();
-      if (!cleanName) return;
+      if (!cleanName) throw new Error("empty");
       const { error } = await supabase.from("estimate_rooms").update({ name: cleanName }).eq("id", roomId);
       if (error) throw error;
     },
     onSuccess: () => {
       setRenamingRoom(null);
-      queryClient.invalidateQueries({ queryKey: ["estimate", id] });
+      invalidate();
     },
   });
 
@@ -149,14 +260,36 @@ function EstimatePage() {
       const { error } = await supabase.from("estimate_items").update({ room_id: roomId }).eq("id", itemId);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["estimate", id] }),
+    onSuccess: invalidate,
   });
 
-  async function recalcTotal() {
-    const { data: rows } = await supabase.from("estimate_items").select("volume_m3").eq("estimate_id", id);
-    const total = Math.round((rows ?? []).reduce((sum, r) => sum + Number(r.volume_m3), 0) * 100) / 100;
-    await supabase.from("estimates").update({ total_volume_m3: total }).eq("id", id);
-  }
+  const saveAccess = useMutation({
+    mutationFn: async () => {
+      if (!access) return;
+      const { error } = await supabase
+        .from("estimates")
+        .update({
+          access_floor: access.access_floor === "" ? null : Number(access.access_floor),
+          has_elevator: access.has_elevator,
+          carry_distance_m: access.carry_distance_m === "" ? null : Number(access.carry_distance_m),
+          access_notes: access.access_notes.trim() || null,
+          internal_notes: (internalNotes ?? "").trim() || null,
+        })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(t("rep.saved"));
+      invalidate();
+    },
+    onError: () => toast.error(t("upload.failed")),
+  });
+
+  const items = useMemo(() => data?.items ?? [], [data]);
+  const rooms = data?.rooms ?? [];
+  const included = items.filter((item) => item.is_included !== false);
+  const netVolume = Math.round(included.reduce((sum, i) => sum + Number(i.volume_m3), 0) * 100) / 100;
+  const gross = recommendedVolume(netVolume);
 
   if (isLoading || authLoading) {
     return (
@@ -166,44 +299,92 @@ function EstimatePage() {
     );
   }
 
-  const estimate = data?.estimate;
   if (!estimate) {
     return (
       <div className="flex min-h-screen flex-col">
         <SiteHeader />
-        <main className="flex flex-1 items-center justify-center p-8 text-muted-foreground">
-          {t("res.notFound")}
-        </main>
+        <main className="flex flex-1 items-center justify-center p-8 text-muted-foreground">{t("res.notFound")}</main>
         <SiteFooter />
       </div>
     );
   }
 
-  const items = data.items;
-  const rooms = data.rooms;
-  const company = data.company as { price_per_m3: number; currency: string; company_name: string } | null;
-  const total = items.reduce((sum, i) => sum + Number(i.volume_m3), 0);
+  const company = data?.company as { price_per_m3: number; currency: string; company_name: string } | null;
+  const currency = company?.currency ?? "NOK";
   const canEdit = Boolean(session);
+  const businessView = canEdit && view === "business";
+  const shareToken = (estimate.share_token as string | undefined) ?? token;
+
+  const statusKey =
+    estimate.status === "approved" ? "rep.status.processed" : items.length ? "rep.status.ready" : "rep.status.draft";
+
   const groups = [
-    ...rooms.map((room) => ({
-      ...room,
-      items: items.filter((item) => item.room_id === room.id),
-    })),
+    ...rooms.map((room) => ({ ...room, items: items.filter((item) => item.room_id === room.id) })),
     ...(items.some((item) => !item.room_id)
       ? [{ id: "other", name: t("res.other"), sort_order: 999, items: items.filter((item) => !item.room_id) }]
       : []),
   ].filter((group) => group.items.length > 0);
 
+  function copySecretLink() {
+    const url = `${window.location.origin}/estimate/${id}${shareToken ? `?token=${shareToken}` : ""}`;
+    navigator.clipboard.writeText(url);
+    toast.success(t("res.copied"));
+  }
+
+  function exportCsv() {
+    const rows = [
+      ["Room", "Item", "Qty", "L cm", "W cm", "H cm", "m3", "Included", "Tags", "Notes"],
+      ...groups.flatMap((group) =>
+        group.items.map((item) => [
+          group.name,
+          lang === "no" ? item.name_no || item.name : item.name,
+          item.quantity,
+          Math.round(item.length_cm),
+          Math.round(item.width_cm),
+          Math.round(item.height_cm),
+          item.volume_m3,
+          item.is_included === false ? "no" : "yes",
+          (item.tags ?? []).join("|"),
+          (item.notes ?? "").replace(/[\n;]/g, " "),
+        ]),
+      ),
+    ];
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `volumcalc-${String(id).slice(0, 8)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
       <main className="flex-1">
-        <div className="mx-auto max-w-4xl px-4 py-10">
+        <div className="mx-auto max-w-5xl px-4 py-10">
+          {/* Header */}
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-sm text-muted-foreground">{t("res.title")}</p>
-              <h1 className="text-3xl font-bold">
-                {estimate.customer_name || `#${String(estimate.id).slice(0, 8).toUpperCase()}`}
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t("rep.estimateId")} #{String(estimate.id).slice(0, 8).toUpperCase()}
+                </p>
+                <Badge
+                  variant="secondary"
+                  className={
+                    statusKey === "rep.status.processed"
+                      ? "bg-success/15 text-success"
+                      : statusKey === "rep.status.ready"
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground"
+                  }
+                >
+                  {t(statusKey)}
+                </Badge>
+              </div>
+              <h1 className="mt-1 text-3xl font-bold tracking-tight">
+                {estimate.customer_name || t("res.title")}
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 {shortDate(estimate.created_at, lang)}
@@ -211,11 +392,18 @@ function EstimatePage() {
                 {estimate.customer_phone ? ` · ${estimate.customer_phone}` : ""}
               </p>
             </div>
-            <div className="no-print flex flex-wrap gap-2">
+            <div className="no-print flex flex-wrap items-center gap-2">
+              {shareToken && (
+                <Button variant="outline" size="sm" onClick={copySecretLink}>
+                  <Link2 className="size-4" />
+                  {t("rep.shareSecret")}
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={() => window.print()}>
                 <Download className="size-4" />
-                {t("res.pdf")}
+                {t("rep.pdf")}
               </Button>
+              {!businessView && shareToken && <QuoteRequestDialog id={String(estimate.id)} token={shareToken} />}
               {canEdit && estimate.status !== "approved" && (
                 <Button size="sm" onClick={() => approve.mutate()}>
                   <Check className="size-4" />
@@ -225,159 +413,502 @@ function EstimatePage() {
             </div>
           </div>
 
-          <ShareButtons
-            title={`${t("res.title")} — VolumCalc`}
-            text={`${t("res.title")}: ${m3(total)} · ${items.length} ${t("res.items")}`}
-          />
+          {canEdit && (
+            <Tabs
+              value={view}
+              onValueChange={(value) => setView(value as "customer" | "business")}
+              className="no-print mt-6"
+            >
+              <TabsList>
+                <TabsTrigger value="customer">{t("rep.viewCustomer")}</TabsTrigger>
+                <TabsTrigger value="business">{t("rep.viewBusiness")}</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          )}
 
-          <div className="card-soft mt-8 grid gap-6 p-6 sm:grid-cols-3">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("res.total")}</p>
-              <p className="mt-1 flex items-center gap-2 text-4xl font-extrabold text-primary">
-                <Boxes className="size-7" />
-                {m3(total)}
+          {/* Summary cards */}
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            <div className="card-soft p-6">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("rep.netVolume")}</p>
+              <p className="mt-2 flex items-center gap-2 text-3xl font-extrabold text-primary">
+                <Boxes className="size-6" />
+                {m3(netVolume)}
               </p>
             </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("res.items")}</p>
-              <p className="mt-1 text-4xl font-extrabold">{items.length}</p>
-            </div>
-            {company && (
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("res.estimated")}</p>
-                <p className="mt-1 text-4xl font-extrabold">
-                  {money(total * Number(company.price_per_m3), company.currency, lang)}
+            <div className="card-soft p-6">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("rep.recommended")}</p>
+              <p className="mt-2 flex items-center gap-2 text-3xl font-extrabold">
+                <Truck className="size-6 text-primary" />
+                {m3(gross)}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">{t(recommendVehicle(gross))}</p>
+              {!businessView && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t("rep.storage")} {storageUnitM2(gross)} m²
                 </p>
-              </div>
-            )}
+              )}
+            </div>
+            <div className="card-soft p-6">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("rep.counts")}</p>
+              <p className="mt-2 flex items-center gap-2 text-3xl font-extrabold">
+                <Package className="size-6 text-primary" />
+                {included.length}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {included.length} {t("rep.itemsWord")} · {groups.length} {t("rep.roomsWord")}
+              </p>
+            </div>
           </div>
 
+          {company && (
+            <div className="card-soft mt-4 flex items-center justify-between p-5">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("res.estimated")}</p>
+              <p className="text-2xl font-bold">
+                {money(netVolume * Number(company.price_per_m3), company.currency, lang)}
+              </p>
+            </div>
+          )}
+
+          <ShareButtons
+            title={`${t("res.title")} — VolumCalc`}
+            text={`${t("res.title")}: ${m3(netVolume)} · ${included.length} ${t("res.items")}`}
+          />
+
+          {/* Rooms & items */}
           <div className="mt-8 space-y-6">
             {groups.map((group) => (
               <section key={group.id} className="card-soft overflow-hidden">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/40 px-5 py-4">
                   {renamingRoom === group.id ? (
-                    <form className="no-print flex gap-2" onSubmit={(event) => { event.preventDefault(); renameRoom.mutate({ roomId: group.id, name: roomName }); }}>
-                      <Input value={roomName} onChange={(event) => setRoomName(event.target.value)} maxLength={80} autoFocus className="h-9 w-56" aria-label={t("res.renameRoom")} />
-                      <Button size="sm" type="submit">{t("dash.saveItem")}</Button>
+                    <form
+                      className="no-print flex gap-2"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        if (!roomName.trim()) return;
+                        renameRoom.mutate({ roomId: group.id, name: roomName });
+                      }}
+                    >
+                      <Input
+                        value={roomName}
+                        onChange={(event) => setRoomName(event.target.value)}
+                        maxLength={80}
+                        autoFocus
+                        className="h-9 w-56"
+                        aria-label={t("res.renameRoom")}
+                      />
+                      <Button size="sm" type="submit" disabled={!roomName.trim()}>
+                        {t("dash.saveItem")}
+                      </Button>
                     </form>
                   ) : (
                     <div className="flex items-center gap-2">
                       <h2 className="text-lg font-bold">{group.name}</h2>
                       {canEdit && group.id !== "other" && (
-                        <Button size="icon" variant="ghost" className="no-print size-8" aria-label={t("res.renameRoom")} onClick={() => { setRenamingRoom(group.id); setRoomName(group.name); }}>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="no-print size-8"
+                          aria-label={t("res.renameRoom")}
+                          onClick={() => {
+                            setRenamingRoom(group.id);
+                            setRoomName(group.name);
+                          }}
+                        >
                           <Pencil className="size-3.5" />
                         </Button>
                       )}
                     </div>
                   )}
-                  <p className="text-sm font-semibold text-primary">{t("res.roomTotal")}: {m3(group.items.reduce((sum, item) => sum + Number(item.volume_m3), 0))}</p>
-                </div>
-                <div className="grid grid-cols-[1fr_auto] items-center gap-2 border-b border-border px-5 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  <span>{t("res.item")}</span>
-                  <span>{t("res.volume")}</span>
-                </div>
-                <ul className="divide-y divide-border">
-                {group.items.map((item) => {
-                const patch = editing[item.id];
-                return (
-                  <li key={item.id} className="px-5 py-4">
-                    <div className="flex items-center gap-4">
-                      {item.photo_url ? (
-                        <img
-                          src={item.photo_url}
-                          alt=""
-                          loading="lazy"
-                          className="size-14 shrink-0 rounded-lg border border-border object-cover"
-                        />
-                      ) : (
-                        <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                          <Boxes className="size-5" />
-                        </div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">
-                          {lang === "no" ? item.name_no || item.name : item.name}
-                          {item.quantity > 1 && (
-                            <span className="text-muted-foreground"> × {item.quantity}</span>
-                          )}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {Math.round(item.length_cm)} × {Math.round(item.width_cm)} ×{" "}
-                          {Math.round(item.height_cm)} cm
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold">{m3(item.volume_m3)}</p>
-                        <Badge
-                          variant="secondary"
-                          className={
-                            item.confidence >= 0.8
-                              ? "bg-success/15 text-success"
-                              : item.confidence >= 0.6
-                                ? "bg-warning/20 text-warning-foreground"
-                                : "bg-destructive/10 text-destructive"
-                          }
-                        >
-                          {Math.round(item.confidence * 100)}% {t("res.confidence")}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {canEdit && (
-                      <div className="no-print mt-3 flex flex-wrap items-center gap-2">
-                        <label className="sr-only" htmlFor={`room-${item.id}`}>{t("res.moveRoom")}</label>
-                        <select
-                          id={`room-${item.id}`}
-                          className="h-8 rounded-md border border-input bg-background px-2 text-sm"
-                          value={item.room_id ?? ""}
-                          onChange={(event) => moveItem.mutate({ itemId: item.id, roomId: event.target.value || null })}
-                          aria-label={t("res.moveRoom")}
-                        >
-                          <option value="">{t("res.other")}</option>
-                          {rooms.map((room) => <option key={room.id} value={room.id}>{room.name}</option>)}
-                        </select>
-                        {(["length_cm", "width_cm", "height_cm", "quantity"] as const).map((field) => (
-                          <Input
-                            key={field}
-                            type="number"
-                            className="h-8 w-20"
-                            value={String(patch?.[field] ?? item[field])}
-                            onChange={(e) =>
-                              setEditing((prev) => ({
-                                ...prev,
-                                [item.id]: { ...prev[item.id], [field]: Number(e.target.value) },
-                              }))
-                            }
-                          />
-                        ))}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={!patch || saveItem.isPending}
-                          onClick={() => saveItem.mutate({ item, patch: patch ?? {} })}
-                        >
-                          {t("dash.saveItem")}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-destructive"
-                          onClick={() => deleteItem.mutate(item.id)}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
+                  <p className="text-sm font-semibold text-primary">
+                    {t("res.roomTotal")}:{" "}
+                    {m3(
+                      group.items
+                        .filter((item) => item.is_included !== false)
+                        .reduce((sum, item) => sum + Number(item.volume_m3), 0),
                     )}
-                  </li>
-                );
-                })}
+                  </p>
+                </div>
+
+                <ul className="divide-y divide-border">
+                  {group.items.map((item) => (
+                    <li
+                      key={item.id}
+                      className={item.is_included === false ? "px-5 py-4 opacity-60" : "px-5 py-4"}
+                    >
+                      <div className="flex items-start gap-4">
+                        {item.photo_url ? (
+                          <img
+                            src={item.photo_url}
+                            alt=""
+                            loading="lazy"
+                            className="size-16 shrink-0 rounded-lg border border-border object-cover"
+                          />
+                        ) : (
+                          <div className="flex size-16 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                            <Boxes className="size-5" />
+                          </div>
+                        )}
+
+                        <div className="min-w-0 flex-1">
+                          {canEdit ? (
+                            <Input
+                              defaultValue={lang === "no" ? item.name_no || item.name : item.name}
+                              maxLength={120}
+                              className="h-9 max-w-xs font-medium"
+                              aria-label={t("res.item")}
+                              onBlur={(e) => {
+                                const value = e.target.value.trim();
+                                if (!value) {
+                                  e.target.value = lang === "no" ? item.name_no || item.name : item.name;
+                                  return;
+                                }
+                                const current = lang === "no" ? item.name_no || item.name : item.name;
+                                if (value === current) return;
+                                patchItem.mutate({
+                                  item,
+                                  patch: lang === "no" ? { name_no: value } : { name: value },
+                                });
+                              }}
+                            />
+                          ) : (
+                            <p className="truncate font-medium">
+                              {lang === "no" ? item.name_no || item.name : item.name}
+                            </p>
+                          )}
+
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {Math.round(item.length_cm)} × {Math.round(item.width_cm)} ×{" "}
+                            {Math.round(item.height_cm)} cm · {m3(item.volume_m3)}
+                          </p>
+
+                          {canEdit && (
+                            <div className="no-print mt-2 flex flex-wrap items-center gap-2">
+                              <div className="flex items-center gap-1 rounded-md border border-input">
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="size-8"
+                                  aria-label="-"
+                                  disabled={item.quantity <= 1}
+                                  onClick={() =>
+                                    patchItem.mutate({ item, patch: { quantity: item.quantity - 1 } })
+                                  }
+                                >
+                                  <Minus className="size-3.5" />
+                                </Button>
+                                <span className="w-6 text-center text-sm font-semibold">{item.quantity}</span>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="size-8"
+                                  aria-label="+"
+                                  onClick={() =>
+                                    patchItem.mutate({ item, patch: { quantity: item.quantity + 1 } })
+                                  }
+                                >
+                                  <Plus className="size-3.5" />
+                                </Button>
+                              </div>
+
+                              {(["length_cm", "width_cm", "height_cm"] as const).map((field) => (
+                                <Input
+                                  key={field}
+                                  type="number"
+                                  min={1}
+                                  defaultValue={String(Math.round(item[field]))}
+                                  className="h-8 w-20"
+                                  aria-label={t("res.dims")}
+                                  onBlur={(e) => {
+                                    const value = Number(e.target.value);
+                                    if (!value || value <= 0) {
+                                      e.target.value = String(Math.round(item[field]));
+                                      return;
+                                    }
+                                    if (value === Math.round(item[field])) return;
+                                    patchItem.mutate({ item, patch: { [field]: value } });
+                                  }}
+                                />
+                              ))}
+
+                              <label className="sr-only" htmlFor={`room-${item.id}`}>
+                                {t("res.moveRoom")}
+                              </label>
+                              <select
+                                id={`room-${item.id}`}
+                                className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+                                value={item.room_id ?? ""}
+                                onChange={(event) =>
+                                  moveItem.mutate({ itemId: item.id, roomId: event.target.value || null })
+                                }
+                              >
+                                <option value="">{t("res.other")}</option>
+                                {rooms.map((room) => (
+                                  <option key={room.id} value={room.id}>
+                                    {room.name}
+                                  </option>
+                                ))}
+                              </select>
+
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-destructive"
+                                aria-label={t("dash.deleteItem")}
+                                onClick={() => {
+                                  softDelete.mutate({ itemId: item.id });
+                                  toast(t("rep.itemDeleted"), {
+                                    action: {
+                                      label: t("rep.undo"),
+                                      onClick: () => softDelete.mutate({ itemId: item.id, restore: true }),
+                                    },
+                                  });
+                                }}
+                              >
+                                <Trash2 className="size-4" />
+                              </Button>
+                            </div>
+                          )}
+
+                          {/* Tags */}
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {TAGS.map((tag) => {
+                              const active = (item.tags ?? []).includes(tag.value);
+                              if (!canEdit && !active) return null;
+                              return (
+                                <button
+                                  key={tag.value}
+                                  type="button"
+                                  disabled={!canEdit}
+                                  onClick={() =>
+                                    patchItem.mutate({
+                                      item,
+                                      patch: {
+                                        tags: active
+                                          ? (item.tags ?? []).filter((v) => v !== tag.value)
+                                          : [...(item.tags ?? []), tag.value],
+                                      },
+                                    })
+                                  }
+                                  className={
+                                    active
+                                      ? "rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                                      : "rounded-full border border-dashed border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                                  }
+                                >
+                                  {t(tag.key)}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* Note */}
+                          {canEdit ? (
+                            <form
+                              className="no-print mt-2 flex gap-2"
+                              onSubmit={(event) => {
+                                event.preventDefault();
+                                const value = (noteDraft[item.id] ?? item.notes ?? "").trim();
+                                patchItem.mutate({ item, patch: { notes: value || null } });
+                              }}
+                            >
+                              <Input
+                                className="h-8 max-w-md"
+                                placeholder={t("rep.addNote")}
+                                maxLength={500}
+                                value={noteDraft[item.id] ?? item.notes ?? ""}
+                                onChange={(e) =>
+                                  setNoteDraft((prev) => ({ ...prev, [item.id]: e.target.value }))
+                                }
+                              />
+                              <Button size="sm" variant="outline" type="submit">
+                                {t("dash.saveItem")}
+                              </Button>
+                            </form>
+                          ) : (
+                            item.notes && <p className="mt-2 text-sm text-muted-foreground">{item.notes}</p>
+                          )}
+                        </div>
+
+                        <div className="flex shrink-0 flex-col items-end gap-2">
+                          <p className="font-semibold">{m3(item.volume_m3)}</p>
+                          <Badge
+                            variant="secondary"
+                            className={
+                              item.confidence >= 0.8
+                                ? "bg-success/15 text-success"
+                                : item.confidence >= 0.6
+                                  ? "bg-warning/20 text-warning-foreground"
+                                  : "bg-destructive/10 text-destructive"
+                            }
+                          >
+                            {Math.round(item.confidence * 100)}% {t("res.confidence")}
+                          </Badge>
+                          {canEdit ? (
+                            <div className="no-print flex items-center gap-2">
+                              <Switch
+                                id={`inc-${item.id}`}
+                                checked={item.is_included !== false}
+                                onCheckedChange={(value) =>
+                                  patchItem.mutate({ item, patch: { is_included: value } })
+                                }
+                              />
+                              <Label htmlFor={`inc-${item.id}`} className="text-xs text-muted-foreground">
+                                {item.is_included === false ? t("rep.excluded") : t("rep.included")}
+                              </Label>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">
+                              {item.is_included === false ? t("rep.excluded") : t("rep.included")}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
                 </ul>
               </section>
             ))}
           </div>
 
-          {estimate.photo_urls?.length > 0 && (
+          {/* Access & conditions */}
+          {access && (
+            <section className="card-soft mt-8 p-6">
+              <h2 className="text-lg font-bold">{t("rep.accessTitle")}</h2>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="floor">{t("rep.floor")}</Label>
+                  <Input
+                    id="floor"
+                    type="number"
+                    min={0}
+                    max={60}
+                    disabled={!canEdit}
+                    value={access.access_floor}
+                    onChange={(e) => setAccess({ ...access, access_floor: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="carry">{t("rep.carry")}</Label>
+                  <Input
+                    id="carry"
+                    type="number"
+                    min={0}
+                    max={2000}
+                    disabled={!canEdit}
+                    placeholder="15"
+                    value={access.carry_distance_m}
+                    onChange={(e) => setAccess({ ...access, carry_distance_m: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">{t("rep.carryHelp")}</p>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center gap-2">
+                <Checkbox
+                  id="elevator"
+                  disabled={!canEdit}
+                  checked={access.has_elevator}
+                  onCheckedChange={(value) => setAccess({ ...access, has_elevator: value === true })}
+                />
+                <Label htmlFor="elevator">{t("rep.elevator")}</Label>
+              </div>
+              <div className="mt-4 space-y-1.5">
+                <Label htmlFor="access-notes">{t("rep.generalNotes")}</Label>
+                <Textarea
+                  id="access-notes"
+                  rows={3}
+                  maxLength={2000}
+                  disabled={!canEdit}
+                  placeholder={t("rep.generalNotesPh")}
+                  value={access.access_notes}
+                  onChange={(e) => setAccess({ ...access, access_notes: e.target.value })}
+                />
+              </div>
+              {canEdit && (
+                <Button className="no-print mt-4" size="sm" onClick={() => saveAccess.mutate()} disabled={saveAccess.isPending}>
+                  {saveAccess.isPending && <Loader2 className="size-4 animate-spin" />}
+                  {t("rep.saveAccess")}
+                </Button>
+              )}
+            </section>
+          )}
+
+          {/* Business-only panel */}
+          {businessView && (
+            <section className="card-soft mt-8 p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-lg font-bold">{t("rep.internalTitle")}</h2>
+                <Button variant="outline" size="sm" className="no-print" onClick={exportCsv}>
+                  <Download className="size-4" />
+                  {t("rep.export")}
+                </Button>
+              </div>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="hourly">{t("rep.hourly")}</Label>
+                  <Input id="hourly" type="number" min={0} value={hourly} onChange={(e) => setHourly(e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="hours">{t("rep.hours")}</Label>
+                  <Input id="hours" type="number" min={0} value={hours} onChange={(e) => setHours(e.target.value)} />
+                </div>
+                <div className="rounded-xl bg-muted/50 p-4">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("rep.hourly")}</p>
+                  <p className="text-xl font-bold">
+                    {money(Number(hourly || 0) * Number(hours || 0), currency, lang)}
+                  </p>
+                  {company && (
+                    <>
+                      <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">{t("rep.fixed")}</p>
+                      <p className="text-xl font-bold">
+                        {money(netVolume * Number(company.price_per_m3), currency, lang)}
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <p className="text-sm font-semibold">{t("rep.checklist")}</p>
+                <ul className="mt-2 space-y-2">
+                  {CHECKLIST.map((key) => (
+                    <li key={key} className="flex items-center gap-2">
+                      <Checkbox
+                        id={key}
+                        checked={Boolean(checked[key])}
+                        onCheckedChange={(value) => setChecked((prev) => ({ ...prev, [key]: value === true }))}
+                      />
+                      <Label htmlFor={key} className="text-sm font-normal">
+                        {t(key)}
+                      </Label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-6 space-y-1.5">
+                <Label htmlFor="internal">{t("rep.internalNotes")}</Label>
+                <Textarea
+                  id="internal"
+                  rows={3}
+                  maxLength={2000}
+                  value={internalNotes ?? ""}
+                  onChange={(e) => setInternalNotes(e.target.value)}
+                />
+                <Button
+                  className="no-print mt-2"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => saveAccess.mutate()}
+                  disabled={saveAccess.isPending}
+                >
+                  {t("dash.saveItem")}
+                </Button>
+              </div>
+            </section>
+          )}
+
+          {estimate.photo_urls && estimate.photo_urls.length > 0 && (
             <section className="mt-8">
               <h2 className="font-semibold">{t("res.photos")}</h2>
               <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
