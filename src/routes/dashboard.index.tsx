@@ -8,6 +8,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { m3, shortDate } from "@/lib/format";
 
 export const Route = createFileRoute("/dashboard/")({
+  head: () => ({
+    meta: [
+      { title: "Estimates dashboard — VolumCalc" },
+      { name: "description", content: "Review and manage photo-based moving volume estimates." },
+      { property: "og:title", content: "Estimates dashboard — VolumCalc" },
+      { property: "og:description", content: "Review and manage photo-based moving volume estimates." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: DashboardHome,
 });
 
@@ -59,7 +70,7 @@ function DashboardHome() {
                 className="grid grid-cols-2 items-center gap-3 px-5 py-4 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:gap-4"
               >
                 <div className="col-span-2 sm:col-span-1">
-                  <p className="font-medium">{e.customer_name || "—"}</p>
+                  <p className="font-medium">{e.customer_name || `#${String(e.id).slice(0, 8).toUpperCase()}`}</p>
                   <p className="text-xs text-muted-foreground">{e.address || e.customer_phone || ""}</p>
                 </div>
                 <span className="text-sm text-muted-foreground">{shortDate(e.created_at, lang)}</span>

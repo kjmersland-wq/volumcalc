@@ -18,6 +18,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/dashboard/settings")({
+  head: () => ({
+    meta: [
+      { title: "Company settings — VolumCalc" },
+      { name: "description", content: "Manage company branding, pricing, currency, and language in VolumCalc." },
+      { property: "og:title", content: "Company settings — VolumCalc" },
+      { property: "og:description", content: "Manage your company settings in VolumCalc." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: SettingsPage,
 });
 
@@ -40,10 +51,12 @@ function SettingsPage() {
     queryKey: ["company", session?.user.id],
     enabled: Boolean(session),
     queryFn: async () => {
+      const userId = session?.user.id;
+      if (!userId) throw new Error("Authentication required");
       const { data, error } = await supabase
         .from("companies")
         .select("*")
-        .eq("id", session!.user.id)
+        .eq("id", userId)
         .maybeSingle();
       if (error) throw error;
       return data;
