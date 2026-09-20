@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as FlyttebilKalkulatorRouteImport } from './routes/flyttebil-kalkulator'
 import { Route as MovingInventoryListRouteImport } from './routes/moving-inventory-list'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -19,6 +20,7 @@ import { Route as UploadRouteImport } from './routes/upload'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
+import { Route as EnMovingVanCalculatorRouteImport } from './routes/en.moving-van-calculator'
 import { Route as EstimateIdRouteImport } from './routes/estimate.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -34,6 +36,11 @@ const AuthRoute = AuthRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FlyttebilKalkulatorRoute = FlyttebilKalkulatorRouteImport.update({
+  id: '/flyttebil-kalkulator',
+  path: '/flyttebil-kalkulator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MovingInventoryListRoute = MovingInventoryListRouteImport.update({
@@ -71,6 +78,11 @@ const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => DashboardRoute,
 } as any)
+const EnMovingVanCalculatorRoute = EnMovingVanCalculatorRouteImport.update({
+  id: '/en/moving-van-calculator',
+  path: '/en/moving-van-calculator',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EstimateIdRoute = EstimateIdRouteImport.update({
   id: '/estimate/$id',
   path: '/estimate/$id',
@@ -81,24 +93,28 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
   '/moving-inventory-list': typeof MovingInventoryListRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/upload': typeof UploadRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
+  '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
   '/estimate/$id': typeof EstimateIdRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
   '/moving-inventory-list': typeof MovingInventoryListRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/upload': typeof UploadRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
+  '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
   '/estimate/$id': typeof EstimateIdRoute
   '/dashboard': typeof DashboardIndexRoute
 }
@@ -107,12 +123,14 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
   '/moving-inventory-list': typeof MovingInventoryListRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/upload': typeof UploadRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
+  '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
   '/estimate/$id': typeof EstimateIdRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -122,24 +140,28 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/flyttebil-kalkulator'
     | '/moving-inventory-list'
     | '/pricing'
     | '/sitemap.xml'
     | '/upload'
     | '/checkout/return'
     | '/dashboard/settings'
+    | '/en/moving-van-calculator'
     | '/estimate/$id'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/flyttebil-kalkulator'
     | '/moving-inventory-list'
     | '/pricing'
     | '/sitemap.xml'
     | '/upload'
     | '/checkout/return'
     | '/dashboard/settings'
+    | '/en/moving-van-calculator'
     | '/estimate/$id'
     | '/dashboard'
   id:
@@ -147,12 +169,14 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/flyttebil-kalkulator'
     | '/moving-inventory-list'
     | '/pricing'
     | '/sitemap.xml'
     | '/upload'
     | '/checkout/return'
     | '/dashboard/settings'
+    | '/en/moving-van-calculator'
     | '/estimate/$id'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
@@ -161,11 +185,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRouteWithChildren
+  FlyttebilKalkulatorRoute: typeof FlyttebilKalkulatorRoute
   MovingInventoryListRoute: typeof MovingInventoryListRoute
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UploadRoute: typeof UploadRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
+  EnMovingVanCalculatorRoute: typeof EnMovingVanCalculatorRoute
   EstimateIdRoute: typeof EstimateIdRoute
 }
 
@@ -190,6 +216,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/flyttebil-kalkulator': {
+      id: '/flyttebil-kalkulator'
+      path: '/flyttebil-kalkulator'
+      fullPath: '/flyttebil-kalkulator'
+      preLoaderRoute: typeof FlyttebilKalkulatorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/moving-inventory-list': {
@@ -241,6 +274,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSettingsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/en/moving-van-calculator': {
+      id: '/en/moving-van-calculator'
+      path: '/en/moving-van-calculator'
+      fullPath: '/en/moving-van-calculator'
+      preLoaderRoute: typeof EnMovingVanCalculatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/estimate/$id': {
       id: '/estimate/$id'
       path: '/estimate/$id'
@@ -269,11 +309,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRouteWithChildren,
+  FlyttebilKalkulatorRoute: FlyttebilKalkulatorRoute,
   MovingInventoryListRoute: MovingInventoryListRoute,
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UploadRoute: UploadRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
+  EnMovingVanCalculatorRoute: EnMovingVanCalculatorRoute,
   EstimateIdRoute: EstimateIdRoute,
 }
 export const routeTree = rootRouteImport
