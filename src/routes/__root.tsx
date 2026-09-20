@@ -75,7 +75,15 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+  validateSearch: (search: Record<string, unknown>) => ({
+    lang: search.lang === "no" ? ("no" as const) : search.lang === "en" ? ("en" as const) : undefined,
+  }),
+  head: ({ match }) => {
+    const norwegian = match.search.lang === "no";
+    const socialImage = norwegian
+      ? "https://volumcalc.com/og-volumcalc-no.jpg"
+      : "https://volumcalc.com/og-volumcalc-en.jpg";
+    return ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -91,7 +99,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Room-by-room cubic metre estimates from photos for private moves and moving companies.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: socialImage },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "640" },
+      { property: "og:image:alt", content: norwegian ? "VolumCalc – romvis volumberegning fra bilder" : "VolumCalc — room-by-room volume estimates from photos" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: socialImage },
     ],
     links: [
       {
@@ -106,7 +119,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
     ],
-  }),
+    });
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

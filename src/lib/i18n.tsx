@@ -118,6 +118,14 @@ const dict: Dict = {
     no: "Estimatet er basert på bildene og er veiledende frem til flyttebyrået har godkjent det.",
     en: "This estimate is based on the photos and is indicative until the moving company approves it.",
   },
+  "share.title": { no: "Del beregningen", en: "Share this estimate" },
+  "share.sub": { no: "Send rapporten trygt via kanalen du foretrekker.", en: "Send the report using your preferred channel." },
+  "share.whatsapp": { no: "Del på WhatsApp", en: "Share on WhatsApp" },
+  "share.facebook": { no: "Del på Facebook", en: "Share on Facebook" },
+  "share.linkedin": { no: "Del på LinkedIn", en: "Share on LinkedIn" },
+  "share.x": { no: "Del på X", en: "Share on X" },
+  "share.email": { no: "Del med e-post", en: "Share by email" },
+  "share.more": { no: "Flere", en: "More" },
 
   "auth.title": { no: "Logg inn for flyttebyrå", en: "Moving company login" },
   "auth.signin": { no: "Logg inn", en: "Sign in" },
@@ -180,6 +188,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("en");
 
   useEffect(() => {
+    const urlLang = new URLSearchParams(window.location.search).get("lang");
+    if (urlLang === "en" || urlLang === "no") {
+      setLangState(urlLang);
+      window.localStorage.setItem("volumcalc-lang", urlLang);
+      return;
+    }
     const stored = window.localStorage.getItem("volumcalc-lang");
     if (stored === "en" || stored === "no") {
       setLangState(stored);
