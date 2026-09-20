@@ -52,11 +52,9 @@ function UploadPage() {
   function addFiles(list: FileList | null) {
     if (!list) return;
     const imageFiles = Array.from(list).filter((f) => f.type.startsWith("image/"));
-    const incoming = imageFiles.slice(0, 15 - files.length);
-    if (imageFiles.length > incoming.length) toast.error(t("upload.limit"));
-    if (!incoming.length) return;
-    setFiles((prev) => [...prev, ...incoming]);
-    setPreviews((prev) => [...prev, ...incoming.map((f) => URL.createObjectURL(f))]);
+    if (!imageFiles.length) return;
+    setFiles((prev) => [...prev, ...imageFiles]);
+    setPreviews((prev) => [...prev, ...imageFiles.map((f) => URL.createObjectURL(f))]);
   }
 
   function removeFile(index: number) {
