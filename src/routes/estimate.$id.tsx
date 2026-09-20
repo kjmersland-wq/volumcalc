@@ -13,9 +13,14 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { getSharedEstimate } from "@/lib/estimates.functions";
 import { m3, money, shortDate } from "@/lib/format";
 
 export const Route = createFileRoute("/estimate/$id")({
+  validateSearch: (search: Record<string, unknown>): { token?: string } => {
+    const token = search['token'];
+    return typeof token === "string" && token ? { token } : {};
+  },
   head: () => ({
     meta: [
       { title: "Volume estimate — VolumCalc" },
