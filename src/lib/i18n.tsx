@@ -5,6 +5,48 @@ export type Lang = "no" | "en";
 type Dict = Record<string, { no: string; en: string }>;
 
 const dict: Dict = {
+  "nav.contact": { no: "Kontakt", en: "Contact" },
+  "contact.badge": { no: "Kontakt oss", en: "Contact us" },
+  "contact.title": { no: "Snakk med VolumCalc", en: "Talk to VolumCalc" },
+  "contact.sub": {
+    no: "Spørsmål om volumberegning, priser, demo eller samarbeid? Send oss en melding, så svarer vi raskt.",
+    en: "Questions about volume estimates, pricing, a demo or a partnership? Send us a message and we reply quickly.",
+  },
+  "contact.name": { no: "Navn", en: "Name" },
+  "contact.email": { no: "E-post", en: "Email" },
+  "contact.phone": { no: "Telefon (valgfritt)", en: "Phone (optional)" },
+  "contact.subject": { no: "Emne", en: "Subject" },
+  "contact.message": { no: "Melding", en: "Message" },
+  "contact.placeholder": {
+    no: "Fortell kort hva du lurer på – f.eks. antall flyttinger i måneden, ønsket demo eller teknisk spørsmål.",
+    en: "Tell us briefly what you need — e.g. monthly move volume, a demo request or a technical question.",
+  },
+  "contact.send": { no: "Send melding", en: "Send message" },
+  "contact.sent": {
+    no: "Takk! Meldingen er sendt til kjell@volumcalc.com. Vi svarer vanligvis innen én virkedag.",
+    en: "Thanks! Your message was sent to kjell@volumcalc.com. We usually reply within one business day.",
+  },
+  "contact.sentTitle": { no: "Melding sendt", en: "Message sent" },
+  "contact.another": { no: "Send en ny melding", en: "Send another message" },
+  "contact.error": { no: "Noe gikk galt. Prøv igjen eller send e-post direkte.", en: "Something went wrong. Try again or email us directly." },
+  "contact.required": { no: "Fyll ut navn, e-post, emne og melding.", en: "Please fill in name, email, subject and message." },
+  "contact.privacy": {
+    no: "Vi bruker opplysningene kun til å svare deg.",
+    en: "We only use your details to reply to you.",
+  },
+  "contact.emailUs": { no: "Send e-post", en: "Email us" },
+  "contact.response": { no: "Svartid", en: "Response time" },
+  "contact.responseTime": { no: "Vanligvis innen én virkedag", en: "Usually within one business day" },
+  "contact.aside": {
+    no: "Er du flyttebyrå og vil teste VolumCalc med egne bilder? Nevn det i meldingen, så setter vi opp en gratis prøvekonto.",
+    en: "Running a moving company and want to test VolumCalc with your own photos? Mention it and we will set up a free trial account.",
+  },
+  "contact.homeTitle": { no: "Har du spørsmål?", en: "Got a question?" },
+  "contact.homeSub": {
+    no: "Send oss noen ord, så tar vi kontakt.",
+    en: "Send us a few words and we will get back to you.",
+  },
+
   "nav.how": { no: "Slik fungerer det", en: "How it works" },
   "nav.pricing": { no: "Priser", en: "Pricing" },
   "nav.login": { no: "Logg inn", en: "Log in" },

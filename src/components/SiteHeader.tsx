@@ -23,6 +23,9 @@ export function SiteHeader() {
           <Link to="/pricing" className="transition-colors hover:text-foreground">
             {t("nav.pricing")}
           </Link>
+          <Link to="/contact" className="transition-colors hover:text-foreground">
+            {t("nav.contact")}
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2">

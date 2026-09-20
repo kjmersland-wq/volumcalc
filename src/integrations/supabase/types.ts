@@ -53,6 +53,45 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          email_sent: boolean
+          handled: boolean
+          id: string
+          locale: string
+          message: string
+          name: string
+          phone: string | null
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          email_sent?: boolean
+          handled?: boolean
+          id?: string
+          locale?: string
+          message: string
+          name: string
+          phone?: string | null
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          email_sent?: boolean
+          handled?: boolean
+          id?: string
+          locale?: string
+          message?: string
+          name?: string
+          phone?: string | null
+          subject?: string
+        }
+        Relationships: []
+      }
       estimate_items: {
         Row: {
           category: string | null
