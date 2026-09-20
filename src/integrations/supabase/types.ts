@@ -14,7 +14,160 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      companies: {
+        Row: {
+          brand_color: string
+          company_name: string
+          contact_email: string | null
+          created_at: string
+          currency: string
+          default_language: string
+          id: string
+          logo_url: string | null
+          price_per_m3: number
+          updated_at: string
+        }
+        Insert: {
+          brand_color?: string
+          company_name?: string
+          contact_email?: string | null
+          created_at?: string
+          currency?: string
+          default_language?: string
+          id: string
+          logo_url?: string | null
+          price_per_m3?: number
+          updated_at?: string
+        }
+        Update: {
+          brand_color?: string
+          company_name?: string
+          contact_email?: string | null
+          created_at?: string
+          currency?: string
+          default_language?: string
+          id?: string
+          logo_url?: string | null
+          price_per_m3?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      estimate_items: {
+        Row: {
+          category: string | null
+          confidence: number
+          created_at: string
+          estimate_id: string
+          height_cm: number
+          id: string
+          length_cm: number
+          name: string
+          name_no: string | null
+          photo_url: string | null
+          quantity: number
+          volume_m3: number
+          width_cm: number
+        }
+        Insert: {
+          category?: string | null
+          confidence?: number
+          created_at?: string
+          estimate_id: string
+          height_cm?: number
+          id?: string
+          length_cm?: number
+          name: string
+          name_no?: string | null
+          photo_url?: string | null
+          quantity?: number
+          volume_m3?: number
+          width_cm?: number
+        }
+        Update: {
+          category?: string | null
+          confidence?: number
+          created_at?: string
+          estimate_id?: string
+          height_cm?: number
+          id?: string
+          length_cm?: number
+          name?: string
+          name_no?: string | null
+          photo_url?: string | null
+          quantity?: number
+          volume_m3?: number
+          width_cm?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estimate_items_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      estimates: {
+        Row: {
+          address: string | null
+          company_id: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          move_date: string | null
+          notes: string | null
+          photo_urls: string[]
+          share_token: string
+          status: string
+          total_volume_m3: number
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          company_id?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          move_date?: string | null
+          notes?: string | null
+          photo_urls?: string[]
+          share_token?: string
+          status?: string
+          total_volume_m3?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          company_id?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          move_date?: string | null
+          notes?: string | null
+          photo_urls?: string[]
+          share_token?: string
+          status?: string
+          total_volume_m3?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estimates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
