@@ -109,8 +109,8 @@ const PRESETS: Preset[] = [
   { key: "house", label: { no: "Enebolig", en: "House" }, volume: 42, hint: { no: "hus med garasje og loft", en: "house with garage and attic" } },
 ];
 
-function pickVehicle(gross: number) {
-  return VEHICLES.find((vehicle) => gross <= vehicle.maxGross) ?? VEHICLES[VEHICLES.length - 1];
+function pickVehicle(gross: number): Vehicle {
+  return VEHICLES.find((vehicle) => gross <= vehicle.maxGross) ?? VEHICLES[VEHICLES.length - 1]!;
 }
 
 function VanIllustration({ id }: { id: string }) {
