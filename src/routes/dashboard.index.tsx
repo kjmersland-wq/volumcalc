@@ -24,6 +24,7 @@ export const Route = createFileRoute("/dashboard/")({
 
 function DashboardHome() {
   const { t, lang } = useI18n();
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["estimates"],
@@ -37,6 +38,28 @@ function DashboardHome() {
       return data;
     },
   });
+
+  const { data: quotes } = useQuery({
+    queryKey: ["quote-requests"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quote_requests")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const markHandled = useMutation({
+    mutationFn: async (quoteId: string) => {
+      const { error } = await supabase.from("quote_requests").update({ handled: true }).eq("id", quoteId);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["quote-requests"] }),
+  });
+
 
   if (isLoading) {
     return (
