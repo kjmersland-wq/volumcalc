@@ -192,8 +192,6 @@ function Pricing() {
               <StripeEmbeddedCheckout
                 key={checkout.priceId}
                 priceId={checkout.priceId}
-                customerEmail={user?.email}
-                userId={user?.id}
               />
             )}
           </div>
