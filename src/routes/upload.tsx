@@ -93,6 +93,7 @@ function UploadPage() {
           ...(form.phone.trim() ? { customer_phone: form.phone.trim() } : {}),
           ...(form.date ? { move_date: form.date } : {}),
           ...(form.address.trim() ? { address: form.address.trim() } : {}),
+          ...(companyId ? { company_id: companyId } : {}),
         },
       });
 
