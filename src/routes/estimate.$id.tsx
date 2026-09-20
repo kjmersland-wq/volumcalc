@@ -122,7 +122,7 @@ function itemVolume(item: Item, patch: Partial<Item> = {}) {
 function EstimatePage() {
   const { id } = Route.useParams();
   const { token } = Route.useSearch();
-  const { t, lang } = useI18n();
+  const { lang } = useI18n();
   const { session, loading: authLoading } = useAuth();
   const loadShared = useServerFn(getSharedEstimate);
   const queryClient = useQueryClient();
@@ -472,6 +472,27 @@ function EstimatePage() {
       <SiteHeader />
       <main className="flex-1">
         <div className="mx-auto max-w-5xl px-4 py-10">
+          {company && (
+            <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-muted/30 p-5">
+              <div className="flex items-center gap-4">
+                {company.logo_url && (
+                  <img src={company.logo_url} alt="" className="h-12 w-auto max-w-40 object-contain" />
+                )}
+                <div>
+                  <p className="text-lg font-bold">{company.company_name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {[company.org_number, company.address].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right text-xs text-muted-foreground">
+                {company.phone && <p>{company.phone}</p>}
+                {company.contact_email && <p>{company.contact_email}</p>}
+                {company.website && <p>{company.website}</p>}
+              </div>
+            </div>
+          )}
+
           {/* Header */}
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -533,6 +554,45 @@ function EstimatePage() {
                 <TabsTrigger value="business">{rt("rep.viewBusiness")}</TabsTrigger>
               </TabsList>
             </Tabs>
+          )}
+
+          {canEdit && (
+            <div className="no-print mt-4 grid gap-4 rounded-xl border border-border bg-card p-5 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="report-lang">{rt("rep.reportLang")}</Label>
+                <Select
+                  value={reportLang}
+                  onValueChange={(value) => {
+                    setReportLang(value as ReportLang);
+                    saveReportSettings.mutate({ report_language: value });
+                  }}
+                >
+                  <SelectTrigger id="report-lang">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no">Norsk</SelectItem>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="pl">Polski</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">{rt("rep.reportLangHelp")}</p>
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="tender"
+                    checked={tenderMode}
+                    onCheckedChange={(value) => {
+                      setTenderMode(value);
+                      saveReportSettings.mutate({ tender_mode: value });
+                    }}
+                  />
+                  <Label htmlFor="tender">{rt("rep.tender")}</Label>
+                </div>
+                <p className="text-xs text-muted-foreground">{rt("rep.tenderHelp")}</p>
+              </div>
+            </div>
           )}
 
           {/* Summary cards */}
@@ -939,6 +999,210 @@ function EstimatePage() {
                 </Button>
               )}
             </section>
+          )}
+
+          {/* Storage, delivery and packing */}
+          {logistics && (
+            <div className="mt-8 space-y-6">
+              <section className="card-soft p-6">
+                <h2 className="text-lg font-bold">{rt("rep.storageTitle")}</h2>
+                <div className="mt-4 flex items-center gap-2">
+                  <Checkbox
+                    id="storage-enabled"
+                    disabled={!canEdit}
+                    checked={logistics.storage_enabled}
+                    onCheckedChange={(value) =>
+                      setLogistics({ ...logistics, storage_enabled: value === true })
+                    }
+                  />
+                  <Label htmlFor="storage-enabled">{rt("rep.storageEnabled")}</Label>
+                </div>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="storage-company">{rt("rep.storageCompany")}</Label>
+                    <Input
+                      id="storage-company"
+                      disabled={!canEdit}
+                      maxLength={160}
+                      value={logistics.storage_company}
+                      onChange={(e) => setLogistics({ ...logistics, storage_company: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="storage-contact">{rt("rep.storageContact")}</Label>
+                    <Input
+                      id="storage-contact"
+                      disabled={!canEdit}
+                      maxLength={160}
+                      value={logistics.storage_contact}
+                      onChange={(e) => setLogistics({ ...logistics, storage_contact: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="storage-address">{rt("rep.storageAddress")}</Label>
+                    <Input
+                      id="storage-address"
+                      disabled={!canEdit}
+                      maxLength={240}
+                      value={logistics.storage_address}
+                      onChange={(e) => setLogistics({ ...logistics, storage_address: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="storage-phone">{rt("rep.storagePhone")}</Label>
+                    <Input
+                      id="storage-phone"
+                      disabled={!canEdit}
+                      maxLength={40}
+                      value={logistics.storage_phone}
+                      onChange={(e) => setLogistics({ ...logistics, storage_phone: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <section className="card-soft p-6">
+                <h2 className="text-lg font-bold">{rt("rep.deliveryTitle")}</h2>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label htmlFor="delivery-address">{rt("rep.deliveryAddress")}</Label>
+                    <Input
+                      id="delivery-address"
+                      disabled={!canEdit}
+                      maxLength={240}
+                      value={logistics.delivery_address}
+                      onChange={(e) => setLogistics({ ...logistics, delivery_address: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="delivery-floor">{rt("rep.deliveryFloor")}</Label>
+                    <Input
+                      id="delivery-floor"
+                      disabled={!canEdit}
+                      maxLength={40}
+                      value={logistics.delivery_floor}
+                      onChange={(e) => setLogistics({ ...logistics, delivery_floor: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="delivery-carry">{rt("rep.deliveryCarry")}</Label>
+                    <Input
+                      id="delivery-carry"
+                      disabled={!canEdit}
+                      maxLength={20}
+                      value={logistics.delivery_carry_distance}
+                      onChange={(e) =>
+                        setLogistics({ ...logistics, delivery_carry_distance: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-2">
+                  <Checkbox
+                    id="delivery-elevator"
+                    disabled={!canEdit}
+                    checked={logistics.delivery_elevator}
+                    onCheckedChange={(value) =>
+                      setLogistics({ ...logistics, delivery_elevator: value === true })
+                    }
+                  />
+                  <Label htmlFor="delivery-elevator">{rt("rep.deliveryElevator")}</Label>
+                </div>
+                <div className="mt-4 space-y-1.5">
+                  <Label htmlFor="delivery-notes">{rt("rep.deliveryNotes")}</Label>
+                  <Textarea
+                    id="delivery-notes"
+                    rows={3}
+                    maxLength={2000}
+                    disabled={!canEdit}
+                    value={logistics.delivery_notes}
+                    onChange={(e) => setLogistics({ ...logistics, delivery_notes: e.target.value })}
+                  />
+                </div>
+              </section>
+
+              <section className="card-soft p-6">
+                <h2 className="text-lg font-bold">{rt("rep.packingTitle")}</h2>
+                <div className="mt-4 flex items-center gap-2">
+                  <Checkbox
+                    id="packing"
+                    disabled={!canEdit}
+                    checked={logistics.packing_requested}
+                    onCheckedChange={(value) =>
+                      setLogistics({ ...logistics, packing_requested: value === true })
+                    }
+                  />
+                  <Label htmlFor="packing">{rt("rep.packingRequested")}</Label>
+                </div>
+
+                <div className="mt-4 max-w-xs space-y-1.5">
+                  <Label htmlFor="packing-level">{rt("rep.packingLevel")}</Label>
+                  <Select
+                    value={logistics.packing_level}
+                    onValueChange={(value) => setLogistics({ ...logistics, packing_level: value })}
+                  >
+                    <SelectTrigger id="packing-level" disabled={!canEdit}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fragile">{rt("rep.packingLevel.fragile")}</SelectItem>
+                      <SelectItem value="partial">{rt("rep.packingLevel.partial")}</SelectItem>
+                      <SelectItem value="full">{rt("rep.packingLevel.full")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <p className="mt-6 text-sm font-semibold">{rt("rep.materials")}</p>
+                <div className="mt-3 grid gap-4 sm:grid-cols-3">
+                  {MATERIALS.map((key) => (
+                    <div key={key} className="space-y-1.5">
+                      <Label htmlFor={`mat-${key}`}>{rt(`mat.${key}`)}</Label>
+                      <Input
+                        id={`mat-${key}`}
+                        type="number"
+                        min={0}
+                        max={999}
+                        disabled={!canEdit}
+                        value={String(logistics.packing_materials[key] ?? 0)}
+                        onChange={(e) =>
+                          setLogistics({
+                            ...logistics,
+                            packing_materials: {
+                              ...logistics.packing_materials,
+                              [key]: Number(e.target.value) || 0,
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 space-y-1.5">
+                  <Label htmlFor="packing-notes">{rt("rep.packingNotes")}</Label>
+                  <Textarea
+                    id="packing-notes"
+                    rows={3}
+                    maxLength={2000}
+                    disabled={!canEdit}
+                    value={logistics.packing_notes}
+                    onChange={(e) => setLogistics({ ...logistics, packing_notes: e.target.value })}
+                  />
+                </div>
+
+                {canEdit && (
+                  <Button
+                    className="no-print mt-4"
+                    size="sm"
+                    onClick={() => saveLogistics.mutate()}
+                    disabled={saveLogistics.isPending}
+                  >
+                    {saveLogistics.isPending && <Loader2 className="size-4 animate-spin" />}
+                    {rt("rep.saveExtras")}
+                  </Button>
+                )}
+              </section>
+            </div>
           )}
 
           {/* Business-only panel */}
