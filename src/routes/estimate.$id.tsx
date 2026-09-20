@@ -31,6 +31,7 @@ import { QuoteRequestDialog } from "@/components/QuoteRequestDialog";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 import { getSharedEstimate } from "@/lib/estimates.functions";
 import { m3, money, shortDate } from "@/lib/format";
 import { recommendVehicle, recommendedVolume, storageUnitM2 } from "@/lib/volume";
@@ -205,7 +206,7 @@ function EstimatePage() {
         patch.height_cm !== undefined ||
         patch.quantity !== undefined
       ) {
-        payload['volume_m3'] = itemVolume(item, patch);
+        payload.volume_m3 = itemVolume(item, patch);
       }
       const { error } = await supabase.from("estimate_items").update(payload).eq("id", item.id);
       if (error) throw error;
