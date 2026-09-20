@@ -58,15 +58,19 @@ export type Database = {
           category: string | null
           confidence: number
           created_at: string
+          deleted_at: string | null
           estimate_id: string
           height_cm: number
           id: string
+          is_included: boolean
           length_cm: number
           name: string
           name_no: string | null
+          notes: string | null
           photo_url: string | null
           quantity: number
           room_id: string | null
+          tags: string[]
           volume_m3: number
           width_cm: number
         }
@@ -74,15 +78,19 @@ export type Database = {
           category?: string | null
           confidence?: number
           created_at?: string
+          deleted_at?: string | null
           estimate_id: string
           height_cm?: number
           id?: string
+          is_included?: boolean
           length_cm?: number
           name: string
           name_no?: string | null
+          notes?: string | null
           photo_url?: string | null
           quantity?: number
           room_id?: string | null
+          tags?: string[]
           volume_m3?: number
           width_cm?: number
         }
@@ -90,15 +98,19 @@ export type Database = {
           category?: string | null
           confidence?: number
           created_at?: string
+          deleted_at?: string | null
           estimate_id?: string
           height_cm?: number
           id?: string
+          is_included?: boolean
           length_cm?: number
           name?: string
           name_no?: string | null
+          notes?: string | null
           photo_url?: string | null
           quantity?: number
           room_id?: string | null
+          tags?: string[]
           volume_m3?: number
           width_cm?: number
         }
@@ -156,13 +168,18 @@ export type Database = {
       }
       estimates: {
         Row: {
+          access_floor: number | null
+          access_notes: string | null
           address: string | null
+          carry_distance_m: number | null
           company_id: string | null
           created_at: string
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
+          has_elevator: boolean
           id: string
+          internal_notes: string | null
           move_date: string | null
           notes: string | null
           photo_urls: string[]
@@ -172,13 +189,18 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_floor?: number | null
+          access_notes?: string | null
           address?: string | null
+          carry_distance_m?: number | null
           company_id?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          has_elevator?: boolean
           id?: string
+          internal_notes?: string | null
           move_date?: string | null
           notes?: string | null
           photo_urls?: string[]
@@ -188,13 +210,18 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_floor?: number | null
+          access_notes?: string | null
           address?: string | null
+          carry_distance_m?: number | null
           company_id?: string | null
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          has_elevator?: boolean
           id?: string
+          internal_notes?: string | null
           move_date?: string | null
           notes?: string | null
           photo_urls?: string[]
@@ -209,6 +236,57 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_requests: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          email: string | null
+          estimate_id: string
+          handled: boolean
+          id: string
+          message: string | null
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          email?: string | null
+          estimate_id: string
+          handled?: boolean
+          id?: string
+          message?: string | null
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          email?: string | null
+          estimate_id?: string
+          handled?: boolean
+          id?: string
+          message?: string | null
+          name?: string
+          phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_requests_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
             referencedColumns: ["id"]
           },
         ]
