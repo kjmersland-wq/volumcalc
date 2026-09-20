@@ -156,5 +156,5 @@ const content: Record<"no" | "en", LegalContent> = {
 
 function PrivacyPage() {
   const { lang } = useI18n();
-  return <LegalLayout content={content[lang]} />;
+  return <LegalLayout content={content[lang === "no" ? "no" : "en"]} />;
 }

@@ -142,7 +142,7 @@ function EstimatePage() {
   const [hourly, setHourly] = useState("1200");
   const [hours, setHours] = useState("5");
   const [checked, setChecked] = useState<Record<string, boolean>>({});
-  const [reportLang, setReportLang] = useState<ReportLang>(lang);
+  const [reportLang, setReportLang] = useState<ReportLang>(lang === "no" || lang === "pl" ? lang : "en");
   const [tenderMode, setTenderMode] = useState(false);
   const [logistics, setLogistics] = useState<Logistics | null>(null);
 
