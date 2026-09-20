@@ -104,11 +104,13 @@ export async function analyzeImages(images: string[]): Promise<{ items: Detected
   });
 
   if (response.status === 429) throw new Error("rate_limited");
-  if (response.status === 402) throw new Error("payment_required");
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as { message?: string; error?: { message?: string } } | null;
     const safeMessage = payload?.message ?? payload?.error?.message ?? "AI analysis failed";
     console.error("AI gateway error", response.status, safeMessage);
+    if (response.status === 402 || response.status === 403 || /credit/i.test(safeMessage)) {
+      throw new Error("payment_required");
+    }
     throw new Error("AI analysis failed");
   }
 
