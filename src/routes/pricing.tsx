@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, UserRound, Building2 } from "lucide-react";
+import { Check, UserRound, Building2, LockKeyhole } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { useI18n } from "@/lib/i18n";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/pricing")({
@@ -28,6 +32,8 @@ export const Route = createFileRoute("/pricing")({
 
 function Pricing() {
   const { t, lang } = useI18n();
+  const { user } = useAuth();
+  const [checkout, setCheckout] = useState<{ priceId: string; name: string } | null>(null);
 
   const plans = [
     {
@@ -39,6 +45,7 @@ function Pricing() {
           ? ["Opplastingslenke", "AI-volumberegning", "Delbar rapport"]
           : ["Upload link", "AI volume estimate", "Shareable report"],
       featured: false,
+      priceId: null,
     },
     {
       name: "Business",
@@ -49,6 +56,7 @@ function Pricing() {
           ? ["Alt i Starter", "Egen logo og farger", "Pris per m³ og tilbud", "PDF-rapport"]
           : ["Everything in Starter", "Your logo and colours", "Rate per m³ and quotes", "PDF report"],
       featured: true,
+      priceId: "volumcalc_business_monthly_nok",
     },
     {
       name: "Enterprise",
@@ -59,6 +67,7 @@ function Pricing() {
           ? ["Alt i Business", "Flere avdelinger", "API og integrasjoner", "Egen kundekontakt"]
           : ["Everything in Business", "Multiple branches", "API and integrations", "Dedicated contact"],
       featured: false,
+      priceId: null,
     },
   ];
 
@@ -68,18 +77,21 @@ function Pricing() {
       price: "0",
       desc: lang === "no" ? "1 beregning · maks 6 bilder" : "1 estimate · maximum 6 photos",
       features: lang === "no" ? ["Romvis sortering", "Totalvolum", "Delbar rapport"] : ["Room grouping", "Total volume", "Shareable report"],
+      priceId: null,
     },
     {
       name: lang === "no" ? "Én beregning" : "Single estimate",
       price: "129",
       desc: lang === "no" ? "For én flytting" : "For one move",
       features: lang === "no" ? ["Opptil 15 bilder", "Romvis sortering", "PDF-rapport"] : ["Up to 15 photos", "Room grouping", "PDF report"],
+      priceId: "volumcalc_single_estimate_nok",
     },
     {
       name: lang === "no" ? "3 beregninger" : "3 estimates",
       price: "299",
       desc: lang === "no" ? "Spar 88 NOK" : "Save 88 NOK",
       features: lang === "no" ? ["3 komplette beregninger", "Opptil 15 bilder hver", "PDF-rapporter"] : ["3 complete estimates", "Up to 15 photos each", "PDF reports"],
+      priceId: "volumcalc_three_estimates_nok",
     },
   ];
 
@@ -106,7 +118,14 @@ function Pricing() {
                 <ul className="mt-6 flex-1 space-y-2.5 text-sm">
                   {plan.features.map((feature) => <li key={feature} className="flex gap-2"><Check className="mt-0.5 size-4 text-success" />{feature}</li>)}
                 </ul>
-                <Button asChild className="mt-8" variant={index === 1 ? "default" : "outline"}><Link to="/upload">{t("price.cta")}</Link></Button>
+                {plan.priceId ? (
+                  <Button className="mt-8" variant={index === 1 ? "default" : "outline"} onClick={() => setCheckout({ priceId: plan.priceId, name: plan.name })}>
+                    <LockKeyhole className="size-4" />
+                    {t("payment.buy")}
+                  </Button>
+                ) : (
+                  <Button asChild className="mt-8" variant="outline"><Link to="/upload">{t("price.cta")}</Link></Button>
+                )}
               </div>
             ))}
           </div>
@@ -148,15 +167,38 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-              <Button asChild className="mt-8" variant={plan.featured ? "default" : "outline"}>
-                <Link to="/auth">{t("price.cta")}</Link>
-              </Button>
+              {plan.priceId ? (
+                <Button className="mt-8" variant="default" onClick={() => setCheckout({ priceId: plan.priceId, name: plan.name })}>
+                  <LockKeyhole className="size-4" />
+                  {t("payment.subscribe")}
+                </Button>
+              ) : (
+                <Button asChild className="mt-8" variant="outline"><Link to={plan.price === "0" ? "/upload" : "/auth"}>{t("price.cta")}</Link></Button>
+              )}
             </div>
           ))}
           </div>
         </section>
       </main>
       <SiteFooter />
+      <Dialog open={Boolean(checkout)} onOpenChange={(open) => !open && setCheckout(null)}>
+        <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto p-0">
+          <DialogHeader className="border-b border-border px-6 py-5 pr-12">
+            <DialogTitle>{checkout?.name}</DialogTitle>
+            <DialogDescription>{t("payment.secure")}</DialogDescription>
+          </DialogHeader>
+          <div className="min-h-[560px] px-2 pb-5 sm:px-5">
+            {checkout && (
+              <StripeEmbeddedCheckout
+                key={checkout.priceId}
+                priceId={checkout.priceId}
+                customerEmail={user?.email}
+                userId={user?.id}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
