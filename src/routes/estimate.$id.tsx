@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Boxes, Check, Download, Link2, Loader2, Trash2 } from "lucide-react";
+import { Boxes, Check, Download, Link2, Loader2, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,11 +16,13 @@ import { m3, money, shortDate } from "@/lib/format";
 export const Route = createFileRoute("/estimate/$id")({
   head: () => ({
     meta: [
-      { title: "Volume estimate — CubicCalc" },
+      { title: "Volume estimate — VolumCalc" },
       { name: "description", content: "Itemised cubic metre estimate generated from customer photos." },
-      { property: "og:title", content: "Volume estimate — CubicCalc" },
+      { property: "og:title", content: "Volume estimate — VolumCalc" },
       { property: "og:description", content: "Itemised cubic metre estimate generated from photos." },
       { name: "robots", content: "noindex" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: EstimatePage,
@@ -37,7 +39,10 @@ type Item = {
   volume_m3: number;
   confidence: number;
   photo_url: string | null;
+  room_id: string | null;
 };
+
+type Room = { id: string; name: string; sort_order: number };
 
 function EstimatePage() {
   const { id } = Route.useParams();
@@ -45,18 +50,21 @@ function EstimatePage() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<Record<string, Partial<Item>>>({});
+  const [renamingRoom, setRenamingRoom] = useState<string | null>(null);
+  const [roomName, setRoomName] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["estimate", id],
     queryFn: async () => {
-      const [{ data: estimate }, { data: items }, { data: company }] = await Promise.all([
+      const [{ data: estimate }, { data: items }, { data: rooms }, { data: company }] = await Promise.all([
         supabase.from("estimates").select("*").eq("id", id).maybeSingle(),
         supabase.from("estimate_items").select("*").eq("estimate_id", id).order("volume_m3", { ascending: false }),
+        supabase.from("estimate_rooms").select("id,name,sort_order").eq("estimate_id", id).order("sort_order"),
         session
           ? supabase.from("companies").select("*").eq("id", session.user.id).maybeSingle()
           : Promise.resolve({ data: null }),
       ]);
-      return { estimate, items: (items ?? []) as Item[], company };
+      return { estimate, items: (items ?? []) as Item[], rooms: (rooms ?? []) as Room[], company };
     },
   });
 
@@ -104,6 +112,27 @@ function EstimatePage() {
     },
   });
 
+  const renameRoom = useMutation({
+    mutationFn: async ({ roomId, name }: { roomId: string; name: string }) => {
+      const cleanName = name.trim();
+      if (!cleanName) return;
+      const { error } = await supabase.from("estimate_rooms").update({ name: cleanName }).eq("id", roomId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setRenamingRoom(null);
+      queryClient.invalidateQueries({ queryKey: ["estimate", id] });
+    },
+  });
+
+  const moveItem = useMutation({
+    mutationFn: async ({ itemId, roomId }: { itemId: string; roomId: string | null }) => {
+      const { error } = await supabase.from("estimate_items").update({ room_id: roomId }).eq("id", itemId);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["estimate", id] }),
+  });
+
   async function recalcTotal() {
     const { data: rows } = await supabase.from("estimate_items").select("volume_m3").eq("estimate_id", id);
     const total = Math.round((rows ?? []).reduce((sum, r) => sum + Number(r.volume_m3), 0) * 100) / 100;
@@ -132,9 +161,19 @@ function EstimatePage() {
   }
 
   const items = data.items;
+  const rooms = data.rooms;
   const company = data.company as { price_per_m3: number; currency: string; company_name: string } | null;
   const total = items.reduce((sum, i) => sum + Number(i.volume_m3), 0);
   const canEdit = Boolean(session);
+  const groups = [
+    ...rooms.map((room) => ({
+      ...room,
+      items: items.filter((item) => item.room_id === room.id),
+    })),
+    ...(items.some((item) => !item.room_id)
+      ? [{ id: "other", name: t("res.other"), sort_order: 999, items: items.filter((item) => !item.room_id) }]
+      : []),
+  ].filter((group) => group.items.length > 0);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -202,13 +241,33 @@ function EstimatePage() {
             )}
           </div>
 
-          <div className="card-soft mt-8 overflow-hidden">
-            <div className="grid grid-cols-[1fr_auto] items-center gap-2 border-b border-border px-5 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <span>{t("res.item")}</span>
-              <span>{t("res.volume")}</span>
-            </div>
-            <ul className="divide-y divide-border">
-              {items.map((item) => {
+          <div className="mt-8 space-y-6">
+            {groups.map((group) => (
+              <section key={group.id} className="card-soft overflow-hidden">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/40 px-5 py-4">
+                  {renamingRoom === group.id ? (
+                    <form className="no-print flex gap-2" onSubmit={(event) => { event.preventDefault(); renameRoom.mutate({ roomId: group.id, name: roomName }); }}>
+                      <Input value={roomName} onChange={(event) => setRoomName(event.target.value)} maxLength={80} autoFocus className="h-9 w-56" aria-label={t("res.renameRoom")} />
+                      <Button size="sm" type="submit">{t("dash.saveItem")}</Button>
+                    </form>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-lg font-bold">{group.name}</h2>
+                      {canEdit && group.id !== "other" && (
+                        <Button size="icon" variant="ghost" className="no-print size-8" aria-label={t("res.renameRoom")} onClick={() => { setRenamingRoom(group.id); setRoomName(group.name); }}>
+                          <Pencil className="size-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                  <p className="text-sm font-semibold text-primary">{t("res.roomTotal")}: {m3(group.items.reduce((sum, item) => sum + Number(item.volume_m3), 0))}</p>
+                </div>
+                <div className="grid grid-cols-[1fr_auto] items-center gap-2 border-b border-border px-5 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <span>{t("res.item")}</span>
+                  <span>{t("res.volume")}</span>
+                </div>
+                <ul className="divide-y divide-border">
+                {group.items.map((item) => {
                 const patch = editing[item.id];
                 return (
                   <li key={item.id} className="px-5 py-4">
@@ -256,6 +315,17 @@ function EstimatePage() {
 
                     {canEdit && (
                       <div className="no-print mt-3 flex flex-wrap items-center gap-2">
+                        <label className="sr-only" htmlFor={`room-${item.id}`}>{t("res.moveRoom")}</label>
+                        <select
+                          id={`room-${item.id}`}
+                          className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+                          value={item.room_id ?? ""}
+                          onChange={(event) => moveItem.mutate({ itemId: item.id, roomId: event.target.value || null })}
+                          aria-label={t("res.moveRoom")}
+                        >
+                          <option value="">{t("res.other")}</option>
+                          {rooms.map((room) => <option key={room.id} value={room.id}>{room.name}</option>)}
+                        </select>
                         {(["length_cm", "width_cm", "height_cm", "quantity"] as const).map((field) => (
                           <Input
                             key={field}
@@ -290,8 +360,10 @@ function EstimatePage() {
                     )}
                   </li>
                 );
-              })}
-            </ul>
+                })}
+                </ul>
+              </section>
+            ))}
           </div>
 
           {estimate.photo_urls?.length > 0 && (
