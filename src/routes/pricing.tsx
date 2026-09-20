@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check } from "lucide-react";
+import { Check, UserRound, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -9,16 +9,18 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — CubicCalc" },
+      { title: "Pricing for individuals and movers — VolumCalc" },
       {
         name: "description",
         content: "Plans for movers and storage providers, from a free starter tier to unlimited estimates.",
       },
-      { property: "og:title", content: "Pricing — CubicCalc" },
+      { property: "og:title", content: "Pricing for individuals and movers — VolumCalc" },
       {
         property: "og:description",
         content: "Simple monthly plans for AI cubic volume estimates.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Pricing,
@@ -60,16 +62,60 @@ function Pricing() {
     },
   ];
 
+  const privatePlans = [
+    {
+      name: lang === "no" ? "Gratis prøve" : "Free trial",
+      price: "0",
+      desc: lang === "no" ? "1 beregning · maks 6 bilder" : "1 estimate · maximum 6 photos",
+      features: lang === "no" ? ["Romvis sortering", "Totalvolum", "Delbar rapport"] : ["Room grouping", "Total volume", "Shareable report"],
+    },
+    {
+      name: lang === "no" ? "Én beregning" : "Single estimate",
+      price: "129",
+      desc: lang === "no" ? "For én flytting" : "For one move",
+      features: lang === "no" ? ["Opptil 15 bilder", "Romvis sortering", "PDF-rapport"] : ["Up to 15 photos", "Room grouping", "PDF report"],
+    },
+    {
+      name: lang === "no" ? "3 beregninger" : "3 estimates",
+      price: "299",
+      desc: lang === "no" ? "Spar 88 NOK" : "Save 88 NOK",
+      features: lang === "no" ? ["3 komplette beregninger", "Opptil 15 bilder hver", "PDF-rapporter"] : ["3 complete estimates", "Up to 15 photos each", "PDF reports"],
+    },
+  ];
+
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
       <main className="flex-1">
-        <section className="surface-hero px-4 py-16 text-center">
+        <section className="surface-hero border-b border-border/60 px-4 py-16 text-center">
           <h1 className="text-4xl font-extrabold sm:text-5xl">{t("price.title")}</h1>
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">{t("price.sub")}</p>
         </section>
 
-        <section className="mx-auto grid max-w-6xl gap-6 px-4 py-16 md:grid-cols-3">
+        <section className="mx-auto max-w-6xl px-4 py-16">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-lg bg-primary-soft text-primary"><UserRound className="size-5" /></span>
+            <h2 className="text-2xl font-bold">{t("price.private")}</h2>
+          </div>
+          <div className="mt-7 grid gap-6 md:grid-cols-3">
+            {privatePlans.map((plan, index) => (
+              <div key={plan.name} className={cn("card-soft flex flex-col p-7", index === 1 && "border-primary shadow-[var(--shadow-lift)]")}>
+                <h3 className="text-lg font-semibold">{plan.name}</h3>
+                <p className="mt-4 text-3xl font-bold">{plan.price} <span className="text-base font-medium text-muted-foreground">NOK</span></p>
+                <p className="mt-1 text-sm text-muted-foreground">{plan.desc}</p>
+                <ul className="mt-6 flex-1 space-y-2.5 text-sm">
+                  {plan.features.map((feature) => <li key={feature} className="flex gap-2"><Check className="mt-0.5 size-4 text-success" />{feature}</li>)}
+                </ul>
+                <Button asChild className="mt-8" variant={index === 1 ? "default" : "outline"}><Link to="/upload">{t("price.cta")}</Link></Button>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-20 flex items-center gap-3 border-t border-border pt-16">
+            <span className="flex size-10 items-center justify-center rounded-lg bg-primary-soft text-primary"><Building2 className="size-5" /></span>
+            <h2 className="text-2xl font-bold">{t("price.business")}</h2>
+          </div>
+          <div className="mt-7 grid gap-6 md:grid-cols-3">
           {plans.map((plan) => (
             <div
               key={plan.name}
@@ -107,6 +153,7 @@ function Pricing() {
               </Button>
             </div>
           ))}
+          </div>
         </section>
       </main>
       <SiteFooter />

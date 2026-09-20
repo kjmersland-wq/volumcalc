@@ -1,21 +1,24 @@
 import { useEffect } from "react";
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
-import { Boxes, LayoutGrid, Link2, Loader2, LogOut, Settings } from "lucide-react";
+import { LayoutGrid, Link2, Loader2, LogOut, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { VolumCalcLogo } from "@/components/VolumCalcLogo";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — CubicCalc" },
+      { title: "Dashboard — VolumCalc" },
       { name: "description", content: "Review incoming photo submissions and volume estimates." },
-      { property: "og:title", content: "Dashboard — CubicCalc" },
+      { property: "og:title", content: "Dashboard — VolumCalc" },
       { property: "og:description", content: "Review incoming photo submissions and volume estimates." },
       { name: "robots", content: "noindex" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: DashboardLayout,
@@ -42,11 +45,8 @@ function DashboardLayout() {
     <div className="flex min-h-screen flex-col bg-muted/30">
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <Boxes className="size-5" />
-            </span>
-            CubicCalc
+          <Link to="/" aria-label="VolumCalc home">
+            <VolumCalcLogo markClassName="size-9" />
           </Link>
           <div className="flex items-center gap-2">
             <LanguageToggle className="mr-1" />

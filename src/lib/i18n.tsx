@@ -15,8 +15,8 @@ const dict: Dict = {
   "hero.title1": { no: "Kubikk på", en: "Cubic metres in" },
   "hero.title2": { no: "sekunder – ikke befaring", en: "seconds — not site visits" },
   "hero.sub": {
-    no: "La kundene dine ta bilder av møblene. CubicCalc gjenkjenner hver gjenstand, estimerer mål og gir deg totalt volum i m³ – klart for pristilbud og lasteplanlegging.",
-    en: "Let your customers photograph their furniture. CubicCalc detects every item, estimates dimensions and returns total volume in m³ — ready for quoting and load planning.",
+    no: "VolumCalc gjør bilder av rommene dine om til en ryddig, rominndelt volumberegning – klar for flytteplanlegging og pristilbud.",
+    en: "VolumCalc turns room photos into a clear, room-by-room volume estimate — ready for moving plans and quotes.",
   },
   "hero.cta": { no: "Start en gratis beregning", en: "Start a free estimate" },
   "hero.cta2": { no: "For flyttebyråer", en: "For moving companies" },
@@ -71,11 +71,17 @@ const dict: Dict = {
 
   "upload.title": { no: "Last opp bilder av tingene dine", en: "Upload photos of your items" },
   "upload.sub": {
-    no: "Ta bilder av hvert rom og hvert større møbel. Jo flere bilder, jo mer nøyaktig blir volumet.",
-    en: "Photograph each room and every larger item. More photos means a more accurate volume.",
+    no: "AI-en sorterer bildene og gjenstandene automatisk etter rom.",
+    en: "AI automatically sorts your photos and items by room.",
+  },
+  "upload.guideTitle": { no: "Slik får du best resultat", en: "How to get the best result" },
+  "upload.guide": {
+    no: "Ta 1–3 bilder per rom. Ett oversiktsbilde av hele rommet + 1–2 nærbilder av de største møblene gir best resultat. Du trenger ikke fotografere hver minste gjenstand.",
+    en: "Take 1–3 photos per room. One overview photo of the whole room + 1–2 closer photos of the largest furniture items gives the best result. You don’t need to photograph every small object.",
   },
   "upload.drop": { no: "Dra bilder hit eller trykk for å velge", en: "Drag photos here or tap to select" },
-  "upload.hint": { no: "JPG eller PNG, opptil 20 MB per bilde", en: "JPG or PNG, up to 20 MB per photo" },
+  "upload.hint": { no: "JPG eller PNG · maks 15 bilder", en: "JPG or PNG · maximum 15 photos" },
+  "upload.limit": { no: "Du kan laste opp maksimalt 15 bilder.", en: "You can upload a maximum of 15 photos." },
   "upload.photos": { no: "bilder valgt", en: "photos selected" },
   "upload.details": { no: "Kontaktinformasjon (valgfritt)", en: "Contact details (optional)" },
   "upload.name": { no: "Navn", en: "Name" },
@@ -101,6 +107,11 @@ const dict: Dict = {
   "res.share": { no: "Kopier delingslenke", en: "Copy share link" },
   "res.copied": { no: "Lenke kopiert", en: "Link copied" },
   "res.photos": { no: "Bilder", en: "Photos" },
+  "res.room": { no: "Rom", en: "Room" },
+  "res.renameRoom": { no: "Gi rommet nytt navn", en: "Rename room" },
+  "res.moveRoom": { no: "Flytt til rom", en: "Move to room" },
+  "res.roomTotal": { no: "Romvolum", en: "Room volume" },
+  "res.other": { no: "Annet", en: "Other" },
   "res.notFound": { no: "Fant ikke beregningen.", en: "Estimate not found." },
   "res.estimated": { no: "Estimert pris", en: "Estimated price" },
   "res.disclaimer": {
@@ -149,11 +160,13 @@ const dict: Dict = {
   "set.save": { no: "Lagre innstillinger", en: "Save settings" },
   "set.saved": { no: "Innstillinger lagret", en: "Settings saved" },
 
-  "price.title": { no: "Enkle priser for flyttebyråer", en: "Simple pricing for movers" },
+  "price.title": { no: "Enkle priser, uansett hvordan du flytter", en: "Simple pricing, however you move" },
   "price.sub": {
-    no: "Start gratis. Oppgrader når volumet øker.",
-    en: "Start free. Upgrade as your volume grows.",
+    no: "Velg en enkelt beregning for din egen flytting, eller en plan for flyttebyrået.",
+    en: "Choose a one-off estimate for your own move, or a plan for your moving company.",
   },
+  "price.private": { no: "For privatpersoner", en: "For private individuals" },
+  "price.business": { no: "For flyttebyråer", en: "For moving companies" },
   "price.month": { no: "/mnd", en: "/mo" },
   "price.cta": { no: "Kom i gang", en: "Get started" },
   "price.popular": { no: "Mest populær", en: "Most popular" },
@@ -167,13 +180,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("no");
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("cubiccalc-lang");
+    const stored = window.localStorage.getItem("volumcalc-lang") ?? window.localStorage.getItem("cubiccalc-lang");
     if (stored === "en" || stored === "no") setLangState(stored);
   }, []);
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
-    window.localStorage.setItem("cubiccalc-lang", l);
+    window.localStorage.setItem("volumcalc-lang", l);
   }, []);
 
   const t = useCallback(
