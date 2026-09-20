@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const dataUrl = z.string().min(20).max(12_000_000).regex(/^data:image\/(jpeg|png|webp);base64,/);
 
@@ -184,3 +185,43 @@ export const requestQuote = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+
+/**
+ * A signed-in company takes ownership of an estimate that no company owns yet.
+ * The caller must hold the secret share link for that exact estimate, so an
+ * estimate can never be claimed by guessing ids.
+ */
+export const claimEstimate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => sharedSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: estimate } = await supabaseAdmin
+      .from("estimates")
+      .select("id,share_token,company_id")
+      .eq("id", data.id)
+      .maybeSingle();
+
+    if (!estimate || estimate.share_token !== data.token) throw new Error("Estimate not found");
+    if (estimate.company_id && estimate.company_id !== context.userId) {
+      throw new Error("This estimate already belongs to another company");
+    }
+
+    if (!estimate.company_id) {
+      const { error } = await supabaseAdmin
+        .from("estimates")
+        .update({ company_id: context.userId })
+        .eq("id", estimate.id)
+        .is("company_id", null);
+      if (error) throw new Error("Could not claim the estimate");
+
+      await supabaseAdmin
+        .from("quote_requests")
+        .update({ company_id: context.userId })
+        .eq("estimate_id", estimate.id)
+        .is("company_id", null);
+    }
+
+    return { ok: true };
+  });
