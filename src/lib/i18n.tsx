@@ -4,7 +4,7 @@ export type Lang = "no" | "en";
 
 type Dict = Record<string, { no: string; en: string }>;
 
-const dict: Dict = {
+export const dict: Dict = {
   "nav.contact": { no: "Kontakt", en: "Contact" },
   "contact.badge": { no: "Kontakt oss", en: "Contact us" },
   "contact.title": { no: "Snakk med VolumCalc", en: "Talk to VolumCalc" },
