@@ -35,8 +35,15 @@ export function ShareButtons({ title, text }: ShareButtonsProps) {
     await copyLink();
   }
 
-  const encodedUrl = encodeURIComponent(typeof window === "undefined" ? "" : getShareUrl());
-  const encodedText = encodeURIComponent(`${text} ${typeof window === "undefined" ? "" : getShareUrl()}`);
+  function shareUrl(baseUrl: string, includeText = false) {
+    const encodedUrl = encodeURIComponent(getShareUrl());
+    const encodedText = encodeURIComponent(`${text} ${getShareUrl()}`);
+    openShare(includeText ? `${baseUrl}${encodedText}` : `${baseUrl}${encodedUrl}`);
+  }
+
+  function shareByEmail() {
+    window.location.href = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${text}\n\n${getShareUrl()}`)}`;
+  }
 
   return (
     <section className="no-print mt-6 border-y border-border py-5" aria-labelledby="share-heading">
@@ -46,22 +53,20 @@ export function ShareButtons({ title, text }: ShareButtonsProps) {
           <p className="text-sm text-muted-foreground">{t("share.sub")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" size="icon" onClick={() => openShare(`https://wa.me/?text=${encodedText}`)} aria-label={t("share.whatsapp")} title={t("share.whatsapp")}>
+          <Button type="button" variant="outline" size="icon" onClick={() => shareUrl("https://wa.me/?text=", true)} aria-label={t("share.whatsapp")} title={t("share.whatsapp")}>
             <MessageCircle className="size-4" />
           </Button>
-          <Button type="button" variant="outline" size="icon" onClick={() => openShare(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`)} aria-label={t("share.facebook")} title={t("share.facebook")}>
+          <Button type="button" variant="outline" size="icon" onClick={() => shareUrl("https://www.facebook.com/sharer/sharer.php?u=")} aria-label={t("share.facebook")} title={t("share.facebook")}>
             <Facebook className="size-4" />
           </Button>
-          <Button type="button" variant="outline" size="icon" onClick={() => openShare(`https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`)} aria-label={t("share.linkedin")} title={t("share.linkedin")}>
+          <Button type="button" variant="outline" size="icon" onClick={() => shareUrl("https://www.linkedin.com/sharing/share-offsite/?url=")} aria-label={t("share.linkedin")} title={t("share.linkedin")}>
             <Linkedin className="size-4" />
           </Button>
-          <Button type="button" variant="outline" size="icon" onClick={() => openShare(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodedUrl}`)} aria-label={t("share.x")} title={t("share.x")}>
+          <Button type="button" variant="outline" size="icon" onClick={() => openShare(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(getShareUrl())}`)} aria-label={t("share.x")} title={t("share.x")}>
             <span className="text-sm font-bold" aria-hidden="true">X</span>
           </Button>
-          <Button type="button" variant="outline" size="icon" asChild>
-            <a href={`mailto:?subject=${encodeURIComponent(title)}&body=${encodedText}`} aria-label={t("share.email")} title={t("share.email")}>
-              <Mail className="size-4" />
-            </a>
+          <Button type="button" variant="outline" size="icon" onClick={shareByEmail} aria-label={t("share.email")} title={t("share.email")}>
+            <Mail className="size-4" />
           </Button>
           <Button type="button" variant="outline" size="icon" onClick={copyLink} aria-label={t("res.share")} title={t("res.share")}>
             <Copy className="size-4" />
