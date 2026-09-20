@@ -24,11 +24,19 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ShareButtons } from "@/components/ShareButtons";
 import { QuoteRequestDialog } from "@/components/QuoteRequestDialog";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, translate, type Lang } from "@/lib/i18n";
+import { reportPl, type ReportLang } from "@/lib/report-pl";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
@@ -75,6 +83,25 @@ type Item = {
 
 type Room = { id: string; name: string; sort_order: number };
 
+type Logistics = {
+  storage_enabled: boolean;
+  storage_company: string;
+  storage_address: string;
+  storage_contact: string;
+  storage_phone: string;
+  delivery_address: string;
+  delivery_floor: string;
+  delivery_elevator: boolean;
+  delivery_carry_distance: string;
+  delivery_notes: string;
+  packing_requested: boolean;
+  packing_level: string;
+  packing_materials: Record<string, number>;
+  packing_notes: string;
+};
+
+const MATERIALS = ["boxes", "bubble", "paper", "tape", "wardrobe", "mattress", "blanket"] as const;
+
 const TAGS = [
   { value: "disassemble", key: "rep.tag.disassemble" },
   { value: "fragile", key: "rep.tag.fragile" },
@@ -114,6 +141,13 @@ function EstimatePage() {
   const [hourly, setHourly] = useState("1200");
   const [hours, setHours] = useState("5");
   const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const [reportLang, setReportLang] = useState<ReportLang>(lang);
+  const [tenderMode, setTenderMode] = useState(false);
+  const [logistics, setLogistics] = useState<Logistics | null>(null);
+
+  // Report labels follow the chosen report language; user-entered text is untouched.
+  const rt = (key: string) =>
+    reportLang === "pl" ? (reportPl[key] ?? translate(key, "en")) : translate(key, reportLang as Lang);
 
   const { data, isLoading } = useQuery({
     queryKey: ["estimate", id, session?.user.id ?? "guest"],
@@ -175,6 +209,28 @@ function EstimatePage() {
       },
     );
     setInternalNotes((prev) => prev ?? estimate.internal_notes ?? "");
+    const e = estimate as Record<string, unknown>;
+    setLogistics((prev) =>
+      prev ?? {
+        storage_enabled: Boolean(e['storage_enabled']),
+        storage_company: (e['storage_company'] as string) ?? "",
+        storage_address: (e['storage_address'] as string) ?? "",
+        storage_contact: (e['storage_contact'] as string) ?? "",
+        storage_phone: (e['storage_phone'] as string) ?? "",
+        delivery_address: (e['delivery_address'] as string) ?? "",
+        delivery_floor: (e['delivery_floor'] as string) ?? "",
+        delivery_elevator: Boolean(e['delivery_elevator']),
+        delivery_carry_distance: (e['delivery_carry_distance'] as string) ?? "",
+        delivery_notes: (e['delivery_notes'] as string) ?? "",
+        packing_requested: Boolean(e['packing_requested']),
+        packing_level: (e['packing_level'] as string) ?? "fragile",
+        packing_materials: (e['packing_materials'] as Record<string, number>) ?? {},
+        packing_notes: (e['packing_notes'] as string) ?? "",
+      },
+    );
+    setTenderMode(Boolean(e['tender_mode']));
+    const saved = e['report_language'];
+    if (saved === "no" || saved === "en" || saved === "pl") setReportLang(saved);
   }, [estimate]);
 
   useEffect(() => {
@@ -214,7 +270,7 @@ function EstimatePage() {
       await recalcTotal();
     },
     onSuccess: invalidate,
-    onError: () => toast.error(t("upload.failed")),
+    onError: () => toast.error(rt("upload.failed")),
   });
 
   const softDelete = useMutation({
@@ -238,7 +294,7 @@ function EstimatePage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success(t("dash.approved"));
+      toast.success(rt("dash.approved"));
       invalidate();
       queryClient.invalidateQueries({ queryKey: ["estimates"] });
     },
@@ -281,10 +337,49 @@ function EstimatePage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success(t("rep.saved"));
+      toast.success(rt("rep.saved"));
       invalidate();
     },
-    onError: () => toast.error(t("upload.failed")),
+    onError: () => toast.error(rt("upload.failed")),
+  });
+
+  const saveLogistics = useMutation({
+    mutationFn: async () => {
+      if (!logistics) return;
+      const { error } = await supabase
+        .from("estimates")
+        .update({
+          storage_enabled: logistics.storage_enabled,
+          storage_company: logistics.storage_company.trim() || null,
+          storage_address: logistics.storage_address.trim() || null,
+          storage_contact: logistics.storage_contact.trim() || null,
+          storage_phone: logistics.storage_phone.trim() || null,
+          delivery_address: logistics.delivery_address.trim() || null,
+          delivery_floor: logistics.delivery_floor.trim() || null,
+          delivery_elevator: logistics.delivery_elevator,
+          delivery_carry_distance: logistics.delivery_carry_distance.trim() || null,
+          delivery_notes: logistics.delivery_notes.trim() || null,
+          packing_requested: logistics.packing_requested,
+          packing_level: logistics.packing_level,
+          packing_materials: logistics.packing_materials,
+          packing_notes: logistics.packing_notes.trim() || null,
+        })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(rt("rep.saved"));
+      invalidate();
+    },
+    onError: () => toast.error(rt("upload.failed")),
+  });
+
+  const saveReportSettings = useMutation({
+    mutationFn: async (patch: { report_language?: string; tender_mode?: boolean }) => {
+      const { error } = await supabase.from("estimates").update(patch).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
   });
 
   const items = useMemo(() => data?.items ?? [], [data]);
@@ -305,13 +400,25 @@ function EstimatePage() {
     return (
       <div className="flex min-h-screen flex-col">
         <SiteHeader />
-        <main className="flex flex-1 items-center justify-center p-8 text-muted-foreground">{t("res.notFound")}</main>
+        <main className="flex flex-1 items-center justify-center p-8 text-muted-foreground">{rt("res.notFound")}</main>
         <SiteFooter />
       </div>
     );
   }
 
-  const company = data?.company as { price_per_m3: number; currency: string; company_name: string } | null;
+  const company = data?.company as
+    | {
+        price_per_m3: number;
+        currency: string;
+        company_name: string;
+        logo_url?: string | null;
+        org_number?: string | null;
+        address?: string | null;
+        phone?: string | null;
+        contact_email?: string | null;
+        website?: string | null;
+      }
+    | null;
   const currency = company?.currency ?? "NOK";
   const canEdit = Boolean(session);
   const businessView = canEdit && view === "business";
@@ -323,14 +430,14 @@ function EstimatePage() {
   const groups = [
     ...rooms.map((room) => ({ ...room, items: items.filter((item) => item.room_id === room.id) })),
     ...(items.some((item) => !item.room_id)
-      ? [{ id: "other", name: t("res.other"), sort_order: 999, items: items.filter((item) => !item.room_id) }]
+      ? [{ id: "other", name: rt("res.other"), sort_order: 999, items: items.filter((item) => !item.room_id) }]
       : []),
   ].filter((group) => group.items.length > 0);
 
   function copySecretLink() {
     const url = `${window.location.origin}/estimate/${id}${shareToken ? `?token=${shareToken}` : ""}`;
     navigator.clipboard.writeText(url);
-    toast.success(t("res.copied"));
+    toast.success(rt("res.copied"));
   }
 
   function exportCsv() {
@@ -370,7 +477,7 @@ function EstimatePage() {
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {t("rep.estimateId")} #{String(estimate.id).slice(0, 8).toUpperCase()}
+                  {rt("rep.estimateId")} #{String(estimate.id).slice(0, 8).toUpperCase()}
                 </p>
                 <Badge
                   variant="secondary"
@@ -382,11 +489,11 @@ function EstimatePage() {
                         : "bg-muted text-muted-foreground"
                   }
                 >
-                  {t(statusKey)}
+                  {rt(statusKey)}
                 </Badge>
               </div>
               <h1 className="mt-1 text-3xl font-bold tracking-tight">
-                {estimate.customer_name || t("res.title")}
+                {estimate.customer_name || rt("res.title")}
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 {shortDate(estimate.created_at, lang)}
@@ -398,18 +505,18 @@ function EstimatePage() {
               {shareToken && (
                 <Button variant="outline" size="sm" onClick={copySecretLink}>
                   <Link2 className="size-4" />
-                  {t("rep.shareSecret")}
+                  {rt("rep.shareSecret")}
                 </Button>
               )}
               <Button variant="outline" size="sm" onClick={() => window.print()}>
                 <Download className="size-4" />
-                {t("rep.pdf")}
+                {rt("rep.pdf")}
               </Button>
               {!businessView && shareToken && <QuoteRequestDialog id={String(estimate.id)} token={shareToken} />}
               {canEdit && estimate.status !== "approved" && (
                 <Button size="sm" onClick={() => approve.mutate()}>
                   <Check className="size-4" />
-                  {t("dash.approve")}
+                  {rt("dash.approve")}
                 </Button>
               )}
             </div>
@@ -422,8 +529,8 @@ function EstimatePage() {
               className="no-print mt-6"
             >
               <TabsList>
-                <TabsTrigger value="customer">{t("rep.viewCustomer")}</TabsTrigger>
-                <TabsTrigger value="business">{t("rep.viewBusiness")}</TabsTrigger>
+                <TabsTrigger value="customer">{rt("rep.viewCustomer")}</TabsTrigger>
+                <TabsTrigger value="business">{rt("rep.viewBusiness")}</TabsTrigger>
               </TabsList>
             </Tabs>
           )}
@@ -431,40 +538,40 @@ function EstimatePage() {
           {/* Summary cards */}
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             <div className="card-soft p-6">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("rep.netVolume")}</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{rt("rep.netVolume")}</p>
               <p className="mt-2 flex items-center gap-2 text-3xl font-extrabold text-primary">
                 <Boxes className="size-6" />
                 {m3(netVolume)}
               </p>
             </div>
             <div className="card-soft p-6">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("rep.recommended")}</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{rt("rep.recommended")}</p>
               <p className="mt-2 flex items-center gap-2 text-3xl font-extrabold">
                 <Truck className="size-6 text-primary" />
                 {m3(gross)}
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">{t(recommendVehicle(gross))}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{rt(recommendVehicle(gross))}</p>
               {!businessView && (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {t("rep.storage")} {storageUnitM2(gross)} m²
+                  {rt("rep.storage")} {storageUnitM2(gross)} m²
                 </p>
               )}
             </div>
             <div className="card-soft p-6">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("rep.counts")}</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{rt("rep.counts")}</p>
               <p className="mt-2 flex items-center gap-2 text-3xl font-extrabold">
                 <Package className="size-6 text-primary" />
                 {included.length}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {included.length} {t("rep.itemsWord")} · {groups.length} {t("rep.roomsWord")}
+                {included.length} {rt("rep.itemsWord")} · {groups.length} {rt("rep.roomsWord")}
               </p>
             </div>
           </div>
 
-          {company && (
+          {company && !tenderMode && (
             <div className="card-soft mt-4 flex items-center justify-between p-5">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("res.estimated")}</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{rt("res.estimated")}</p>
               <p className="text-2xl font-bold">
                 {money(netVolume * Number(company.price_per_m3), company.currency, lang)}
               </p>
@@ -472,8 +579,8 @@ function EstimatePage() {
           )}
 
           <ShareButtons
-            title={`${t("res.title")} — VolumCalc`}
-            text={`${t("res.title")}: ${m3(netVolume)} · ${included.length} ${t("res.items")}`}
+            title={`${rt("res.title")} — VolumCalc`}
+            text={`${rt("res.title")}: ${m3(netVolume)} · ${included.length} ${rt("res.items")}`}
           />
 
           {/* Rooms & items */}
@@ -496,10 +603,10 @@ function EstimatePage() {
                         maxLength={80}
                         autoFocus
                         className="h-9 w-56"
-                        aria-label={t("res.renameRoom")}
+                        aria-label={rt("res.renameRoom")}
                       />
                       <Button size="sm" type="submit" disabled={!roomName.trim()}>
-                        {t("dash.saveItem")}
+                        {rt("dash.saveItem")}
                       </Button>
                     </form>
                   ) : (
@@ -510,7 +617,7 @@ function EstimatePage() {
                           size="icon"
                           variant="ghost"
                           className="no-print size-8"
-                          aria-label={t("res.renameRoom")}
+                          aria-label={rt("res.renameRoom")}
                           onClick={() => {
                             setRenamingRoom(group.id);
                             setRoomName(group.name);
@@ -522,7 +629,7 @@ function EstimatePage() {
                     </div>
                   )}
                   <p className="text-sm font-semibold text-primary">
-                    {t("res.roomTotal")}:{" "}
+                    {rt("res.roomTotal")}:{" "}
                     {m3(
                       group.items
                         .filter((item) => item.is_included !== false)
@@ -557,7 +664,7 @@ function EstimatePage() {
                               defaultValue={lang === "no" ? item.name_no || item.name : item.name}
                               maxLength={120}
                               className="h-9 max-w-xs font-medium"
-                              aria-label={t("res.item")}
+                              aria-label={rt("res.item")}
                               onBlur={(e) => {
                                 const value = e.target.value.trim();
                                 if (!value) {
@@ -619,7 +726,7 @@ function EstimatePage() {
                                   min={1}
                                   defaultValue={String(Math.round(item[field]))}
                                   className="h-8 w-20"
-                                  aria-label={t("res.dims")}
+                                  aria-label={rt("res.dims")}
                                   onBlur={(e) => {
                                     const value = Number(e.target.value);
                                     if (!value || value <= 0) {
@@ -633,7 +740,7 @@ function EstimatePage() {
                               ))}
 
                               <label className="sr-only" htmlFor={`room-${item.id}`}>
-                                {t("res.moveRoom")}
+                                {rt("res.moveRoom")}
                               </label>
                               <select
                                 id={`room-${item.id}`}
@@ -643,7 +750,7 @@ function EstimatePage() {
                                   moveItem.mutate({ itemId: item.id, roomId: event.target.value || null })
                                 }
                               >
-                                <option value="">{t("res.other")}</option>
+                                <option value="">{rt("res.other")}</option>
                                 {rooms.map((room) => (
                                   <option key={room.id} value={room.id}>
                                     {room.name}
@@ -655,12 +762,12 @@ function EstimatePage() {
                                 size="sm"
                                 variant="ghost"
                                 className="text-destructive"
-                                aria-label={t("dash.deleteItem")}
+                                aria-label={rt("dash.deleteItem")}
                                 onClick={() => {
                                   softDelete.mutate({ itemId: item.id });
-                                  toast(t("rep.itemDeleted"), {
+                                  toast(rt("rep.itemDeleted"), {
                                     action: {
-                                      label: t("rep.undo"),
+                                      label: rt("rep.undo"),
                                       onClick: () => softDelete.mutate({ itemId: item.id, restore: true }),
                                     },
                                   });
@@ -697,7 +804,7 @@ function EstimatePage() {
                                       : "rounded-full border border-dashed border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary"
                                   }
                                 >
-                                  {t(tag.key)}
+                                  {rt(tag.key)}
                                 </button>
                               );
                             })}
@@ -715,7 +822,7 @@ function EstimatePage() {
                             >
                               <Input
                                 className="h-8 max-w-md"
-                                placeholder={t("rep.addNote")}
+                                placeholder={rt("rep.addNote")}
                                 maxLength={500}
                                 value={noteDraft[item.id] ?? item.notes ?? ""}
                                 onChange={(e) =>
@@ -723,7 +830,7 @@ function EstimatePage() {
                                 }
                               />
                               <Button size="sm" variant="outline" type="submit">
-                                {t("dash.saveItem")}
+                                {rt("dash.saveItem")}
                               </Button>
                             </form>
                           ) : (
@@ -743,7 +850,7 @@ function EstimatePage() {
                                   : "bg-destructive/10 text-destructive"
                             }
                           >
-                            {Math.round(item.confidence * 100)}% {t("res.confidence")}
+                            {Math.round(item.confidence * 100)}% {rt("res.confidence")}
                           </Badge>
                           {canEdit ? (
                             <div className="no-print flex items-center gap-2">
@@ -755,12 +862,12 @@ function EstimatePage() {
                                 }
                               />
                               <Label htmlFor={`inc-${item.id}`} className="text-xs text-muted-foreground">
-                                {item.is_included === false ? t("rep.excluded") : t("rep.included")}
+                                {item.is_included === false ? rt("rep.excluded") : rt("rep.included")}
                               </Label>
                             </div>
                           ) : (
                             <span className="text-xs text-muted-foreground">
-                              {item.is_included === false ? t("rep.excluded") : t("rep.included")}
+                              {item.is_included === false ? rt("rep.excluded") : rt("rep.included")}
                             </span>
                           )}
                         </div>
@@ -775,10 +882,10 @@ function EstimatePage() {
           {/* Access & conditions */}
           {access && (
             <section className="card-soft mt-8 p-6">
-              <h2 className="text-lg font-bold">{t("rep.accessTitle")}</h2>
+              <h2 className="text-lg font-bold">{rt("rep.accessTitle")}</h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="floor">{t("rep.floor")}</Label>
+                  <Label htmlFor="floor">{rt("rep.floor")}</Label>
                   <Input
                     id="floor"
                     type="number"
@@ -790,7 +897,7 @@ function EstimatePage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="carry">{t("rep.carry")}</Label>
+                  <Label htmlFor="carry">{rt("rep.carry")}</Label>
                   <Input
                     id="carry"
                     type="number"
@@ -801,7 +908,7 @@ function EstimatePage() {
                     value={access.carry_distance_m}
                     onChange={(e) => setAccess({ ...access, carry_distance_m: e.target.value })}
                   />
-                  <p className="text-xs text-muted-foreground">{t("rep.carryHelp")}</p>
+                  <p className="text-xs text-muted-foreground">{rt("rep.carryHelp")}</p>
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2">
@@ -811,16 +918,16 @@ function EstimatePage() {
                   checked={access.has_elevator}
                   onCheckedChange={(value) => setAccess({ ...access, has_elevator: value === true })}
                 />
-                <Label htmlFor="elevator">{t("rep.elevator")}</Label>
+                <Label htmlFor="elevator">{rt("rep.elevator")}</Label>
               </div>
               <div className="mt-4 space-y-1.5">
-                <Label htmlFor="access-notes">{t("rep.generalNotes")}</Label>
+                <Label htmlFor="access-notes">{rt("rep.generalNotes")}</Label>
                 <Textarea
                   id="access-notes"
                   rows={3}
                   maxLength={2000}
                   disabled={!canEdit}
-                  placeholder={t("rep.generalNotesPh")}
+                  placeholder={rt("rep.generalNotesPh")}
                   value={access.access_notes}
                   onChange={(e) => setAccess({ ...access, access_notes: e.target.value })}
                 />
@@ -828,7 +935,7 @@ function EstimatePage() {
               {canEdit && (
                 <Button className="no-print mt-4" size="sm" onClick={() => saveAccess.mutate()} disabled={saveAccess.isPending}>
                   {saveAccess.isPending && <Loader2 className="size-4 animate-spin" />}
-                  {t("rep.saveAccess")}
+                  {rt("rep.saveAccess")}
                 </Button>
               )}
             </section>
@@ -838,30 +945,31 @@ function EstimatePage() {
           {businessView && (
             <section className="card-soft mt-8 p-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-lg font-bold">{t("rep.internalTitle")}</h2>
+                <h2 className="text-lg font-bold">{rt("rep.internalTitle")}</h2>
                 <Button variant="outline" size="sm" className="no-print" onClick={exportCsv}>
                   <Download className="size-4" />
-                  {t("rep.export")}
+                  {rt("rep.export")}
                 </Button>
               </div>
 
+              {!tenderMode && (
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="hourly">{t("rep.hourly")}</Label>
+                  <Label htmlFor="hourly">{rt("rep.hourly")}</Label>
                   <Input id="hourly" type="number" min={0} value={hourly} onChange={(e) => setHourly(e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="hours">{t("rep.hours")}</Label>
+                  <Label htmlFor="hours">{rt("rep.hours")}</Label>
                   <Input id="hours" type="number" min={0} value={hours} onChange={(e) => setHours(e.target.value)} />
                 </div>
                 <div className="rounded-xl bg-muted/50 p-4">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("rep.hourly")}</p>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{rt("rep.hourly")}</p>
                   <p className="text-xl font-bold">
                     {money(Number(hourly || 0) * Number(hours || 0), currency, lang)}
                   </p>
-                  {company && (
+                  {company && !tenderMode && (
                     <>
-                      <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">{t("rep.fixed")}</p>
+                      <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">{rt("rep.fixed")}</p>
                       <p className="text-xl font-bold">
                         {money(netVolume * Number(company.price_per_m3), currency, lang)}
                       </p>
@@ -869,9 +977,10 @@ function EstimatePage() {
                   )}
                 </div>
               </div>
+              )}
 
               <div className="mt-6">
-                <p className="text-sm font-semibold">{t("rep.checklist")}</p>
+                <p className="text-sm font-semibold">{rt("rep.checklist")}</p>
                 <ul className="mt-2 space-y-2">
                   {CHECKLIST.map((key) => (
                     <li key={key} className="flex items-center gap-2">
@@ -881,7 +990,7 @@ function EstimatePage() {
                         onCheckedChange={(value) => setChecked((prev) => ({ ...prev, [key]: value === true }))}
                       />
                       <Label htmlFor={key} className="text-sm font-normal">
-                        {t(key)}
+                        {rt(key)}
                       </Label>
                     </li>
                   ))}
@@ -889,7 +998,7 @@ function EstimatePage() {
               </div>
 
               <div className="mt-6 space-y-1.5">
-                <Label htmlFor="internal">{t("rep.internalNotes")}</Label>
+                <Label htmlFor="internal">{rt("rep.internalNotes")}</Label>
                 <Textarea
                   id="internal"
                   rows={3}
@@ -904,7 +1013,7 @@ function EstimatePage() {
                   onClick={() => saveAccess.mutate()}
                   disabled={saveAccess.isPending}
                 >
-                  {t("dash.saveItem")}
+                  {rt("dash.saveItem")}
                 </Button>
               </div>
             </section>
@@ -912,7 +1021,7 @@ function EstimatePage() {
 
           {estimate.photo_urls && estimate.photo_urls.length > 0 && (
             <section className="mt-8">
-              <h2 className="font-semibold">{t("res.photos")}</h2>
+              <h2 className="font-semibold">{rt("res.photos")}</h2>
               <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
                 {estimate.photo_urls.map((url: string) => (
                   <img
@@ -927,7 +1036,7 @@ function EstimatePage() {
             </section>
           )}
 
-          <p className="mt-8 text-xs text-muted-foreground">{t("res.disclaimer")}</p>
+          <p className="mt-8 text-xs text-muted-foreground">{rt("res.disclaimer")}</p>
         </div>
       </main>
       <SiteFooter />
