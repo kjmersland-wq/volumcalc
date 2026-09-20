@@ -36,24 +36,13 @@ function Pricing() {
 
   const plans = [
     {
-      name: "Starter",
-      price: "0",
-      desc: lang === "no" ? "10 beregninger per måned" : "10 estimates per month",
-      features:
-        lang === "no"
-          ? ["Opplastingslenke", "AI-volumberegning", "Delbar rapport"]
-          : ["Upload link", "AI volume estimate", "Shareable report"],
-      featured: false,
-      priceId: null,
-    },
-    {
       name: "Business",
       price: "1 490",
       desc: lang === "no" ? "300 beregninger per måned" : "300 estimates per month",
       features:
         lang === "no"
-          ? ["Alt i Starter", "Egen logo og farger", "Pris per m³ og tilbud", "PDF-rapport"]
-          : ["Everything in Starter", "Your logo and colours", "Rate per m³ and quotes", "PDF report"],
+          ? ["Alle basisfunksjoner", "Egen logo og farger", "Pris per m³ og tilbud", "PDF-rapport"]
+          : ["All core features", "Your logo and colours", "Rate per m³ and quotes", "PDF report"],
       featured: true,
       priceId: "volumcalc_business_monthly_nok",
     },
@@ -126,7 +115,7 @@ function Pricing() {
             <span className="flex size-10 items-center justify-center rounded-lg bg-primary-soft text-primary"><Building2 className="size-5" /></span>
             <h2 className="text-2xl font-bold">{t("price.business")}</h2>
           </div>
-          <div className="mt-7 grid gap-6 md:grid-cols-3">
+          <div className="mt-7 grid gap-6 md:grid-cols-2">
           {plans.map((plan) => (
             <div
               key={plan.name}
@@ -165,7 +154,7 @@ function Pricing() {
                   {t("payment.subscribe")}
                 </Button>
               ) : (
-                <Button asChild className="mt-8" variant="outline"><Link to={plan.price === "0" ? "/upload" : "/auth"}>{t("price.cta")}</Link></Button>
+                <Button asChild className="mt-8" variant="outline"><Link to="/auth">{t("price.cta")}</Link></Button>
               )}
             </div>
           ))}
