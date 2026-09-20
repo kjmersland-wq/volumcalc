@@ -79,20 +79,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CubicCalc — AI cubic volume estimates for movers" },
+      { title: "VolumCalc — AI volume estimates from photos" },
       {
         name: "description",
-        content: "Photo-based cubic metre estimates for moving and storage companies.",
+        content: "Room-by-room cubic metre estimates from photos for private moves and moving companies.",
       },
-      { name: "author", content: "CubicCalc" },
-      { property: "og:title", content: "CubicCalc — AI cubic volume estimates for movers" },
+      { name: "author", content: "VolumCalc" },
+      { property: "og:title", content: "VolumCalc — AI volume estimates from photos" },
       {
         property: "og:description",
-        content: "Photo-based cubic metre estimates for moving and storage companies.",
+        content: "Room-by-room cubic metre estimates from photos for private moves and moving companies.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -105,7 +104,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
     ],
   }),
   shellComponent: RootShell,
@@ -116,7 +115,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="no">
       <head>
         <HeadContent />
       </head>

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Boxes } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { VolumCalcLogo } from "@/components/VolumCalcLogo";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -12,11 +12,8 @@ export function SiteHeader() {
   return (
     <header className="no-print sticky top-0 z-40 w-full border-b border-border/70 bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 font-semibold">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Boxes className="size-5" />
-          </span>
-          <span className="text-lg tracking-tight">CubicCalc</span>
+        <Link to="/" aria-label="VolumCalc home">
+          <VolumCalcLogo markClassName="size-9" />
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
