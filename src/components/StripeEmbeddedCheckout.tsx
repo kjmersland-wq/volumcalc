@@ -4,8 +4,8 @@ import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 
 type Props = {
   priceId: string;
-  customerEmail?: string;
-  userId?: string;
+  customerEmail?: string | undefined;
+  userId?: string | undefined;
 };
 
 export function StripeEmbeddedCheckout({ priceId, customerEmail, userId }: Props) {
@@ -13,8 +13,8 @@ export function StripeEmbeddedCheckout({ priceId, customerEmail, userId }: Props
     const result = await createCheckoutSession({
       data: {
         priceId,
-        customerEmail,
-        userId,
+        ...(customerEmail && { customerEmail }),
+        ...(userId && { userId }),
         environment: getStripeEnvironment(),
         returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
       },
