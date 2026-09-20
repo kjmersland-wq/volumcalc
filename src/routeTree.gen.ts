@@ -24,6 +24,7 @@ import { Route as MovingInventoryListRouteImport } from './routes/moving-invento
 import { Route as NoRouteImport } from './routes/no'
 import { Route as OmOssRouteImport } from './routes/om-oss'
 import { Route as PersonvernRouteImport } from './routes/personvern'
+import { Route as PlRouteImport } from './routes/pl'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as SeRouteImport } from './routes/se'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -111,6 +112,11 @@ const PersonvernRoute = PersonvernRouteImport.update({
   path: '/personvern',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlRoute = PlRouteImport.update({
+  id: '/pl',
+  path: '/pl',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/no': typeof NoRoute
   '/om-oss': typeof OmOssRoute
   '/personvern': typeof PersonvernRoute
+  '/pl': typeof PlRoute
   '/pricing': typeof PricingRoute
   '/se': typeof SeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByTo {
   '/no': typeof NoRoute
   '/om-oss': typeof OmOssRoute
   '/personvern': typeof PersonvernRoute
+  '/pl': typeof PlRoute
   '/pricing': typeof PricingRoute
   '/se': typeof SeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/no': typeof NoRoute
   '/om-oss': typeof OmOssRoute
   '/personvern': typeof PersonvernRoute
+  '/pl': typeof PlRoute
   '/pricing': typeof PricingRoute
   '/se': typeof SeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -269,6 +278,7 @@ export interface FileRouteTypes {
     | '/no'
     | '/om-oss'
     | '/personvern'
+    | '/pl'
     | '/pricing'
     | '/se'
     | '/sitemap.xml'
@@ -296,6 +306,7 @@ export interface FileRouteTypes {
     | '/no'
     | '/om-oss'
     | '/personvern'
+    | '/pl'
     | '/pricing'
     | '/se'
     | '/sitemap.xml'
@@ -324,6 +335,7 @@ export interface FileRouteTypes {
     | '/no'
     | '/om-oss'
     | '/personvern'
+    | '/pl'
     | '/pricing'
     | '/se'
     | '/sitemap.xml'
@@ -353,6 +365,7 @@ export interface RootRouteChildren {
   NoRoute: typeof NoRoute
   OmOssRoute: typeof OmOssRoute
   PersonvernRoute: typeof PersonvernRoute
+  PlRoute: typeof PlRoute
   PricingRoute: typeof PricingRoute
   SeRoute: typeof SeRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -470,6 +483,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PersonvernRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pl': {
+      id: '/pl'
+      path: '/pl'
+      fullPath: '/pl'
+      preLoaderRoute: typeof PlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pricing': {
       id: '/pricing'
       path: '/pricing'
@@ -582,6 +602,7 @@ const rootRouteChildren: RootRouteChildren = {
   NoRoute: NoRoute,
   OmOssRoute: OmOssRoute,
   PersonvernRoute: PersonvernRoute,
+  PlRoute: PlRoute,
   PricingRoute: PricingRoute,
   SeRoute: SeRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
