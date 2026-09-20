@@ -66,6 +66,7 @@ export type Database = {
           name_no: string | null
           photo_url: string | null
           quantity: number
+          room_id: string | null
           volume_m3: number
           width_cm: number
         }
@@ -81,6 +82,7 @@ export type Database = {
           name_no?: string | null
           photo_url?: string | null
           quantity?: number
+          room_id?: string | null
           volume_m3?: number
           width_cm?: number
         }
@@ -96,12 +98,55 @@ export type Database = {
           name_no?: string | null
           photo_url?: string | null
           quantity?: number
+          room_id?: string | null
           volume_m3?: number
           width_cm?: number
         }
         Relationships: [
           {
             foreignKeyName: "estimate_items_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimate_items_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "estimate_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      estimate_rooms: {
+        Row: {
+          created_at: string
+          estimate_id: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estimate_id: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estimate_id?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estimate_rooms_estimate_id_fkey"
             columns: ["estimate_id"]
             isOneToOne: false
             referencedRelation: "estimates"
