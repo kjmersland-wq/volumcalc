@@ -20,6 +20,7 @@ import { Route as FlyttebilKalkulatorRouteImport } from './routes/flyttebil-kalk
 import { Route as HjelpRouteImport } from './routes/hjelp'
 import { Route as KjopsvilkarRouteImport } from './routes/kjopsvilkar'
 import { Route as MovingInventoryListRouteImport } from './routes/moving-inventory-list'
+import { Route as NoRouteImport } from './routes/no'
 import { Route as OmOssRouteImport } from './routes/om-oss'
 import { Route as PersonvernRouteImport } from './routes/personvern'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -86,6 +87,11 @@ const KjopsvilkarRoute = KjopsvilkarRouteImport.update({
 const MovingInventoryListRoute = MovingInventoryListRouteImport.update({
   id: '/moving-inventory-list',
   path: '/moving-inventory-list',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NoRoute = NoRouteImport.update({
+  id: '/no',
+  path: '/no',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OmOssRoute = OmOssRouteImport.update({
@@ -161,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/hjelp': typeof HjelpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
   '/moving-inventory-list': typeof MovingInventoryListRoute
+  '/no': typeof NoRoute
   '/om-oss': typeof OmOssRoute
   '/personvern': typeof PersonvernRoute
   '/pricing': typeof PricingRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/hjelp': typeof HjelpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
   '/moving-inventory-list': typeof MovingInventoryListRoute
+  '/no': typeof NoRoute
   '/om-oss': typeof OmOssRoute
   '/personvern': typeof PersonvernRoute
   '/pricing': typeof PricingRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/hjelp': typeof HjelpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
   '/moving-inventory-list': typeof MovingInventoryListRoute
+  '/no': typeof NoRoute
   '/om-oss': typeof OmOssRoute
   '/personvern': typeof PersonvernRoute
   '/pricing': typeof PricingRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/hjelp'
     | '/kjopsvilkar'
     | '/moving-inventory-list'
+    | '/no'
     | '/om-oss'
     | '/personvern'
     | '/pricing'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/hjelp'
     | '/kjopsvilkar'
     | '/moving-inventory-list'
+    | '/no'
     | '/om-oss'
     | '/personvern'
     | '/pricing'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/hjelp'
     | '/kjopsvilkar'
     | '/moving-inventory-list'
+    | '/no'
     | '/om-oss'
     | '/personvern'
     | '/pricing'
@@ -313,6 +325,7 @@ export interface RootRouteChildren {
   HjelpRoute: typeof HjelpRoute
   KjopsvilkarRoute: typeof KjopsvilkarRoute
   MovingInventoryListRoute: typeof MovingInventoryListRoute
+  NoRoute: typeof NoRoute
   OmOssRoute: typeof OmOssRoute
   PersonvernRoute: typeof PersonvernRoute
   PricingRoute: typeof PricingRoute
@@ -401,6 +414,13 @@ declare module '@tanstack/react-router' {
       path: '/moving-inventory-list'
       fullPath: '/moving-inventory-list'
       preLoaderRoute: typeof MovingInventoryListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/no': {
+      id: '/no'
+      path: '/no'
+      fullPath: '/no'
+      preLoaderRoute: typeof NoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/om-oss': {
@@ -518,6 +538,7 @@ const rootRouteChildren: RootRouteChildren = {
   HjelpRoute: HjelpRoute,
   KjopsvilkarRoute: KjopsvilkarRoute,
   MovingInventoryListRoute: MovingInventoryListRoute,
+  NoRoute: NoRoute,
   OmOssRoute: OmOssRoute,
   PersonvernRoute: PersonvernRoute,
   PricingRoute: PricingRoute,
