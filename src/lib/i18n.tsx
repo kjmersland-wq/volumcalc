@@ -135,6 +135,14 @@ const dict: Dict = {
   "upload.analysing": { no: "AI analyserer møblene dine …", en: "AI is analysing your furniture …" },
   "upload.saving": { no: "Lagrer beregningen …", en: "Saving your estimate …" },
   "upload.failed": { no: "Noe gikk galt. Prøv igjen.", en: "Something went wrong. Please try again." },
+  "upload.aiCredits": {
+    no: "AI-kvoten er brukt opp. Fyll på AI-kreditter for å beregne volum.",
+    en: "The AI quota is used up. Top up AI credits to run a calculation.",
+  },
+  "upload.aiBusy": {
+    no: "AI-tjenesten er travel akkurat nå. Prøv igjen om litt.",
+    en: "The AI service is busy right now. Please try again shortly.",
+  },
 
   "res.title": { no: "Volumberegning", en: "Volume estimate" },
   "res.total": { no: "Totalt volum", en: "Total volume" },
