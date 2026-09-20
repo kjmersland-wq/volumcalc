@@ -8,7 +8,6 @@ const languages = [
   { code: "sv", label: "SE", name: "Svenska", path: "/se", flagUrl: "https://flagcdn.com/w40/se.png" },
   { code: "da", label: "DK", name: "Dansk", path: "/dk", flagUrl: "https://flagcdn.com/w40/dk.png" },
   { code: "fi", label: "FI", name: "Suomi", path: "/fi", flagUrl: "https://flagcdn.com/w40/fi.png" },
-  { code: "us", label: "US", name: "English (US)", path: "/us", flagUrl: "https://flagcdn.com/w40/us.png" },
   { code: "de", label: "DE", name: "Deutsch", path: "/de", flagUrl: "https://flagcdn.com/w40/de.png" },
   { code: "nl", label: "NL", name: "Nederlands", path: "/nl", flagUrl: "https://flagcdn.com/w40/nl.png" },
   { code: "fr", label: "FR", name: "Français", path: "/fr", flagUrl: "https://flagcdn.com/w40/fr.png" },
@@ -16,8 +15,6 @@ const languages = [
   { code: "es", label: "ES", name: "Español", path: "/es", flagUrl: "https://flagcdn.com/w40/es.png" },
   { code: "it", label: "IT", name: "Italiano", path: "/it", flagUrl: "https://flagcdn.com/w40/it.png" },
   { code: "pt", label: "PT", name: "Português", path: "/pt", flagUrl: "https://flagcdn.com/w40/pt.png" },
-  { code: "ja", label: "JP", name: "日本語", path: "/jp", flagUrl: "https://flagcdn.com/w40/jp.png" },
-  { code: "zh", label: "CN", name: "中文", path: "/cn", flagUrl: "https://flagcdn.com/w40/cn.png" },
 ] as const;
 
 

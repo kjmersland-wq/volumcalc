@@ -7,16 +7,13 @@ export type Lang =
   | "sv"
   | "da"
   | "fi"
-  | "us"
   | "de"
   | "nl"
   | "fr"
   | "pl"
   | "es"
   | "it"
-  | "pt"
-  | "ja"
-  | "zh";
+  | "pt";
 
 
 type Dict = Record<string, { no: string; en: string }>;
@@ -455,7 +452,6 @@ export const SUPPORTED_LANGS: Lang[] = [
   "sv",
   "da",
   "fi",
-  "us",
   "de",
   "nl",
   "fr",
@@ -463,8 +459,6 @@ export const SUPPORTED_LANGS: Lang[] = [
   "es",
   "it",
   "pt",
-  "ja",
-  "zh",
 ];
 
 function isLang(value: unknown): value is Lang {
@@ -487,7 +481,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       "/se": "sv",
       "/dk": "da",
       "/fi": "fi",
-      "/us": "us",
       "/de": "de",
       "/nl": "nl",
       "/fr": "fr",
@@ -495,8 +488,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       "/es": "es",
       "/it": "it",
       "/pt": "pt",
-      "/jp": "ja",
-      "/cn": "zh",
     };
     const fromPath = pathLang[window.location.pathname.replace(/\/$/, "")];
     if (fromPath) {

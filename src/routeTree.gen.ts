@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as CnRouteImport } from './routes/cn'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -25,7 +24,6 @@ import { Route as FlyttebilKalkulatorRouteImport } from './routes/flyttebil-kalk
 import { Route as FrRouteImport } from './routes/fr'
 import { Route as HjelpRouteImport } from './routes/hjelp'
 import { Route as ItRouteImport } from './routes/it'
-import { Route as JpRouteImport } from './routes/jp'
 import { Route as KjopsvilkarRouteImport } from './routes/kjopsvilkar'
 import { Route as MovingInventoryListRouteImport } from './routes/moving-inventory-list'
 import { Route as NlRouteImport } from './routes/nl'
@@ -38,7 +36,6 @@ import { Route as PtRouteImport } from './routes/pt'
 import { Route as SeRouteImport } from './routes/se'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as UploadRouteImport } from './routes/upload'
-import { Route as UsRouteImport } from './routes/us'
 import { Route as VilkarRouteImport } from './routes/vilkar'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
@@ -55,11 +52,6 @@ const IndexRoute = IndexRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CnRoute = CnRouteImport.update({
-  id: '/cn',
-  path: '/cn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -127,11 +119,6 @@ const ItRoute = ItRouteImport.update({
   path: '/it',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JpRoute = JpRouteImport.update({
-  id: '/jp',
-  path: '/jp',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const KjopsvilkarRoute = KjopsvilkarRouteImport.update({
   id: '/kjopsvilkar',
   path: '/kjopsvilkar',
@@ -192,11 +179,6 @@ const UploadRoute = UploadRouteImport.update({
   path: '/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UsRoute = UsRouteImport.update({
-  id: '/us',
-  path: '/us',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const VilkarRoute = VilkarRouteImport.update({
   id: '/vilkar',
   path: '/vilkar',
@@ -236,7 +218,6 @@ const EstimateIdRoute = EstimateIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/cn': typeof CnRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRouteWithChildren
@@ -250,7 +231,6 @@ export interface FileRoutesByFullPath {
   '/fr': typeof FrRoute
   '/hjelp': typeof HjelpRoute
   '/it': typeof ItRoute
-  '/jp': typeof JpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
   '/moving-inventory-list': typeof MovingInventoryListRoute
   '/nl': typeof NlRoute
@@ -263,7 +243,6 @@ export interface FileRoutesByFullPath {
   '/se': typeof SeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/upload': typeof UploadRoute
-  '/us': typeof UsRoute
   '/vilkar': typeof VilkarRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/dashboard/admin': typeof DashboardAdminRoute
@@ -275,7 +254,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/cn': typeof CnRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
   '/databehandling': typeof DatabehandlingRoute
@@ -288,7 +266,6 @@ export interface FileRoutesByTo {
   '/fr': typeof FrRoute
   '/hjelp': typeof HjelpRoute
   '/it': typeof ItRoute
-  '/jp': typeof JpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
   '/moving-inventory-list': typeof MovingInventoryListRoute
   '/nl': typeof NlRoute
@@ -301,7 +278,6 @@ export interface FileRoutesByTo {
   '/se': typeof SeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/upload': typeof UploadRoute
-  '/us': typeof UsRoute
   '/vilkar': typeof VilkarRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/dashboard/admin': typeof DashboardAdminRoute
@@ -314,7 +290,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/cn': typeof CnRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRouteWithChildren
@@ -328,7 +303,6 @@ export interface FileRoutesById {
   '/fr': typeof FrRoute
   '/hjelp': typeof HjelpRoute
   '/it': typeof ItRoute
-  '/jp': typeof JpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
   '/moving-inventory-list': typeof MovingInventoryListRoute
   '/nl': typeof NlRoute
@@ -341,7 +315,6 @@ export interface FileRoutesById {
   '/se': typeof SeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/upload': typeof UploadRoute
-  '/us': typeof UsRoute
   '/vilkar': typeof VilkarRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/dashboard/admin': typeof DashboardAdminRoute
@@ -355,7 +328,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/cn'
     | '/contact'
     | '/cookies'
     | '/dashboard'
@@ -369,7 +341,6 @@ export interface FileRouteTypes {
     | '/fr'
     | '/hjelp'
     | '/it'
-    | '/jp'
     | '/kjopsvilkar'
     | '/moving-inventory-list'
     | '/nl'
@@ -382,7 +353,6 @@ export interface FileRouteTypes {
     | '/se'
     | '/sitemap.xml'
     | '/upload'
-    | '/us'
     | '/vilkar'
     | '/checkout/return'
     | '/dashboard/admin'
@@ -394,7 +364,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
-    | '/cn'
     | '/contact'
     | '/cookies'
     | '/databehandling'
@@ -407,7 +376,6 @@ export interface FileRouteTypes {
     | '/fr'
     | '/hjelp'
     | '/it'
-    | '/jp'
     | '/kjopsvilkar'
     | '/moving-inventory-list'
     | '/nl'
@@ -420,7 +388,6 @@ export interface FileRouteTypes {
     | '/se'
     | '/sitemap.xml'
     | '/upload'
-    | '/us'
     | '/vilkar'
     | '/checkout/return'
     | '/dashboard/admin'
@@ -432,7 +399,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
-    | '/cn'
     | '/contact'
     | '/cookies'
     | '/dashboard'
@@ -446,7 +412,6 @@ export interface FileRouteTypes {
     | '/fr'
     | '/hjelp'
     | '/it'
-    | '/jp'
     | '/kjopsvilkar'
     | '/moving-inventory-list'
     | '/nl'
@@ -459,7 +424,6 @@ export interface FileRouteTypes {
     | '/se'
     | '/sitemap.xml'
     | '/upload'
-    | '/us'
     | '/vilkar'
     | '/checkout/return'
     | '/dashboard/admin'
@@ -472,7 +436,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
-  CnRoute: typeof CnRoute
   ContactRoute: typeof ContactRoute
   CookiesRoute: typeof CookiesRoute
   DashboardRoute: typeof DashboardRouteWithChildren
@@ -486,7 +449,6 @@ export interface RootRouteChildren {
   FrRoute: typeof FrRoute
   HjelpRoute: typeof HjelpRoute
   ItRoute: typeof ItRoute
-  JpRoute: typeof JpRoute
   KjopsvilkarRoute: typeof KjopsvilkarRoute
   MovingInventoryListRoute: typeof MovingInventoryListRoute
   NlRoute: typeof NlRoute
@@ -499,7 +461,6 @@ export interface RootRouteChildren {
   SeRoute: typeof SeRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UploadRoute: typeof UploadRoute
-  UsRoute: typeof UsRoute
   VilkarRoute: typeof VilkarRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EnMovingVanCalculatorRoute: typeof EnMovingVanCalculatorRoute
@@ -520,13 +481,6 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cn': {
-      id: '/cn'
-      path: '/cn'
-      fullPath: '/cn'
-      preLoaderRoute: typeof CnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -620,13 +574,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ItRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/jp': {
-      id: '/jp'
-      path: '/jp'
-      fullPath: '/jp'
-      preLoaderRoute: typeof JpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/kjopsvilkar': {
       id: '/kjopsvilkar'
       path: '/kjopsvilkar'
@@ -711,13 +658,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UploadRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/us': {
-      id: '/us'
-      path: '/us'
-      fullPath: '/us'
-      preLoaderRoute: typeof UsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/vilkar': {
       id: '/vilkar'
       path: '/vilkar'
@@ -789,7 +729,6 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
-  CnRoute: CnRoute,
   ContactRoute: ContactRoute,
   CookiesRoute: CookiesRoute,
   DashboardRoute: DashboardRouteWithChildren,
@@ -803,7 +742,6 @@ const rootRouteChildren: RootRouteChildren = {
   FrRoute: FrRoute,
   HjelpRoute: HjelpRoute,
   ItRoute: ItRoute,
-  JpRoute: JpRoute,
   KjopsvilkarRoute: KjopsvilkarRoute,
   MovingInventoryListRoute: MovingInventoryListRoute,
   NlRoute: NlRoute,
@@ -816,7 +754,6 @@ const rootRouteChildren: RootRouteChildren = {
   SeRoute: SeRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UploadRoute: UploadRoute,
-  UsRoute: UsRoute,
   VilkarRoute: VilkarRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EnMovingVanCalculatorRoute: EnMovingVanCalculatorRoute,
