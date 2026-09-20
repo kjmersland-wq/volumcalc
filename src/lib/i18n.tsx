@@ -299,6 +299,53 @@ const dict: Dict = {
   "upload.limit": { no: "Du kan laste opp maksimalt 20 bilder per beregning.", en: "You can upload a maximum of 20 photos per estimate." },
   "upload.unlimited": { no: "Kontoen din har ubegrenset antall bilder.", en: "Your account has no photo limit." },
 
+  "admin.nav": { no: "Admin", en: "Admin" },
+  "admin.title": { no: "Transportfirma-kontoer", en: "Moving company accounts" },
+  "admin.sub": {
+    no: "Opprett innlogging, firmaprofil, logo og hemmelig delelenke for hvert transportfirma. Hvert firma ser kun sine egne beregninger.",
+    en: "Create a login, company profile, logo and secret share link for each moving company. Every company only sees its own estimates.",
+  },
+  "admin.new": { no: "Ny firma-konto", en: "New company account" },
+  "admin.email": { no: "Innloggings-e-post", en: "Login email" },
+  "admin.password": { no: "Passord", en: "Password" },
+  "admin.company": { no: "Firmanavn", en: "Company name" },
+  "admin.org": { no: "Org.nr.", en: "Company reg. no." },
+  "admin.address": { no: "Adresse", en: "Address" },
+  "admin.phone": { no: "Telefon", en: "Phone" },
+  "admin.website": { no: "Nettside", en: "Website" },
+  "admin.logo": { no: "Logo-URL", en: "Logo URL" },
+  "admin.color": { no: "Profilfarge", en: "Brand colour" },
+  "admin.price": { no: "Pris per m³", en: "Price per m³" },
+  "admin.demo": { no: "Marker som demo-konto", en: "Mark as demo account" },
+  "admin.create": { no: "Opprett konto", en: "Create account" },
+  "admin.created": { no: "Kontoen er opprettet.", en: "The account was created." },
+  "admin.failed": { no: "Kunne ikke opprette kontoen.", en: "Could not create the account." },
+  "admin.list": { no: "Eksisterende kontoer", en: "Existing accounts" },
+  "admin.link": { no: "Hemmelig delelenke", en: "Secret share link" },
+  "admin.copy": { no: "Kopier lenke", en: "Copy link" },
+  "admin.rotate": { no: "Ny lenke", en: "New link" },
+  "admin.rotated": { no: "Ny lenke laget. Den gamle virker ikke lenger.", en: "New link created. The old one no longer works." },
+  "admin.estimates": { no: "beregninger", en: "estimates" },
+  "admin.onlyAdmin": { no: "Kun for administratorer.", en: "Administrators only." },
+  "admin.setPassword": { no: "Sett nytt passord", en: "Set new password" },
+  "admin.passwordSet": { no: "Passordet er oppdatert.", en: "The password was updated." },
+  "admin.demoLink": { no: "Åpne demo-side", en: "Open demo page" },
+
+  "upload.forCompany": { no: "Du sender bildene til", en: "You are sending these photos to" },
+
+  "demo.badge": { no: "Demo", en: "Demo" },
+  "demo.title": { no: "Slik ser dashbordet ut for ditt firma", en: "This is how the dashboard looks for your company" },
+  "demo.sub": {
+    no: "Et eksempel med et fiktivt firma. Egen logo og firmadetaljer i toppen, egen hemmelig delelenke, og kun firmaets egne beregninger i listen.",
+    en: "An example using a fictitious company. Your own logo and company details in the header, your own secret share link, and only your own estimates in the list.",
+  },
+  "demo.isolation": {
+    no: "Hver konto er adskilt: et firma kan aldri se beregninger som tilhører et annet firma.",
+    en: "Every account is separate: a company can never see estimates that belong to another company.",
+  },
+  "demo.cta": { no: "Vil du ha en slik konto?", en: "Want an account like this?" },
+
+
   "rep.reportLang": { no: "Rapportspråk", en: "Report language" },
   "rep.reportLangHelp": {
     no: "Velg språket rapporten vises, deles og lagres i. Dine egne redigeringer beholdes.",

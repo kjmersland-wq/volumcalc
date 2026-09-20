@@ -15,6 +15,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DatabehandlingRouteImport } from './routes/databehandling'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as FlyttebilKalkulatorRouteImport } from './routes/flyttebil-kalkulator'
 import { Route as HjelpRouteImport } from './routes/hjelp'
 import { Route as KjopsvilkarRouteImport } from './routes/kjopsvilkar'
@@ -27,6 +28,7 @@ import { Route as UploadRouteImport } from './routes/upload'
 import { Route as VilkarRouteImport } from './routes/vilkar'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as DashboardAdminRouteImport } from './routes/dashboard.admin'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as EnMovingVanCalculatorRouteImport } from './routes/en.moving-van-calculator'
 import { Route as EstimateIdRouteImport } from './routes/estimate.$id'
@@ -59,6 +61,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const DatabehandlingRoute = DatabehandlingRouteImport.update({
   id: '/databehandling',
   path: '/databehandling',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FlyttebilKalkulatorRoute = FlyttebilKalkulatorRouteImport.update({
@@ -121,6 +128,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardAdminRoute = DashboardAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -144,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/databehandling': typeof DatabehandlingRoute
+  '/demo': typeof DemoRoute
   '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
   '/hjelp': typeof HjelpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
@@ -155,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/upload': typeof UploadRoute
   '/vilkar': typeof VilkarRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
   '/estimate/$id': typeof EstimateIdRoute
@@ -166,6 +180,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
   '/databehandling': typeof DatabehandlingRoute
+  '/demo': typeof DemoRoute
   '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
   '/hjelp': typeof HjelpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
@@ -177,6 +192,7 @@ export interface FileRoutesByTo {
   '/upload': typeof UploadRoute
   '/vilkar': typeof VilkarRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
   '/estimate/$id': typeof EstimateIdRoute
@@ -190,6 +206,7 @@ export interface FileRoutesById {
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/databehandling': typeof DatabehandlingRoute
+  '/demo': typeof DemoRoute
   '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
   '/hjelp': typeof HjelpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
@@ -201,6 +218,7 @@ export interface FileRoutesById {
   '/upload': typeof UploadRoute
   '/vilkar': typeof VilkarRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
   '/estimate/$id': typeof EstimateIdRoute
@@ -215,6 +233,7 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/dashboard'
     | '/databehandling'
+    | '/demo'
     | '/flyttebil-kalkulator'
     | '/hjelp'
     | '/kjopsvilkar'
@@ -226,6 +245,7 @@ export interface FileRouteTypes {
     | '/upload'
     | '/vilkar'
     | '/checkout/return'
+    | '/dashboard/admin'
     | '/dashboard/settings'
     | '/en/moving-van-calculator'
     | '/estimate/$id'
@@ -237,6 +257,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/cookies'
     | '/databehandling'
+    | '/demo'
     | '/flyttebil-kalkulator'
     | '/hjelp'
     | '/kjopsvilkar'
@@ -248,6 +269,7 @@ export interface FileRouteTypes {
     | '/upload'
     | '/vilkar'
     | '/checkout/return'
+    | '/dashboard/admin'
     | '/dashboard/settings'
     | '/en/moving-van-calculator'
     | '/estimate/$id'
@@ -260,6 +282,7 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/dashboard'
     | '/databehandling'
+    | '/demo'
     | '/flyttebil-kalkulator'
     | '/hjelp'
     | '/kjopsvilkar'
@@ -271,6 +294,7 @@ export interface FileRouteTypes {
     | '/upload'
     | '/vilkar'
     | '/checkout/return'
+    | '/dashboard/admin'
     | '/dashboard/settings'
     | '/en/moving-van-calculator'
     | '/estimate/$id'
@@ -284,6 +308,7 @@ export interface RootRouteChildren {
   CookiesRoute: typeof CookiesRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   DatabehandlingRoute: typeof DatabehandlingRoute
+  DemoRoute: typeof DemoRoute
   FlyttebilKalkulatorRoute: typeof FlyttebilKalkulatorRoute
   HjelpRoute: typeof HjelpRoute
   KjopsvilkarRoute: typeof KjopsvilkarRoute
@@ -341,6 +366,13 @@ declare module '@tanstack/react-router' {
       path: '/databehandling'
       fullPath: '/databehandling'
       preLoaderRoute: typeof DatabehandlingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/flyttebil-kalkulator': {
@@ -427,6 +459,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/admin': {
+      id: '/dashboard/admin'
+      path: '/admin'
+      fullPath: '/dashboard/admin'
+      preLoaderRoute: typeof DashboardAdminRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/settings': {
       id: '/dashboard/settings'
       path: '/settings'
@@ -452,11 +491,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface DashboardRouteChildren {
+  DashboardAdminRoute: typeof DashboardAdminRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardAdminRoute: DashboardAdminRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
@@ -472,6 +513,7 @@ const rootRouteChildren: RootRouteChildren = {
   CookiesRoute: CookiesRoute,
   DashboardRoute: DashboardRouteWithChildren,
   DatabehandlingRoute: DatabehandlingRoute,
+  DemoRoute: DemoRoute,
   FlyttebilKalkulatorRoute: FlyttebilKalkulatorRoute,
   HjelpRoute: HjelpRoute,
   KjopsvilkarRoute: KjopsvilkarRoute,

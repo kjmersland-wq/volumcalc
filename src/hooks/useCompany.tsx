@@ -13,6 +13,8 @@ export type CompanyProfile = {
   phone: string | null;
   website: string | null;
   contact_email: string | null;
+  upload_token: string;
+  is_demo: boolean;
 };
 
 /** The signed-in company's own profile, used for branding and pricing. */
@@ -46,4 +48,19 @@ export function useUnlimitedPhotos() {
     },
   });
   return (data ?? []).some((row) => row.role === "unlimited" || row.role === "admin");
+}
+
+/** True when the signed-in account is a VolumCalc administrator. */
+export function useIsAdmin() {
+  const { session } = useAuth();
+  const { data } = useQuery({
+    queryKey: ["roles", session?.user.id],
+    enabled: Boolean(session),
+    queryFn: async () => {
+      const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", session!.user.id);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  return (data ?? []).some((row) => row.role === "admin");
 }
