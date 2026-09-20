@@ -12,6 +12,9 @@ export function SiteFooter() {
           <Link to="/moving-inventory-list" className="transition-colors hover:text-foreground">
             Inventory guide
           </Link>
+          <Link to="/en/moving-van-calculator" className="transition-colors hover:text-foreground">
+            Van calculator
+          </Link>
           <Link to="/pricing" className="transition-colors hover:text-foreground">
             Pricing
           </Link>
