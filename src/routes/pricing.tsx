@@ -36,24 +36,13 @@ function Pricing() {
 
   const plans = [
     {
-      name: "Starter",
-      price: "0",
-      desc: lang === "no" ? "10 beregninger per måned" : "10 estimates per month",
-      features:
-        lang === "no"
-          ? ["Opplastingslenke", "AI-volumberegning", "Delbar rapport"]
-          : ["Upload link", "AI volume estimate", "Shareable report"],
-      featured: false,
-      priceId: null,
-    },
-    {
       name: "Business",
       price: "1 490",
       desc: lang === "no" ? "300 beregninger per måned" : "300 estimates per month",
       features:
         lang === "no"
-          ? ["Alt i Starter", "Egen logo og farger", "Pris per m³ og tilbud", "PDF-rapport"]
-          : ["Everything in Starter", "Your logo and colours", "Rate per m³ and quotes", "PDF report"],
+          ? ["Alle basisfunksjoner", "Egen logo og farger", "Pris per m³ og tilbud", "PDF-rapport"]
+          : ["All core features", "Your logo and colours", "Rate per m³ and quotes", "PDF report"],
       featured: true,
       priceId: "volumcalc_business_monthly_nok",
     },
