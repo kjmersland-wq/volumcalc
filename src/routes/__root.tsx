@@ -96,6 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Room-by-room cubic metre estimates from photos for private moves and moving companies.",
       },
       { name: "author", content: "VolumCalc" },
+      { name: "google-site-verification", content: "lw36vGJxiTk2wfz2FodnA06RXUeBUdk7a3EwNI-wSE8" },
       { property: "og:title", content: "VolumCalc — AI volume estimates from photos" },
       {
         property: "og:description",
