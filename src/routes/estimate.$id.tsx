@@ -144,7 +144,9 @@ function EstimatePage() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-sm text-muted-foreground">{t("res.title")}</p>
-              <h1 className="text-3xl font-bold">{estimate.customer_name || "—"}</h1>
+              <h1 className="text-3xl font-bold">
+                {estimate.customer_name || `#${String(estimate.id).slice(0, 8).toUpperCase()}`}
+              </h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 {shortDate(estimate.created_at, lang)}
                 {estimate.address ? ` · ${estimate.address}` : ""}
