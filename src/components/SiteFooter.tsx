@@ -9,6 +9,9 @@ export function SiteFooter() {
           <Link to="/upload" className="transition-colors hover:text-foreground">
             Upload
           </Link>
+          <Link to="/moving-inventory-list" className="transition-colors hover:text-foreground">
+            Inventory guide
+          </Link>
           <Link to="/pricing" className="transition-colors hover:text-foreground">
             Pricing
           </Link>
