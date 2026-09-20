@@ -4,7 +4,7 @@ import { z } from "zod";
 const dataUrl = z.string().min(20).max(12_000_000).regex(/^data:image\/(jpeg|png|webp);base64,/);
 
 const createSchema = z.object({
-  images: z.array(dataUrl).min(1).max(15),
+  images: z.array(dataUrl).min(1).max(100), // practical safety cap to keep the request payload processable
   customer_name: z.string().trim().max(120).optional(),
   customer_phone: z.string().trim().max(40).optional(),
   move_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
