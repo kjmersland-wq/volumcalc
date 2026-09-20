@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { m3, shortDate } from "@/lib/format";
 
 export const Route = createFileRoute("/dashboard/")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Estimates dashboard — VolumCalc" },

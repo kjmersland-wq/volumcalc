@@ -13,6 +13,7 @@ import { createEstimate } from "@/lib/estimates.functions";
 import { blobToDataUrl, compressImage } from "@/lib/images";
 
 export const Route = createFileRoute("/upload")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Upload photos — VolumCalc" },

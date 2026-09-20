@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { VolumCalcLogo } from "@/components/VolumCalcLogo";
 
 export const Route = createFileRoute("/dashboard")({
+  staticData: { sitemap: "exclude-subtree" },
   head: () => ({
     meta: [
       { title: "Dashboard — VolumCalc" },
