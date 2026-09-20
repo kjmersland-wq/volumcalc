@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Camera, ImagePlus, Loader2, X } from "lucide-react";
+import { Camera, ImagePlus, Info, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,16 +16,18 @@ import { blobToDataUrl, compressImage } from "@/lib/images";
 export const Route = createFileRoute("/upload")({
   head: () => ({
     meta: [
-      { title: "Upload photos — CubicCalc" },
+      { title: "Upload photos — VolumCalc" },
       {
         name: "description",
         content: "Upload photos of your furniture and get an itemised cubic metre estimate in seconds.",
       },
-      { property: "og:title", content: "Upload photos — CubicCalc" },
+      { property: "og:title", content: "Upload photos — VolumCalc" },
       {
         property: "og:description",
         content: "Snap your rooms, get the total cubic volume of your move.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: UploadPage,
@@ -49,9 +51,9 @@ function UploadPage() {
 
   function addFiles(list: FileList | null) {
     if (!list) return;
-    const incoming = Array.from(list)
-      .filter((f) => f.type.startsWith("image/"))
-      .slice(0, 12 - files.length);
+    const imageFiles = Array.from(list).filter((f) => f.type.startsWith("image/"));
+    const incoming = imageFiles.slice(0, 15 - files.length);
+    if (imageFiles.length > incoming.length) toast.error(t("upload.limit"));
     if (!incoming.length) return;
     setFiles((prev) => [...prev, ...incoming]);
     setPreviews((prev) => [...prev, ...incoming.map((f) => URL.createObjectURL(f))]);
@@ -85,10 +87,12 @@ function UploadPage() {
       const compressed = await Promise.all(files.map((f) => compressImage(f)));
       const paths: string[] = [];
       for (let i = 0; i < compressed.length; i++) {
+        const image = compressed[i];
+        if (!image) continue;
         const path = `${estimate.id}/${i}.jpg`;
         const { error } = await supabase.storage
           .from("estimate-photos")
-          .upload(path, compressed[i]!, { contentType: "image/jpeg", upsert: true });
+          .upload(path, image, { contentType: "image/jpeg", upsert: true });
         if (error) throw error;
         paths.push(path);
       }
@@ -104,6 +108,13 @@ function UploadPage() {
 
       setStage("saving");
       if (result.items.length) {
+        const roomNames = Array.from(new Set(result.items.map((item) => item.room || "Other")));
+        const { data: rooms, error: roomsError } = await supabase
+          .from("estimate_rooms")
+          .insert(roomNames.map((name, sortOrder) => ({ estimate_id: estimate.id, name, sort_order: sortOrder })))
+          .select("id,name");
+        if (roomsError) throw roomsError;
+        const roomIds = new Map((rooms ?? []).map((room) => [room.name, room.id]));
         const { error: itemsError } = await supabase.from("estimate_items").insert(
           result.items.map((item) => ({
             estimate_id: estimate.id,
@@ -117,6 +128,7 @@ function UploadPage() {
             volume_m3: item.volume_m3,
             confidence: item.confidence,
             photo_url: photoUrls[item.photo_index] ?? photoUrls[0] ?? null,
+            room_id: roomIds.get(item.room || "Other") ?? null,
           })),
         );
         if (itemsError) throw itemsError;
@@ -150,6 +162,14 @@ function UploadPage() {
           <h1 className="text-3xl font-bold sm:text-4xl">{t("upload.title")}</h1>
           <p className="mt-3 text-muted-foreground">{t("upload.sub")}</p>
 
+          <div className="mt-7 flex gap-4 rounded-xl border border-primary/20 bg-primary-soft/70 p-5">
+            <Info className="mt-0.5 size-5 shrink-0 text-primary" />
+            <div>
+              <h2 className="font-semibold">{t("upload.guideTitle")}</h2>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{t("upload.guide")}</p>
+            </div>
+          </div>
+
           <div
             onDragOver={(e) => {
               e.preventDefault();
@@ -162,7 +182,7 @@ function UploadPage() {
               addFiles(e.dataTransfer.files);
             }}
             onClick={() => inputRef.current?.click()}
-            className={`mt-8 cursor-pointer rounded-2xl border-2 border-dashed p-10 text-center transition-colors ${
+            className={`mt-6 cursor-pointer rounded-xl border-2 border-dashed p-10 text-center transition-colors ${
               dragging ? "border-primary bg-primary-soft" : "border-border bg-card hover:border-primary/60"
             }`}
           >

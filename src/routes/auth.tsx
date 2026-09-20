@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Boxes, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,14 +9,17 @@ import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
+import { VolumCalcLogo } from "@/components/VolumCalcLogo";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Company login — CubicCalc" },
+      { title: "Company login — VolumCalc" },
       { name: "description", content: "Sign in to manage incoming photo estimates and quotes." },
-      { property: "og:title", content: "Company login — CubicCalc" },
+      { property: "og:title", content: "Company login — VolumCalc" },
       { property: "og:description", content: "Sign in to manage incoming photo estimates and quotes." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: AuthPage,
@@ -78,12 +81,7 @@ function AuthPage() {
   return (
     <div className="surface-hero flex min-h-screen items-center justify-center px-4 py-12">
       <div className="card-soft w-full max-w-md p-8">
-        <div className="flex items-center gap-2">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Boxes className="size-5" />
-          </span>
-          <span className="text-lg font-semibold">CubicCalc</span>
-        </div>
+        <VolumCalcLogo />
         <h1 className="mt-6 text-2xl font-bold">{t("auth.title")}</h1>
 
         <form onSubmit={submit} className="mt-6 space-y-4">

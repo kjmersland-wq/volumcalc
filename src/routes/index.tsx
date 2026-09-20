@@ -9,17 +9,19 @@ import heroRoom from "@/assets/hero-room.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CubicCalc — AI cubic volume estimates from photos" },
+      { title: "VolumCalc — AI volume estimates from room photos" },
       {
         name: "description",
         content:
-          "Let customers photograph their furniture and get an itemised cubic metre estimate in seconds. Built for moving and storage companies.",
+          "Turn room photos into itemised, room-by-room cubic metre estimates for private moves and moving companies.",
       },
-      { property: "og:title", content: "CubicCalc — AI cubic volume estimates from photos" },
+      { property: "og:title", content: "VolumCalc — AI volume estimates from room photos" },
       {
         property: "og:description",
         content: "Itemised m³ estimates from customer photos, ready for quoting and truck planning.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Landing,
@@ -46,10 +48,10 @@ function Landing() {
       <SiteHeader />
 
       <main className="flex-1">
-        <section className="surface-hero">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 md:py-24 lg:grid-cols-2">
+        <section className="surface-hero border-b border-border/60">
+          <div className="mx-auto grid min-h-[calc(100vh-8rem)] max-w-6xl items-center gap-12 px-4 py-14 md:py-20 lg:grid-cols-2">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-card/80 px-3 py-1 text-xs font-medium text-primary shadow-sm">
                 <Sparkles className="size-3.5 text-primary" />
                 {t("hero.badge")}
               </span>
@@ -90,7 +92,7 @@ function Landing() {
                 alt="Living room with furniture and moving boxes ready to be measured"
                 width={1408}
                 height={1008}
-                className="w-full rounded-3xl border border-border object-cover shadow-[var(--shadow-lift)]"
+                className="w-full rounded-2xl border border-border object-cover shadow-[var(--shadow-lift)]"
               />
               <div className="card-soft absolute -bottom-6 left-4 w-56 p-4 sm:left-8">
                 <p className="text-xs text-muted-foreground">{t("res.total")}</p>
