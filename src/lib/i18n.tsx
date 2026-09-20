@@ -178,6 +178,15 @@ const dict: Dict = {
   "price.month": { no: "/mnd", en: "/mo" },
   "price.cta": { no: "Kom i gang", en: "Get started" },
   "price.popular": { no: "Mest populær", en: "Most popular" },
+  "payment.buy": { no: "Kjøp sikkert", en: "Buy securely" },
+  "payment.subscribe": { no: "Abonner", en: "Subscribe" },
+  "payment.secure": { no: "Sikker betaling uten å forlate VolumCalc.", en: "Secure payment without leaving VolumCalc." },
+  "payment.test": { no: "Testmodus: Ingen ekte betalinger belastes.", en: "Test mode: No real payments are charged." },
+  "payment.notLive": { no: "Betaling er ikke aktivert for produksjon ennå.", en: "Payments are not active in production yet." },
+  "payment.complete": { no: "Betalingen er fullført", en: "Payment complete" },
+  "payment.pending": { no: "Betalingsstatus mangler", en: "Payment status unavailable" },
+  "payment.completeSub": { no: "Takk! Du kan nå fortsette til din neste volumberegning.", en: "Thank you. You can now continue to your next volume estimate." },
+  "payment.continue": { no: "Start beregning", en: "Start estimate" },
 };
 
 type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (k: keyof typeof dict | string) => string };

@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as UploadRouteImport } from './routes/upload'
+import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as EstimateIdRouteImport } from './routes/estimate.$id'
@@ -43,6 +44,11 @@ const UploadRoute = UploadRouteImport.update({
   path: '/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
+  id: '/checkout/return',
+  path: '/checkout/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/pricing': typeof PricingRoute
   '/upload': typeof UploadRoute
+  '/checkout/return': typeof CheckoutReturnRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/estimate/$id': typeof EstimateIdRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
   '/upload': typeof UploadRoute
+  '/checkout/return': typeof CheckoutReturnRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/estimate/$id': typeof EstimateIdRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/pricing': typeof PricingRoute
   '/upload': typeof UploadRoute
+  '/checkout/return': typeof CheckoutReturnRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/estimate/$id': typeof EstimateIdRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/pricing'
     | '/upload'
+    | '/checkout/return'
     | '/dashboard/settings'
     | '/estimate/$id'
     | '/dashboard/'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/pricing'
     | '/upload'
+    | '/checkout/return'
     | '/dashboard/settings'
     | '/estimate/$id'
     | '/dashboard'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/pricing'
     | '/upload'
+    | '/checkout/return'
     | '/dashboard/settings'
     | '/estimate/$id'
     | '/dashboard/'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   PricingRoute: typeof PricingRoute
   UploadRoute: typeof UploadRoute
+  CheckoutReturnRoute: typeof CheckoutReturnRoute
   EstimateIdRoute: typeof EstimateIdRoute
 }
 
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       path: '/upload'
       fullPath: '/upload'
       preLoaderRoute: typeof UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/return': {
+      id: '/checkout/return'
+      path: '/checkout/return'
+      fullPath: '/checkout/return'
+      preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/': {
@@ -211,6 +231,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   PricingRoute: PricingRoute,
   UploadRoute: UploadRoute,
+  CheckoutReturnRoute: CheckoutReturnRoute,
   EstimateIdRoute: EstimateIdRoute,
 }
 export const routeTree = rootRouteImport
