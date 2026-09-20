@@ -174,15 +174,22 @@ const dict: Dict = {
 
 type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (k: keyof typeof dict | string) => string };
 
-const LanguageContext = createContext<Ctx>({ lang: "no", setLang: () => {}, t: (k) => String(k) });
+const LanguageContext = createContext<Ctx>({ lang: "en", setLang: () => {}, t: (k) => String(k) });
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("no");
+  const [lang, setLangState] = useState<Lang>("en");
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("volumcalc-lang") ?? window.localStorage.getItem("cubiccalc-lang");
-    if (stored === "en" || stored === "no") setLangState(stored);
+    const stored = window.localStorage.getItem("volumcalc-lang");
+    if (stored === "en" || stored === "no") {
+      setLangState(stored);
+      return;
+    }
+    // No saved choice: .com and other hosts start in English, .no starts in Norwegian
+    const host = window.location.hostname;
+    if (host.endsWith(".no")) setLangState("no");
   }, []);
+
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
