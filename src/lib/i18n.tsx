@@ -122,7 +122,7 @@ const dict: Dict = {
     en: "Take 1–3 photos per room. One overview photo of the whole room + 1–2 closer photos of the largest furniture items gives the best result. You don’t need to photograph every small object.",
   },
   "upload.drop": { no: "Dra bilder hit eller trykk for å velge", en: "Drag photos here or tap to select" },
-  "upload.hint": { no: "JPG eller PNG · så mange bilder du vil", en: "JPG or PNG · as many photos as you like" },
+  "upload.hint": { no: "JPG eller PNG · maks 20 bilder", en: "JPG or PNG · maximum 20 photos" },
   "upload.photos": { no: "bilder valgt", en: "photos selected" },
   "upload.details": { no: "Kontaktinformasjon (valgfritt)", en: "Contact details (optional)" },
   "upload.name": { no: "Navn", en: "Name" },
@@ -292,6 +292,76 @@ const dict: Dict = {
   "quote.sent": { no: "Takk! Forespørselen er sendt.", en: "Thank you. Your request has been sent." },
   "quote.required": { no: "Fyll inn navn og telefon eller e-post.", en: "Enter your name and a phone number or email." },
 
+  "upload.limit": { no: "Du kan laste opp maksimalt 20 bilder per beregning.", en: "You can upload a maximum of 20 photos per estimate." },
+  "upload.unlimited": { no: "Kontoen din har ubegrenset antall bilder.", en: "Your account has no photo limit." },
+
+  "rep.reportLang": { no: "Rapportspråk", en: "Report language" },
+  "rep.reportLangHelp": {
+    no: "Velg språket rapporten vises, deles og lagres i. Dine egne redigeringer beholdes.",
+    en: "Choose the language the report is shown, shared and saved in. Your own edits are kept.",
+  },
+  "rep.tender": { no: "Anbudsmodus – skjul priser", en: "Tender mode – hide prices" },
+  "rep.tenderHelp": {
+    no: "Skjuler estimert pris og all priskalkyle i rapporten, PDF og delt lenke.",
+    en: "Hides the estimated price and all price calculations in the report, PDF and shared link.",
+  },
+
+  "rep.storageTitle": { no: "Mellomlagring / lagerhotell", en: "Interim storage / self-storage" },
+  "rep.storageEnabled": { no: "Tingene skal mellomlagres", en: "Items go into interim storage" },
+  "rep.storageCompany": { no: "Firmanavn på lager", en: "Storage company" },
+  "rep.storageAddress": { no: "Full adresse", en: "Full address" },
+  "rep.storageContact": { no: "Kontaktperson", en: "Contact person" },
+  "rep.storagePhone": { no: "Telefon", en: "Phone" },
+
+  "rep.deliveryTitle": { no: "Levering til ny bopel", en: "Delivery to the new home" },
+  "rep.deliveryAddress": { no: "Full adresse", en: "Full address" },
+  "rep.deliveryFloor": { no: "Etasje", en: "Floor" },
+  "rep.deliveryElevator": { no: "Heis i bygget", en: "Lift in the building" },
+  "rep.deliveryCarry": { no: "Bæreavstand (meter)", en: "Carrying distance (metres)" },
+  "rep.deliveryNotes": { no: "Merknader om levering", en: "Delivery notes" },
+
+  "rep.packingTitle": { no: "Pakking og emballasje", en: "Packing and materials" },
+  "rep.packingRequested": { no: "Vi ønsker hjelp til pakking", en: "We want help with packing" },
+  "rep.packingLevel": { no: "Omfang", en: "Scope" },
+  "rep.packingLevel.fragile": { no: "Kun skjøre gjenstander", en: "Fragile items only" },
+  "rep.packingLevel.partial": { no: "Delvis pakking", en: "Partial packing" },
+  "rep.packingLevel.full": { no: "Full pakking", en: "Full packing" },
+  "rep.materials": { no: "Emballasje som trengs", en: "Packing materials needed" },
+  "mat.boxes": { no: "Flyttekasser", en: "Moving boxes" },
+  "mat.bubble": { no: "Bobleplast (ruller)", en: "Bubble wrap (rolls)" },
+  "mat.paper": { no: "Pakkepapir (pakker)", en: "Packing paper (packs)" },
+  "mat.tape": { no: "Tape (ruller)", en: "Tape (rolls)" },
+  "mat.wardrobe": { no: "Garderobekasser", en: "Wardrobe boxes" },
+  "mat.mattress": { no: "Madrassposer", en: "Mattress bags" },
+  "mat.blanket": { no: "Møbeltepper", en: "Furniture blankets" },
+  "rep.packingNotes": { no: "Spesielle gjenstander (kunst, piano, TV)", en: "Special items (art, piano, TV)" },
+  "rep.saveExtras": { no: "Lagre logistikk", en: "Save logistics" },
+
+  "set.org": { no: "Organisasjonsnummer", en: "Company registration number" },
+  "set.address": { no: "Firmaadresse", en: "Company address" },
+  "set.phone": { no: "Telefon", en: "Phone" },
+  "set.website": { no: "Nettside", en: "Website" },
+  "set.contactEmail": { no: "Kontakt-e-post", en: "Contact email" },
+  "set.brandingHelp": {
+    no: "Logo og firmadetaljer vises øverst i rapporten, i PDF og i headeren når du er innlogget.",
+    en: "Your logo and company details appear at the top of the report, in the PDF and in the header when signed in.",
+  },
+
+  "nav.help": { no: "Hjelp og FAQ", en: "Help and FAQ" },
+  "footer.legal": { no: "Juridisk", en: "Legal" },
+  "footer.product": { no: "Produkt", en: "Product" },
+  "footer.company": { no: "Selskap", en: "Company" },
+  "footer.privacy": { no: "Personvernerklæring", en: "Privacy policy" },
+  "footer.terms": { no: "Vilkår for bruk", en: "Terms of service" },
+  "footer.cookies": { no: "Informasjonskapsler", en: "Cookie policy" },
+  "footer.dpa": { no: "Databehandleravtale", en: "Data processing agreement" },
+  "footer.purchase": { no: "Kjøpsvilkår og angrerett", en: "Purchase terms and right of withdrawal" },
+  "footer.about": { no: "Om oss", en: "About us" },
+  "footer.builtBy": {
+    no: "Utviklet og drevet av KM TECH LABS i Kristiansand, Norge · Org.nr. 934 044 029",
+    en: "Developed and operated by KM TECH LABS in Kristiansand, Norway · Company no. 934 044 029",
+  },
+
   "dash.quotes": { no: "Tilbudsforespørsler", en: "Quote requests" },
   "dash.quotesEmpty": { no: "Ingen forespørsler ennå.", en: "No requests yet." },
   "dash.markHandled": { no: "Merk som behandlet", en: "Mark as handled" },
@@ -338,6 +408,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   );
 
   return <LanguageContext.Provider value={{ lang, setLang, t }}>{children}</LanguageContext.Provider>;
+}
+
+export function translate(key: string, lang: Lang): string {
+  const entry = dict[key];
+  return entry ? entry[lang] : key;
 }
 
 export function useI18n() {

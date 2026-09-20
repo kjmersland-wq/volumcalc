@@ -11,6 +11,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { useI18n } from "@/lib/i18n";
 import { createEstimate } from "@/lib/estimates.functions";
 import { blobToDataUrl, compressImage } from "@/lib/images";
+import { useUnlimitedPhotos } from "@/hooks/useCompany";
 
 export const Route = createFileRoute("/upload")({
   staticData: { sitemap: true },
@@ -40,6 +41,8 @@ function UploadPage() {
   const navigate = useNavigate();
   const submitEstimate = useServerFn(createEstimate);
   const inputRef = useRef<HTMLInputElement>(null);
+  const unlimited = useUnlimitedPhotos();
+  const maxPhotos = unlimited ? Infinity : 20;
 
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -53,8 +56,12 @@ function UploadPage() {
     if (!list) return;
     const imageFiles = Array.from(list).filter((f) => f.type.startsWith("image/"));
     if (!imageFiles.length) return;
-    setFiles((prev) => [...prev, ...imageFiles]);
-    setPreviews((prev) => [...prev, ...imageFiles.map((f) => URL.createObjectURL(f))]);
+    const room = maxPhotos - files.length;
+    const incoming = room === Infinity ? imageFiles : imageFiles.slice(0, Math.max(0, room));
+    if (incoming.length < imageFiles.length) toast.error(t("upload.limit"));
+    if (!incoming.length) return;
+    setFiles((prev) => [...prev, ...incoming]);
+    setPreviews((prev) => [...prev, ...incoming.map((f) => URL.createObjectURL(f))]);
   }
 
   function removeFile(index: number) {
@@ -136,7 +143,9 @@ function UploadPage() {
               <ImagePlus className="size-6" />
             </div>
             <p className="mt-4 font-medium">{t("upload.drop")}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{t("upload.hint")}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {unlimited ? t("upload.unlimited") : t("upload.hint")}
+            </p>
             <input
               ref={inputRef}
               type="file"
