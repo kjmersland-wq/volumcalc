@@ -10,6 +10,7 @@ const createSchema = z.object({
   customer_phone: z.string().trim().max(40).optional(),
   move_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   address: z.string().trim().max(240).optional(),
+  company_id: z.string().uuid().optional(),
 });
 
 const sharedSchema = z.object({
@@ -37,9 +38,22 @@ export const createEstimate = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { analyzeImages } = await import("./analyze.server");
 
+    // A company-specific upload link attributes the estimate to that company so
+    // it lands in their dashboard; otherwise it stays unattributed.
+    let companyId: string | null = null;
+    if (data.company_id) {
+      const { data: company } = await supabaseAdmin
+        .from("companies")
+        .select("id")
+        .eq("id", data.company_id)
+        .maybeSingle();
+      companyId = company?.id ?? null;
+    }
+
     const { data: estimate, error: insertError } = await supabaseAdmin
       .from("estimates")
       .insert({
+        company_id: companyId,
         customer_name: data.customer_name || null,
         customer_phone: data.customer_phone || null,
         move_date: data.move_date || null,

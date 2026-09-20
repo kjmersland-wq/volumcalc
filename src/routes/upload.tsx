@@ -15,6 +15,10 @@ import { useUnlimitedPhotos } from "@/hooks/useCompany";
 
 export const Route = createFileRoute("/upload")({
   staticData: { sitemap: true },
+  validateSearch: (search: Record<string, unknown>): { c?: string } => {
+    const c = search['c'];
+    return typeof c === "string" && c ? { c } : {};
+  },
   head: () => ({
     meta: [
       { title: "Upload photos — VolumCalc" },
@@ -41,6 +45,7 @@ function UploadPage() {
   const navigate = useNavigate();
   const submitEstimate = useServerFn(createEstimate);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { c: companyId } = Route.useSearch();
   const unlimited = useUnlimitedPhotos();
   const maxPhotos = unlimited ? Infinity : 20;
 
