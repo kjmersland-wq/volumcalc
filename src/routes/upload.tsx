@@ -37,7 +37,7 @@ type Stage = "idle" | "uploading" | "analysing" | "saving";
 function UploadPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const analyze = useServerFn(analyzePhotos);
+  const submitEstimate = useServerFn(createEstimate);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [files, setFiles] = useState<File[]>([]);
