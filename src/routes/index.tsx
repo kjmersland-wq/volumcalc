@@ -3,6 +3,7 @@ import { Camera, Sparkles, FileText, ShieldCheck, Palette, ArrowRight, Check } f
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ContactForm, ContactDetails } from "@/components/ContactForm";
 import { useI18n } from "@/lib/i18n";
 import heroRoom from "@/assets/hero-room.jpg";
 
@@ -161,6 +162,18 @@ function Landing() {
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
+          </div>
+        </section>
+        <section id="kontakt" className="border-t border-border bg-muted/30">
+          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 lg:grid-cols-[1fr_1.2fr]">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t("contact.homeTitle")}</h2>
+              <p className="mt-3 text-muted-foreground">{t("contact.homeSub")}</p>
+              <div className="mt-6">
+                <ContactDetails />
+              </div>
+            </div>
+            <ContactForm compact />
           </div>
         </section>
       </main>
