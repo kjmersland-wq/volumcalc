@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { VolumCalcLogo } from "@/components/VolumCalcLogo";
 
 export const Route = createFileRoute("/auth")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Company login — VolumCalc" },

@@ -7,6 +7,7 @@ import { useI18n } from "@/lib/i18n";
 import heroRoom from "@/assets/hero-room.jpg";
 
 export const Route = createFileRoute("/")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "VolumCalc — AI volume estimates from room photos" },

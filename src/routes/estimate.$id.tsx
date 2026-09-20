@@ -37,6 +37,7 @@ import { m3, money, shortDate } from "@/lib/format";
 import { recommendVehicle, recommendedVolume, storageUnitM2 } from "@/lib/volume";
 
 export const Route = createFileRoute("/estimate/$id")({
+  staticData: { sitemap: false },
   validateSearch: (search: Record<string, unknown>): { token?: string } => {
     const token = search['token'];
     return typeof token === "string" && token ? { token } : {};
