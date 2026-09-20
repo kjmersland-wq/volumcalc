@@ -1,7 +1,22 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { extraTranslations } from "./i18n.translations";
 
-export type Lang = "no" | "en" | "sv" | "da" | "pl";
+export type Lang =
+  | "no"
+  | "en"
+  | "sv"
+  | "da"
+  | "fi"
+  | "us"
+  | "de"
+  | "nl"
+  | "fr"
+  | "pl"
+  | "es"
+  | "it"
+  | "pt"
+  | "ja"
+  | "zh";
 
 
 type Dict = Record<string, { no: string; en: string }>;
@@ -434,7 +449,23 @@ type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (k: keyof typeof dict | 
 
 const LanguageContext = createContext<Ctx>({ lang: "en", setLang: () => {}, t: (k) => String(k) });
 
-export const SUPPORTED_LANGS: Lang[] = ["en", "no", "sv", "da", "pl"];
+export const SUPPORTED_LANGS: Lang[] = [
+  "en",
+  "no",
+  "sv",
+  "da",
+  "fi",
+  "us",
+  "de",
+  "nl",
+  "fr",
+  "pl",
+  "es",
+  "it",
+  "pt",
+  "ja",
+  "zh",
+];
 
 function isLang(value: unknown): value is Lang {
   return typeof value === "string" && (SUPPORTED_LANGS as string[]).includes(value);
@@ -451,8 +482,22 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       window.localStorage.setItem("volumcalc-lang", urlLang);
       return;
     }
-    // Language landing paths: /no, /se, /dk, /pl
-    const pathLang: Record<string, Lang> = { "/no": "no", "/se": "sv", "/dk": "da", "/pl": "pl" };
+    const pathLang: Record<string, Lang> = {
+      "/no": "no",
+      "/se": "sv",
+      "/dk": "da",
+      "/fi": "fi",
+      "/us": "us",
+      "/de": "de",
+      "/nl": "nl",
+      "/fr": "fr",
+      "/pl": "pl",
+      "/es": "es",
+      "/it": "it",
+      "/pt": "pt",
+      "/jp": "ja",
+      "/cn": "zh",
+    };
     const fromPath = pathLang[window.location.pathname.replace(/\/$/, "")];
     if (fromPath) {
       setLangState(fromPath);
@@ -484,7 +529,10 @@ export function translate(key: string, lang: Lang): string {
   const entry = dict[key];
   if (!entry) return key;
   if (lang === "no" || lang === "en") return entry[lang];
-  return extraTranslations[lang]?.[key] ?? entry.en;
+  if (lang === "sv" || lang === "da" || lang === "pl") {
+    return extraTranslations[lang]?.[key] ?? entry.en;
+  }
+  return entry.en;
 }
 
 

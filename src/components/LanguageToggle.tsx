@@ -1,13 +1,23 @@
 import { useState, useRef, useEffect } from "react";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, type Lang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const languages = [
-  { code: "en", label: "GB", flagUrl: "https://flagcdn.com/w40/gb.png" },
-  { code: "no", label: "NO", flagUrl: "https://flagcdn.com/w40/no.png" },
-  { code: "sv", label: "SE", flagUrl: "https://flagcdn.com/w40/se.png" },
-  { code: "da", label: "DK", flagUrl: "https://flagcdn.com/w40/dk.png" },
-  { code: "pl", label: "PL", flagUrl: "https://flagcdn.com/w40/pl.png" },
+  { code: "en", label: "GB", name: "English", path: "/", flagUrl: "https://flagcdn.com/w40/gb.png" },
+  { code: "no", label: "NO", name: "Norsk", path: "/no", flagUrl: "https://flagcdn.com/w40/no.png" },
+  { code: "sv", label: "SE", name: "Svenska", path: "/se", flagUrl: "https://flagcdn.com/w40/se.png" },
+  { code: "da", label: "DK", name: "Dansk", path: "/dk", flagUrl: "https://flagcdn.com/w40/dk.png" },
+  { code: "fi", label: "FI", name: "Suomi", path: "/fi", flagUrl: "https://flagcdn.com/w40/fi.png" },
+  { code: "us", label: "US", name: "English (US)", path: "/us", flagUrl: "https://flagcdn.com/w40/us.png" },
+  { code: "de", label: "DE", name: "Deutsch", path: "/de", flagUrl: "https://flagcdn.com/w40/de.png" },
+  { code: "nl", label: "NL", name: "Nederlands", path: "/nl", flagUrl: "https://flagcdn.com/w40/nl.png" },
+  { code: "fr", label: "FR", name: "Français", path: "/fr", flagUrl: "https://flagcdn.com/w40/fr.png" },
+  { code: "pl", label: "PL", name: "Polski", path: "/pl", flagUrl: "https://flagcdn.com/w40/pl.png" },
+  { code: "es", label: "ES", name: "Español", path: "/es", flagUrl: "https://flagcdn.com/w40/es.png" },
+  { code: "it", label: "IT", name: "Italiano", path: "/it", flagUrl: "https://flagcdn.com/w40/it.png" },
+  { code: "pt", label: "PT", name: "Português", path: "/pt", flagUrl: "https://flagcdn.com/w40/pt.png" },
+  { code: "ja", label: "JP", name: "日本語", path: "/jp", flagUrl: "https://flagcdn.com/w40/jp.png" },
+  { code: "zh", label: "CN", name: "中文", path: "/cn", flagUrl: "https://flagcdn.com/w40/cn.png" },
 ] as const;
 
 
@@ -34,6 +44,9 @@ export function LanguageToggle({ className }: { className?: string }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        aria-label="Choose language"
         className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all"
       >
         <img 
@@ -49,14 +62,15 @@ export function LanguageToggle({ className }: { className?: string }) {
 
       {/* Rullegardinliste - Lys bakgrunn */}
       {isOpen && (
-        <div className="absolute right-0 mt-1 w-28 origin-top-right rounded-xl border border-gray-100 bg-white p-1 shadow-lg ring-1 ring-black/5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+        <div role="menu" className="absolute right-0 mt-1 max-h-[70vh] w-44 origin-top-right overflow-y-auto rounded-xl border border-gray-100 bg-white p-1 shadow-lg ring-1 ring-black/5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
           {languages.map((item) => (
             <button
               key={item.code}
               type="button"
               onClick={() => {
-                setLang(item.code as any);
+                setLang(item.code as Lang);
                 setIsOpen(false);
+                window.location.assign(item.path);
               }}
               className={cn(
                 "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm transition-colors hover:bg-gray-50",
@@ -68,7 +82,8 @@ export function LanguageToggle({ className }: { className?: string }) {
                 alt={item.label} 
                 className="h-4 w-4 rounded-full object-cover border border-gray-100" 
               />
-              <span className="text-xs font-bold tracking-wider">{item.label}</span>
+              <span className="w-5 text-xs font-bold tracking-wider">{item.label}</span>
+              <span className="truncate text-xs font-medium">{item.name}</span>
             </button>
           ))}
         </div>
