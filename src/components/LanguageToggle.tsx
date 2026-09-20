@@ -3,10 +3,13 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const languages = [
-  { code: "no", label: "NO", flagUrl: "https://flagcdn.com" },
-  { code: "en", label: "GB", flagUrl: "https://flagcdn.com" },
-  { code: "pl", label: "PL", flagUrl: "https://flagcdn.com" },
+  { code: "en", label: "GB", flagUrl: "https://flagcdn.com/w40/gb.png" },
+  { code: "no", label: "NO", flagUrl: "https://flagcdn.com/w40/no.png" },
+  { code: "sv", label: "SE", flagUrl: "https://flagcdn.com/w40/se.png" },
+  { code: "da", label: "DK", flagUrl: "https://flagcdn.com/w40/dk.png" },
+  { code: "pl", label: "PL", flagUrl: "https://flagcdn.com/w40/pl.png" },
 ] as const;
+
 
 export function LanguageToggle({ className }: { className?: string }) {
   const { lang, setLang } = useI18n();
