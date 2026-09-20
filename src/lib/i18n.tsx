@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { extraTranslations } from "./i18n.translations";
 
-export type Lang = "no" | "en";
+export type Lang = "no" | "en" | "sv" | "da" | "pl";
+
 
 type Dict = Record<string, { no: string; en: string }>;
 
