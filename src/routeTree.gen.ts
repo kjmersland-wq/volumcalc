@@ -10,12 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as UploadRouteImport } from './routes/upload'
+import { Route as EstimateIdRouteImport } from './routes/estimate.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -28,35 +35,48 @@ const UploadRoute = UploadRouteImport.update({
   path: '/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EstimateIdRoute = EstimateIdRouteImport.update({
+  id: '/estimate/$id',
+  path: '/estimate/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
   '/upload': typeof UploadRoute
+  '/estimate/$id': typeof EstimateIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
   '/upload': typeof UploadRoute
+  '/estimate/$id': typeof EstimateIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/pricing': typeof PricingRoute
   '/upload': typeof UploadRoute
+  '/estimate/$id': typeof EstimateIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/pricing' | '/upload'
+  fullPaths: '/' | '/auth' | '/pricing' | '/upload' | '/estimate/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/pricing' | '/upload'
-  id: '__root__' | '/' | '/pricing' | '/upload'
+  to: '/' | '/auth' | '/pricing' | '/upload' | '/estimate/$id'
+  id: '__root__' | '/' | '/auth' | '/pricing' | '/upload' | '/estimate/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   PricingRoute: typeof PricingRoute
   UploadRoute: typeof UploadRoute
+  EstimateIdRoute: typeof EstimateIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -82,13 +109,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/estimate/$id': {
+      id: '/estimate/$id'
+      path: '/estimate/$id'
+      fullPath: '/estimate/$id'
+      preLoaderRoute: typeof EstimateIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   PricingRoute: PricingRoute,
   UploadRoute: UploadRoute,
+  EstimateIdRoute: EstimateIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
