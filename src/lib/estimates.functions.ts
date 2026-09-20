@@ -115,7 +115,7 @@ export const getSharedEstimate = createServerFn({ method: "POST" })
     const { data: estimate } = await supabaseAdmin
       .from("estimates")
       .select(
-        "id,customer_name,address,customer_phone,status,total_volume_m3,photo_urls,created_at,share_token,company_id,access_floor,has_elevator,carry_distance_m,access_notes",
+        "id,customer_name,address,customer_phone,status,total_volume_m3,photo_urls,created_at,share_token,company_id,access_floor,has_elevator,carry_distance_m,access_notes,storage_enabled,storage_company,storage_address,storage_contact,storage_phone,delivery_address,delivery_floor,delivery_elevator,delivery_carry_distance,delivery_notes,packing_requested,packing_level,packing_materials,packing_notes,tender_mode,report_language",
       )
       .eq("id", data.id)
       .maybeSingle();

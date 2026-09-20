@@ -40,6 +40,11 @@ type Form = {
   price_per_m3: string;
   currency: string;
   default_language: string;
+  org_number: string;
+  address: string;
+  phone: string;
+  website: string;
+  contact_email: string;
 };
 
 function SettingsPage() {
@@ -73,6 +78,11 @@ function SettingsPage() {
         price_per_m3: String(data.price_per_m3 ?? 850),
         currency: data.currency ?? "NOK",
         default_language: data.default_language ?? "no",
+        org_number: data.org_number ?? "",
+        address: data.address ?? "",
+        phone: data.phone ?? "",
+        website: data.website ?? "",
+        contact_email: data.contact_email ?? "",
       });
     }
   }, [data]);
@@ -88,6 +98,11 @@ function SettingsPage() {
       price_per_m3: Number(form.price_per_m3) || 0,
       currency: form.currency,
       default_language: form.default_language,
+      org_number: form.org_number.trim() || null,
+      address: form.address.trim() || null,
+      phone: form.phone.trim() || null,
+      website: form.website.trim() || null,
+      contact_email: form.contact_email.trim() || null,
     });
     setSaving(false);
     if (error) toast.error(error.message);
@@ -115,6 +130,7 @@ function SettingsPage() {
             onChange={(e) => setForm({ ...form, company_name: e.target.value })}
           />
         </div>
+        <p className="text-sm text-muted-foreground">{t("set.brandingHelp")}</p>
         <div className="space-y-1.5">
           <Label htmlFor="logo_url">{t("set.logo")}</Label>
           <Input
@@ -173,6 +189,42 @@ function SettingsPage() {
                 <SelectItem value="en">English</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="org_number">{t("set.org")}</Label>
+            <Input
+              id="org_number"
+              value={form.org_number}
+              onChange={(e) => setForm({ ...form, org_number: e.target.value })}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="phone">{t("set.phone")}</Label>
+            <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="address">{t("set.address")}</Label>
+            <Input id="address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="contact_email">{t("set.contactEmail")}</Label>
+            <Input
+              id="contact_email"
+              type="email"
+              value={form.contact_email}
+              onChange={(e) => setForm({ ...form, contact_email: e.target.value })}
+            />
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="website">{t("set.website")}</Label>
+            <Input
+              id="website"
+              placeholder="https://…"
+              value={form.website}
+              onChange={(e) => setForm({ ...form, website: e.target.value })}
+            />
           </div>
         </div>
         <Button onClick={save} disabled={saving}>

@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       companies: {
         Row: {
+          address: string | null
           brand_color: string
           company_name: string
           contact_email: string | null
@@ -24,10 +25,14 @@ export type Database = {
           default_language: string
           id: string
           logo_url: string | null
+          org_number: string | null
+          phone: string | null
           price_per_m3: number
           updated_at: string
+          website: string | null
         }
         Insert: {
+          address?: string | null
           brand_color?: string
           company_name?: string
           contact_email?: string | null
@@ -36,10 +41,14 @@ export type Database = {
           default_language?: string
           id: string
           logo_url?: string | null
+          org_number?: string | null
+          phone?: string | null
           price_per_m3?: number
           updated_at?: string
+          website?: string | null
         }
         Update: {
+          address?: string | null
           brand_color?: string
           company_name?: string
           contact_email?: string | null
@@ -48,8 +57,11 @@ export type Database = {
           default_language?: string
           id?: string
           logo_url?: string | null
+          org_number?: string | null
+          phone?: string | null
           price_per_m3?: number
           updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -216,14 +228,30 @@ export type Database = {
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
+          delivery_address: string | null
+          delivery_carry_distance: string | null
+          delivery_elevator: boolean
+          delivery_floor: string | null
+          delivery_notes: string | null
           has_elevator: boolean
           id: string
           internal_notes: string | null
           move_date: string | null
           notes: string | null
+          packing_level: string | null
+          packing_materials: Json
+          packing_notes: string | null
+          packing_requested: boolean
           photo_urls: string[]
+          report_language: string
           share_token: string
           status: string
+          storage_address: string | null
+          storage_company: string | null
+          storage_contact: string | null
+          storage_enabled: boolean
+          storage_phone: string | null
+          tender_mode: boolean
           total_volume_m3: number
           updated_at: string
         }
@@ -237,14 +265,30 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          delivery_address?: string | null
+          delivery_carry_distance?: string | null
+          delivery_elevator?: boolean
+          delivery_floor?: string | null
+          delivery_notes?: string | null
           has_elevator?: boolean
           id?: string
           internal_notes?: string | null
           move_date?: string | null
           notes?: string | null
+          packing_level?: string | null
+          packing_materials?: Json
+          packing_notes?: string | null
+          packing_requested?: boolean
           photo_urls?: string[]
+          report_language?: string
           share_token?: string
           status?: string
+          storage_address?: string | null
+          storage_company?: string | null
+          storage_contact?: string | null
+          storage_enabled?: boolean
+          storage_phone?: string | null
+          tender_mode?: boolean
           total_volume_m3?: number
           updated_at?: string
         }
@@ -258,14 +302,30 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          delivery_address?: string | null
+          delivery_carry_distance?: string | null
+          delivery_elevator?: boolean
+          delivery_floor?: string | null
+          delivery_notes?: string | null
           has_elevator?: boolean
           id?: string
           internal_notes?: string | null
           move_date?: string | null
           notes?: string | null
+          packing_level?: string | null
+          packing_materials?: Json
+          packing_notes?: string | null
+          packing_requested?: boolean
           photo_urls?: string[]
+          report_language?: string
           share_token?: string
           status?: string
+          storage_address?: string | null
+          storage_company?: string | null
+          storage_contact?: string | null
+          storage_enabled?: boolean
+          storage_phone?: string | null
+          tender_mode?: boolean
           total_volume_m3?: number
           updated_at?: string
         }
@@ -330,15 +390,42 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "unlimited" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -465,6 +552,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "unlimited", "user"],
+    },
   },
 } as const
