@@ -53,23 +53,35 @@ type Room = { id: string; name: string; sort_order: number };
 
 function EstimatePage() {
   const { id } = Route.useParams();
+  const { token } = Route.useSearch();
   const { t, lang } = useI18n();
-  const { session } = useAuth();
+  const { session, loading: authLoading } = useAuth();
+  const loadShared = useServerFn(getSharedEstimate);
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<Record<string, Partial<Item>>>({});
   const [renamingRoom, setRenamingRoom] = useState<string | null>(null);
   const [roomName, setRoomName] = useState("");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["estimate", id],
+    queryKey: ["estimate", id, session?.user.id ?? "guest"],
+    enabled: !authLoading,
     queryFn: async () => {
+      if (!session) {
+        if (!token) return { estimate: null, items: [] as Item[], rooms: [] as Room[], company: null };
+        const shared = await loadShared({ data: { id, token } });
+        if (!shared) return { estimate: null, items: [] as Item[], rooms: [] as Room[], company: null };
+        return {
+          estimate: shared.estimate,
+          items: shared.items as Item[],
+          rooms: shared.rooms as Room[],
+          company: null,
+        };
+      }
       const [{ data: estimate }, { data: items }, { data: rooms }, { data: company }] = await Promise.all([
         supabase.from("estimates").select("*").eq("id", id).maybeSingle(),
         supabase.from("estimate_items").select("*").eq("estimate_id", id).order("volume_m3", { ascending: false }),
         supabase.from("estimate_rooms").select("id,name,sort_order").eq("estimate_id", id).order("sort_order"),
-        session
-          ? supabase.from("companies").select("*").eq("id", session.user.id).maybeSingle()
-          : Promise.resolve({ data: null }),
+        supabase.from("companies").select("*").eq("id", session.user.id).maybeSingle(),
       ]);
       return { estimate, items: (items ?? []) as Item[], rooms: (rooms ?? []) as Room[], company };
     },
