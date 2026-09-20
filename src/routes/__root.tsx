@@ -75,9 +75,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  validateSearch: (search: Record<string, unknown>) => ({
-    lang: search.lang === "no" ? ("no" as const) : search.lang === "en" ? ("en" as const) : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { lang?: "no" | "en" } =>
+    search["lang"] === "no" || search["lang"] === "en"
+      ? { lang: search["lang"] }
+      : {},
   head: ({ match }) => {
     const norwegian = match.search.lang === "no";
     const socialImage = norwegian
