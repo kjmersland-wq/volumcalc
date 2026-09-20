@@ -16,7 +16,8 @@ const decoder = new TextDecoder();
 async function connectWorker(host: string, port: number): Promise<Duplex | null> {
   let connect: ((addr: string, opts?: unknown) => any) | undefined;
   try {
-    ({ connect } = (await import(/* @vite-ignore */ "cloudflare:sockets")) as any);
+    const mod: any = await import(/* @vite-ignore */ ("cloudflare" + ":sockets") as string);
+    connect = mod?.connect;
   } catch {
     return null;
   }
