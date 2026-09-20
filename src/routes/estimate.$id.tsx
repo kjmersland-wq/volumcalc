@@ -158,7 +158,7 @@ function EstimatePage() {
     await supabase.from("estimates").update({ total_volume_m3: total }).eq("id", id);
   }
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="size-6 animate-spin text-primary" />
