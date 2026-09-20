@@ -7,7 +7,6 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { useI18n } from "@/lib/i18n";
-import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/pricing")({
@@ -32,7 +31,6 @@ export const Route = createFileRoute("/pricing")({
 
 function Pricing() {
   const { t, lang } = useI18n();
-  const { user } = useAuth();
   const [checkout, setCheckout] = useState<{ priceId: string; name: string } | null>(null);
 
   const plans = [
@@ -192,8 +190,6 @@ function Pricing() {
               <StripeEmbeddedCheckout
                 key={checkout.priceId}
                 priceId={checkout.priceId}
-                customerEmail={user?.email}
-                userId={user?.id}
               />
             )}
           </div>

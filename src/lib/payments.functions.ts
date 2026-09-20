@@ -1,69 +1,74 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import type Stripe from "stripe";
 import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib/stripe.server";
 
 type CheckoutResult = { clientSecret: string } | { error: string };
 
+type Identity = { userId: string; email?: string };
+
+/**
+ * Resolves the billing identity from the caller's Supabase session only.
+ * Client-supplied user ids / e-mail addresses are never trusted.
+ * Returns null for anonymous callers (Stripe then collects the e-mail itself).
+ */
+async function resolveIdentity(): Promise<Identity | null> {
+  const request = getRequest();
+  const authHeader = request?.headers?.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  const token = authHeader.slice("Bearer ".length);
+  if (!token || token.split(".").length !== 3) return null;
+
+  const SUPABASE_URL = process.env["SUPABASE_URL"];
+  const SUPABASE_PUBLISHABLE_KEY = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) return null;
+
+  const { createClient } = await import("@supabase/supabase-js");
+  const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    global: { headers: { apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${token}` } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data.user?.id) return null;
+  return { userId: data.user.id, ...(data.user.email && { email: data.user.email }) };
+}
+
 async function resolveOrCreateCustomer(
   stripe: ReturnType<typeof createStripeClient>,
-  options: { email?: string; userId?: string },
+  identity: Identity,
 ): Promise<string> {
-  if (options.userId && !/^[a-zA-Z0-9_-]+$/.test(options.userId)) throw new Error("Invalid userId");
-  if (options.userId) {
-    const found = await stripe.customers.search({
-      query: `metadata['userId']:'${options.userId}'`,
-      limit: 1,
-    });
-    const customer = found.data[0];
-    if (customer) return customer.id;
-  }
-  if (options.email) {
-    const existing = await stripe.customers.list({ email: options.email, limit: 1 });
-    const customer = existing.data[0];
-    if (customer) {
-      if (options.userId && customer.metadata?.["userId"] !== options.userId) {
-        await stripe.customers.update(customer.id, {
-          metadata: { ...customer.metadata, userId: options.userId },
-        });
-      }
-      return customer.id;
-    }
-  }
+  const found = await stripe.customers.search({
+    query: `metadata['userId']:'${identity.userId}'`,
+    limit: 1,
+  });
+  const customer = found.data[0];
+  if (customer) return customer.id;
+
   const created = await stripe.customers.create({
-    ...(options.email && { email: options.email }),
-    ...(options.userId && { metadata: { userId: options.userId } }),
+    ...(identity.email && { email: identity.email }),
+    metadata: { userId: identity.userId },
   });
   return created.id;
 }
 
 export const createCheckoutSession = createServerFn({ method: "POST" })
-  .inputValidator((data: {
-    priceId: string;
-    customerEmail?: string;
-    userId?: string;
-    returnUrl: string;
-    environment: StripeEnv;
-  }) => {
+  .inputValidator((data: { priceId: string; returnUrl: string; environment: StripeEnv }) => {
     if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error("Invalid priceId");
     if (!data.returnUrl.startsWith("http://") && !data.returnUrl.startsWith("https://")) {
       throw new Error("Invalid return URL");
     }
-    return data;
+    return { priceId: data.priceId, returnUrl: data.returnUrl, environment: data.environment };
   })
   .handler(async ({ data }): Promise<CheckoutResult> => {
     try {
+      const identity = await resolveIdentity();
       const stripe = createStripeClient(data.environment);
       const prices = await stripe.prices.list({ lookup_keys: [data.priceId] });
       const stripePrice = prices.data[0];
       if (!stripePrice) throw new Error("Price not found");
       const isRecurring = stripePrice.type === "recurring";
-      const customerId =
-        data.customerEmail || data.userId
-          ? await resolveOrCreateCustomer(stripe, {
-              ...(data.customerEmail && { email: data.customerEmail }),
-              ...(data.userId && { userId: data.userId }),
-            })
-          : undefined;
+      const customerId = identity ? await resolveOrCreateCustomer(stripe, identity) : undefined;
 
       let productDescription: string | undefined;
       if (!isRecurring) {
@@ -80,9 +85,9 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         managed_payments: { enabled: true },
         ...(customerId && { customer: customerId }),
         ...(!isRecurring && { payment_intent_data: { description: productDescription } }),
-        ...(data.userId && {
-          metadata: { userId: data.userId, managed_payments: "true" },
-          ...(isRecurring && { subscription_data: { metadata: { userId: data.userId } } }),
+        ...(identity && {
+          metadata: { userId: identity.userId, managed_payments: "true" },
+          ...(isRecurring && { subscription_data: { metadata: { userId: identity.userId } } }),
         }),
       } as Stripe.Checkout.SessionCreateParams);
 
