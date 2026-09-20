@@ -118,5 +118,5 @@ const content: Record<"no" | "en", LegalContent> = {
 
 function DpaPage() {
   const { lang } = useI18n();
-  return <LegalLayout content={content[lang]} />;
+  return <LegalLayout content={content[lang === "no" ? "no" : "en"]} />;
 }

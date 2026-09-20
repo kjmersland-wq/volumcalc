@@ -281,7 +281,7 @@ export const Route = createFileRoute("/hjelp")({
 
 function HelpPage() {
   const { lang } = useI18n();
-  const c = content[lang];
+  const c = content[lang === "no" ? "no" : "en"];
 
   return (
     <div className="flex min-h-screen flex-col">
