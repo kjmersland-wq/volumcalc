@@ -432,18 +432,33 @@ type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (k: keyof typeof dict | 
 
 const LanguageContext = createContext<Ctx>({ lang: "en", setLang: () => {}, t: (k) => String(k) });
 
+export const SUPPORTED_LANGS: Lang[] = ["en", "no", "sv", "da", "pl"];
+
+function isLang(value: unknown): value is Lang {
+  return typeof value === "string" && (SUPPORTED_LANGS as string[]).includes(value);
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("en");
 
   useEffect(() => {
-    const urlLang = new URLSearchParams(window.location.search).get("lang");
-    if (urlLang === "en" || urlLang === "no") {
+    const params = new URLSearchParams(window.location.search);
+    const urlLang = params.get("lang");
+    if (isLang(urlLang)) {
       setLangState(urlLang);
       window.localStorage.setItem("volumcalc-lang", urlLang);
       return;
     }
+    // Language landing paths: /no, /se, /dk, /pl
+    const pathLang: Record<string, Lang> = { "/no": "no", "/se": "sv", "/dk": "da", "/pl": "pl" };
+    const fromPath = pathLang[window.location.pathname.replace(/\/$/, "")];
+    if (fromPath) {
+      setLangState(fromPath);
+      window.localStorage.setItem("volumcalc-lang", fromPath);
+      return;
+    }
     const stored = window.localStorage.getItem("volumcalc-lang");
-    if (stored === "en" || stored === "no") {
+    if (isLang(stored)) {
       setLangState(stored);
       return;
     }
@@ -458,21 +473,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem("volumcalc-lang", l);
   }, []);
 
-  const t = useCallback(
-    (k: string) => {
-      const entry = dict[k];
-      return entry ? entry[lang] : k;
-    },
-    [lang],
-  );
+  const t = useCallback((k: string) => translate(k, lang), [lang]);
 
   return <LanguageContext.Provider value={{ lang, setLang, t }}>{children}</LanguageContext.Provider>;
 }
 
 export function translate(key: string, lang: Lang): string {
   const entry = dict[key];
-  return entry ? entry[lang] : key;
+  if (!entry) return key;
+  if (lang === "no" || lang === "en") return entry[lang];
+  return extraTranslations[lang]?.[key] ?? entry.en;
 }
+
 
 export function useI18n() {
   return useContext(LanguageContext);
