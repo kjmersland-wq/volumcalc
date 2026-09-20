@@ -11,24 +11,34 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CnRouteImport } from './routes/cn'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DatabehandlingRouteImport } from './routes/databehandling'
+import { Route as DeRouteImport } from './routes/de'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as DkRouteImport } from './routes/dk'
+import { Route as EsRouteImport } from './routes/es'
+import { Route as FiRouteImport } from './routes/fi'
 import { Route as FlyttebilKalkulatorRouteImport } from './routes/flyttebil-kalkulator'
+import { Route as FrRouteImport } from './routes/fr'
 import { Route as HjelpRouteImport } from './routes/hjelp'
+import { Route as ItRouteImport } from './routes/it'
+import { Route as JpRouteImport } from './routes/jp'
 import { Route as KjopsvilkarRouteImport } from './routes/kjopsvilkar'
 import { Route as MovingInventoryListRouteImport } from './routes/moving-inventory-list'
+import { Route as NlRouteImport } from './routes/nl'
 import { Route as NoRouteImport } from './routes/no'
 import { Route as OmOssRouteImport } from './routes/om-oss'
 import { Route as PersonvernRouteImport } from './routes/personvern'
 import { Route as PlRouteImport } from './routes/pl'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PtRouteImport } from './routes/pt'
 import { Route as SeRouteImport } from './routes/se'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as UploadRouteImport } from './routes/upload'
+import { Route as UsRouteImport } from './routes/us'
 import { Route as VilkarRouteImport } from './routes/vilkar'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
@@ -45,6 +55,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CnRoute = CnRouteImport.update({
+  id: '/cn',
+  path: '/cn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -67,6 +82,11 @@ const DatabehandlingRoute = DatabehandlingRouteImport.update({
   path: '/databehandling',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeRoute = DeRouteImport.update({
+  id: '/de',
+  path: '/de',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoRoute = DemoRouteImport.update({
   id: '/demo',
   path: '/demo',
@@ -77,14 +97,39 @@ const DkRoute = DkRouteImport.update({
   path: '/dk',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EsRoute = EsRouteImport.update({
+  id: '/es',
+  path: '/es',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FiRoute = FiRouteImport.update({
+  id: '/fi',
+  path: '/fi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FlyttebilKalkulatorRoute = FlyttebilKalkulatorRouteImport.update({
   id: '/flyttebil-kalkulator',
   path: '/flyttebil-kalkulator',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FrRoute = FrRouteImport.update({
+  id: '/fr',
+  path: '/fr',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HjelpRoute = HjelpRouteImport.update({
   id: '/hjelp',
   path: '/hjelp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ItRoute = ItRouteImport.update({
+  id: '/it',
+  path: '/it',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JpRoute = JpRouteImport.update({
+  id: '/jp',
+  path: '/jp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KjopsvilkarRoute = KjopsvilkarRouteImport.update({
@@ -95,6 +140,11 @@ const KjopsvilkarRoute = KjopsvilkarRouteImport.update({
 const MovingInventoryListRoute = MovingInventoryListRouteImport.update({
   id: '/moving-inventory-list',
   path: '/moving-inventory-list',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NlRoute = NlRouteImport.update({
+  id: '/nl',
+  path: '/nl',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NoRoute = NoRouteImport.update({
@@ -122,6 +172,11 @@ const PricingRoute = PricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PtRoute = PtRouteImport.update({
+  id: '/pt',
+  path: '/pt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SeRoute = SeRouteImport.update({
   id: '/se',
   path: '/se',
@@ -135,6 +190,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
   path: '/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsRoute = UsRouteImport.update({
+  id: '/us',
+  path: '/us',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VilkarRoute = VilkarRouteImport.update({
@@ -176,24 +236,34 @@ const EstimateIdRoute = EstimateIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/cn': typeof CnRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/databehandling': typeof DatabehandlingRoute
+  '/de': typeof DeRoute
   '/demo': typeof DemoRoute
   '/dk': typeof DkRoute
+  '/es': typeof EsRoute
+  '/fi': typeof FiRoute
   '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
+  '/fr': typeof FrRoute
   '/hjelp': typeof HjelpRoute
+  '/it': typeof ItRoute
+  '/jp': typeof JpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
   '/moving-inventory-list': typeof MovingInventoryListRoute
+  '/nl': typeof NlRoute
   '/no': typeof NoRoute
   '/om-oss': typeof OmOssRoute
   '/personvern': typeof PersonvernRoute
   '/pl': typeof PlRoute
   '/pricing': typeof PricingRoute
+  '/pt': typeof PtRoute
   '/se': typeof SeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/upload': typeof UploadRoute
+  '/us': typeof UsRoute
   '/vilkar': typeof VilkarRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/dashboard/admin': typeof DashboardAdminRoute
@@ -205,23 +275,33 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/cn': typeof CnRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
   '/databehandling': typeof DatabehandlingRoute
+  '/de': typeof DeRoute
   '/demo': typeof DemoRoute
   '/dk': typeof DkRoute
+  '/es': typeof EsRoute
+  '/fi': typeof FiRoute
   '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
+  '/fr': typeof FrRoute
   '/hjelp': typeof HjelpRoute
+  '/it': typeof ItRoute
+  '/jp': typeof JpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
   '/moving-inventory-list': typeof MovingInventoryListRoute
+  '/nl': typeof NlRoute
   '/no': typeof NoRoute
   '/om-oss': typeof OmOssRoute
   '/personvern': typeof PersonvernRoute
   '/pl': typeof PlRoute
   '/pricing': typeof PricingRoute
+  '/pt': typeof PtRoute
   '/se': typeof SeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/upload': typeof UploadRoute
+  '/us': typeof UsRoute
   '/vilkar': typeof VilkarRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/dashboard/admin': typeof DashboardAdminRoute
@@ -234,24 +314,34 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/cn': typeof CnRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/databehandling': typeof DatabehandlingRoute
+  '/de': typeof DeRoute
   '/demo': typeof DemoRoute
   '/dk': typeof DkRoute
+  '/es': typeof EsRoute
+  '/fi': typeof FiRoute
   '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
+  '/fr': typeof FrRoute
   '/hjelp': typeof HjelpRoute
+  '/it': typeof ItRoute
+  '/jp': typeof JpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
   '/moving-inventory-list': typeof MovingInventoryListRoute
+  '/nl': typeof NlRoute
   '/no': typeof NoRoute
   '/om-oss': typeof OmOssRoute
   '/personvern': typeof PersonvernRoute
   '/pl': typeof PlRoute
   '/pricing': typeof PricingRoute
+  '/pt': typeof PtRoute
   '/se': typeof SeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/upload': typeof UploadRoute
+  '/us': typeof UsRoute
   '/vilkar': typeof VilkarRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/dashboard/admin': typeof DashboardAdminRoute
@@ -265,24 +355,34 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/cn'
     | '/contact'
     | '/cookies'
     | '/dashboard'
     | '/databehandling'
+    | '/de'
     | '/demo'
     | '/dk'
+    | '/es'
+    | '/fi'
     | '/flyttebil-kalkulator'
+    | '/fr'
     | '/hjelp'
+    | '/it'
+    | '/jp'
     | '/kjopsvilkar'
     | '/moving-inventory-list'
+    | '/nl'
     | '/no'
     | '/om-oss'
     | '/personvern'
     | '/pl'
     | '/pricing'
+    | '/pt'
     | '/se'
     | '/sitemap.xml'
     | '/upload'
+    | '/us'
     | '/vilkar'
     | '/checkout/return'
     | '/dashboard/admin'
@@ -294,23 +394,33 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/cn'
     | '/contact'
     | '/cookies'
     | '/databehandling'
+    | '/de'
     | '/demo'
     | '/dk'
+    | '/es'
+    | '/fi'
     | '/flyttebil-kalkulator'
+    | '/fr'
     | '/hjelp'
+    | '/it'
+    | '/jp'
     | '/kjopsvilkar'
     | '/moving-inventory-list'
+    | '/nl'
     | '/no'
     | '/om-oss'
     | '/personvern'
     | '/pl'
     | '/pricing'
+    | '/pt'
     | '/se'
     | '/sitemap.xml'
     | '/upload'
+    | '/us'
     | '/vilkar'
     | '/checkout/return'
     | '/dashboard/admin'
@@ -322,24 +432,34 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/cn'
     | '/contact'
     | '/cookies'
     | '/dashboard'
     | '/databehandling'
+    | '/de'
     | '/demo'
     | '/dk'
+    | '/es'
+    | '/fi'
     | '/flyttebil-kalkulator'
+    | '/fr'
     | '/hjelp'
+    | '/it'
+    | '/jp'
     | '/kjopsvilkar'
     | '/moving-inventory-list'
+    | '/nl'
     | '/no'
     | '/om-oss'
     | '/personvern'
     | '/pl'
     | '/pricing'
+    | '/pt'
     | '/se'
     | '/sitemap.xml'
     | '/upload'
+    | '/us'
     | '/vilkar'
     | '/checkout/return'
     | '/dashboard/admin'
@@ -352,24 +472,34 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  CnRoute: typeof CnRoute
   ContactRoute: typeof ContactRoute
   CookiesRoute: typeof CookiesRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   DatabehandlingRoute: typeof DatabehandlingRoute
+  DeRoute: typeof DeRoute
   DemoRoute: typeof DemoRoute
   DkRoute: typeof DkRoute
+  EsRoute: typeof EsRoute
+  FiRoute: typeof FiRoute
   FlyttebilKalkulatorRoute: typeof FlyttebilKalkulatorRoute
+  FrRoute: typeof FrRoute
   HjelpRoute: typeof HjelpRoute
+  ItRoute: typeof ItRoute
+  JpRoute: typeof JpRoute
   KjopsvilkarRoute: typeof KjopsvilkarRoute
   MovingInventoryListRoute: typeof MovingInventoryListRoute
+  NlRoute: typeof NlRoute
   NoRoute: typeof NoRoute
   OmOssRoute: typeof OmOssRoute
   PersonvernRoute: typeof PersonvernRoute
   PlRoute: typeof PlRoute
   PricingRoute: typeof PricingRoute
+  PtRoute: typeof PtRoute
   SeRoute: typeof SeRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UploadRoute: typeof UploadRoute
+  UsRoute: typeof UsRoute
   VilkarRoute: typeof VilkarRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EnMovingVanCalculatorRoute: typeof EnMovingVanCalculatorRoute
@@ -390,6 +520,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cn': {
+      id: '/cn'
+      path: '/cn'
+      fullPath: '/cn'
+      preLoaderRoute: typeof CnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -420,6 +557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DatabehandlingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/de': {
+      id: '/de'
+      path: '/de'
+      fullPath: '/de'
+      preLoaderRoute: typeof DeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/demo': {
       id: '/demo'
       path: '/demo'
@@ -434,6 +578,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DkRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/es': {
+      id: '/es'
+      path: '/es'
+      fullPath: '/es'
+      preLoaderRoute: typeof EsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fi': {
+      id: '/fi'
+      path: '/fi'
+      fullPath: '/fi'
+      preLoaderRoute: typeof FiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/flyttebil-kalkulator': {
       id: '/flyttebil-kalkulator'
       path: '/flyttebil-kalkulator'
@@ -441,11 +599,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FlyttebilKalkulatorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fr': {
+      id: '/fr'
+      path: '/fr'
+      fullPath: '/fr'
+      preLoaderRoute: typeof FrRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hjelp': {
       id: '/hjelp'
       path: '/hjelp'
       fullPath: '/hjelp'
       preLoaderRoute: typeof HjelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/it': {
+      id: '/it'
+      path: '/it'
+      fullPath: '/it'
+      preLoaderRoute: typeof ItRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jp': {
+      id: '/jp'
+      path: '/jp'
+      fullPath: '/jp'
+      preLoaderRoute: typeof JpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kjopsvilkar': {
@@ -460,6 +639,13 @@ declare module '@tanstack/react-router' {
       path: '/moving-inventory-list'
       fullPath: '/moving-inventory-list'
       preLoaderRoute: typeof MovingInventoryListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nl': {
+      id: '/nl'
+      path: '/nl'
+      fullPath: '/nl'
+      preLoaderRoute: typeof NlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/no': {
@@ -497,6 +683,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pt': {
+      id: '/pt'
+      path: '/pt'
+      fullPath: '/pt'
+      preLoaderRoute: typeof PtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/se': {
       id: '/se'
       path: '/se'
@@ -516,6 +709,13 @@ declare module '@tanstack/react-router' {
       path: '/upload'
       fullPath: '/upload'
       preLoaderRoute: typeof UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/us': {
+      id: '/us'
+      path: '/us'
+      fullPath: '/us'
+      preLoaderRoute: typeof UsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/vilkar': {
@@ -589,24 +789,34 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  CnRoute: CnRoute,
   ContactRoute: ContactRoute,
   CookiesRoute: CookiesRoute,
   DashboardRoute: DashboardRouteWithChildren,
   DatabehandlingRoute: DatabehandlingRoute,
+  DeRoute: DeRoute,
   DemoRoute: DemoRoute,
   DkRoute: DkRoute,
+  EsRoute: EsRoute,
+  FiRoute: FiRoute,
   FlyttebilKalkulatorRoute: FlyttebilKalkulatorRoute,
+  FrRoute: FrRoute,
   HjelpRoute: HjelpRoute,
+  ItRoute: ItRoute,
+  JpRoute: JpRoute,
   KjopsvilkarRoute: KjopsvilkarRoute,
   MovingInventoryListRoute: MovingInventoryListRoute,
+  NlRoute: NlRoute,
   NoRoute: NoRoute,
   OmOssRoute: OmOssRoute,
   PersonvernRoute: PersonvernRoute,
   PlRoute: PlRoute,
   PricingRoute: PricingRoute,
+  PtRoute: PtRoute,
   SeRoute: SeRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UploadRoute: UploadRoute,
+  UsRoute: UsRoute,
   VilkarRoute: VilkarRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   EnMovingVanCalculatorRoute: EnMovingVanCalculatorRoute,
