@@ -191,6 +191,10 @@ const dict: Dict = {
   "dash.link": { no: "Kopier opplastingslenke", en: "Copy upload link" },
   "dash.settings": { no: "Innstillinger", en: "Settings" },
   "dash.signout": { no: "Logg ut", en: "Sign out" },
+  "rep.claimHelp": {
+    no: "Denne beregningen tilhører ingen bedrift ennå. Hent den inn for å redigere og følge den opp.",
+    en: "This estimate does not belong to a company yet. Claim it to edit and follow it up.",
+  },
   "dash.claim": { no: "Hent inn til mitt firma", en: "Claim for my company" },
   "dash.approve": { no: "Godkjenn", en: "Approve" },
   "dash.approved": { no: "Godkjent", en: "Approved" },

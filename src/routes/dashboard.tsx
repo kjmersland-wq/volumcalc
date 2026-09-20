@@ -55,7 +55,9 @@ function DashboardLayout() {
               variant="outline"
               size="sm"
               onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/upload`);
+                navigator.clipboard.writeText(
+                  `${window.location.origin}/upload${session ? `?c=${session.user.id}` : ""}`,
+                );
                 toast.success(t("res.copied"));
               }}
             >

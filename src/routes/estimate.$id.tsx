@@ -40,7 +40,7 @@ import { reportPl, type ReportLang } from "@/lib/report-pl";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
-import { getSharedEstimate } from "@/lib/estimates.functions";
+import { claimEstimate, getSharedEstimate } from "@/lib/estimates.functions";
 import { m3, money, shortDate } from "@/lib/format";
 import { recommendVehicle, recommendedVolume, storageUnitM2 } from "@/lib/volume";
 
@@ -125,6 +125,7 @@ function EstimatePage() {
   const { lang } = useI18n();
   const { session, loading: authLoading } = useAuth();
   const loadShared = useServerFn(getSharedEstimate);
+  const claim = useServerFn(claimEstimate);
   const queryClient = useQueryClient();
 
   const [renamingRoom, setRenamingRoom] = useState<string | null>(null);
@@ -175,6 +176,20 @@ function EstimatePage() {
         supabase.from("estimate_rooms").select("id,name,sort_order").eq("estimate_id", id).order("sort_order"),
         supabase.from("companies").select("*").eq("id", session.user.id).maybeSingle(),
       ]);
+      // An estimate that no company owns yet is only reachable through its share
+      // link; the company can take ownership of it from here.
+      if (!estimate && token) {
+        const shared = await loadShared({ data: { id, token } });
+        if (shared) {
+          return {
+            estimate: shared.estimate,
+            items: shared.items as unknown as Item[],
+            rooms: shared.rooms as Room[],
+            company,
+            unclaimed: true,
+          };
+        }
+      }
       return { estimate, items: (items ?? []) as unknown as Item[], rooms: (rooms ?? []) as Room[], company };
     },
   });
@@ -283,6 +298,19 @@ function EstimatePage() {
       await recalcTotal();
     },
     onSuccess: invalidate,
+  });
+
+  const claimEstimateMutation = useMutation({
+    mutationFn: async () => {
+      if (!token) throw new Error("Missing share token");
+      await claim({ data: { id, token } });
+    },
+    onSuccess: () => {
+      toast.success(rt("rep.saved"));
+      invalidate();
+      queryClient.invalidateQueries({ queryKey: ["estimates"] });
+    },
+    onError: () => toast.error(rt("upload.failed")),
   });
 
   const approve = useMutation({
@@ -420,7 +448,8 @@ function EstimatePage() {
       }
     | null;
   const currency = company?.currency ?? "NOK";
-  const canEdit = Boolean(session);
+  const unclaimed = Boolean((data as { unclaimed?: boolean } | undefined)?.unclaimed);
+  const canEdit = Boolean(session) && !unclaimed;
   const businessView = canEdit && view === "business";
   const shareToken = (estimate.share_token as string | undefined) ?? token;
 
@@ -490,6 +519,20 @@ function EstimatePage() {
                 {company.contact_email && <p>{company.contact_email}</p>}
                 {company.website && <p>{company.website}</p>}
               </div>
+            </div>
+          )}
+
+          {unclaimed && (
+            <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 p-5">
+              <p className="text-sm text-muted-foreground">{rt("rep.claimHelp")}</p>
+              <Button
+                size="sm"
+                onClick={() => claimEstimateMutation.mutate()}
+                disabled={claimEstimateMutation.isPending}
+              >
+                {claimEstimateMutation.isPending && <Loader2 className="size-4 animate-spin" />}
+                {rt("dash.claim")}
+              </Button>
             </div>
           )}
 
