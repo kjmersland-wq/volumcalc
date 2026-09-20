@@ -72,13 +72,6 @@ function Pricing() {
 
   const privatePlans = [
     {
-      name: lang === "no" ? "Gratis prøve" : "Free trial",
-      price: "0",
-      desc: lang === "no" ? "1 beregning · maks 6 bilder" : "1 estimate · maximum 6 photos",
-      features: lang === "no" ? ["Romvis sortering", "Totalvolum", "Delbar rapport"] : ["Room grouping", "Total volume", "Shareable report"],
-      priceId: null,
-    },
-    {
       name: lang === "no" ? "Én beregning" : "Single estimate",
       price: "129",
       desc: lang === "no" ? "For én flytting" : "For one move",
@@ -109,8 +102,8 @@ function Pricing() {
             <h2 className="text-2xl font-bold">{t("price.private")}</h2>
           </div>
           <div className="mt-7 grid gap-6 md:grid-cols-3">
-            {privatePlans.map((plan, index) => (
-              <div key={plan.name} className={cn("card-soft flex flex-col p-7", index === 1 && "border-primary shadow-[var(--shadow-lift)]")}>
+            {privatePlans.map((plan) => (
+              <div key={plan.name} className={cn("card-soft flex flex-col p-7", plan.priceId === "volumcalc_single_estimate_nok" && "border-primary shadow-[var(--shadow-lift)]")}>
                 <h3 className="text-lg font-semibold">{plan.name}</h3>
                 <p className="mt-4 text-3xl font-bold">{plan.price} <span className="text-base font-medium text-muted-foreground">NOK</span></p>
                 <p className="mt-1 text-sm text-muted-foreground">{plan.desc}</p>
@@ -118,7 +111,7 @@ function Pricing() {
                   {plan.features.map((feature) => <li key={feature} className="flex gap-2"><Check className="mt-0.5 size-4 text-success" />{feature}</li>)}
                 </ul>
                 {plan.priceId ? (
-                  <Button className="mt-8" variant={index === 1 ? "default" : "outline"} onClick={() => setCheckout({ priceId: plan.priceId, name: plan.name })}>
+                  <Button className="mt-8" variant={plan.priceId === "volumcalc_single_estimate_nok" ? "default" : "outline"} onClick={() => setCheckout({ priceId: plan.priceId, name: plan.name })}>
                     <LockKeyhole className="size-4" />
                     {t("payment.buy")}
                   </Button>
