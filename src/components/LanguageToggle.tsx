@@ -1,32 +1,75 @@
+import { useState, useRef, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-// Vi lager en liste med språk, tilhørende flagg og visningsnavn
 const languages = [
-  { code: "no", flag: "🇳🇴", label: "NO" },
-  { code: "en", flag: "🇬🇧", label: "EN" },
-  { code: "pl", flag: "🇵🇱", label: "PL" },
+  { code: "no", label: "NO", flagUrl: "https://flagcdn.com" },
+  { code: "en", label: "GB", flagUrl: "https://flagcdn.com" },
+  { code: "pl", label: "PL", flagUrl: "https://flagcdn.com" },
 ] as const;
 
 export function LanguageToggle({ className }: { className?: string }) {
   const { lang, setLang } = useI18n();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const currentLang = languages.find((l) => l.code === lang) || languages[0];
 
   return (
-    <div className={cn("no-print flex items-center rounded-full border border-border p-0.5 text-xs bg-white shadow-sm", className)}>
-      {languages.map(({ code, flag, label }) => (
-        <button
-          key={code}
-          type="button"
-          onClick={() => setLang(code as any)} // Tvinger type her i tilfelle i18n-biblioteket må oppdateres etterpå
-          className={cn(
-            "flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium transition-colors",
-            lang === code ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
-          )}
-        >
-          <span>{flag}</span>
-          <span className="uppercase">{label}</span>
-        </button>
-      ))}
+    <div ref={dropdownRef} className={cn("no-print relative inline-block text-left z-50", className)}>
+      {/* Hovedknapp - Lyst design som matcher VolumCalc-headeren */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all"
+      >
+        <img 
+          src={currentLang.flagUrl} 
+          alt={currentLang.label} 
+          className="h-4 w-4 rounded-full object-cover border border-gray-100" 
+        />
+        <span className="text-xs font-bold tracking-wider text-gray-700">{currentLang.label}</span>
+        <svg className={cn("h-3 w-3 text-gray-400 transition-transform duration-200", isOpen && "rotate-180")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Rullegardinliste - Lys bakgrunn */}
+      {isOpen && (
+        <div className="absolute right-0 mt-1 w-28 origin-top-right rounded-xl border border-gray-100 bg-white p-1 shadow-lg ring-1 ring-black/5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+          {languages.map((item) => (
+            <button
+              key={item.code}
+              type="button"
+              onClick={() => {
+                setLang(item.code as any);
+                setIsOpen(false);
+              }}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm transition-colors hover:bg-gray-50",
+                lang === item.code ? "bg-gray-100 font-semibold text-gray-900" : "text-gray-600"
+              )}
+            >
+              <img 
+                src={item.flagUrl} 
+                alt={item.label} 
+                className="h-4 w-4 rounded-full object-cover border border-gray-100" 
+              />
+              <span className="text-xs font-bold tracking-wider">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
