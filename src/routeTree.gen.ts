@@ -16,6 +16,7 @@ import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DatabehandlingRouteImport } from './routes/databehandling'
 import { Route as DemoRouteImport } from './routes/demo'
+import { Route as DkRouteImport } from './routes/dk'
 import { Route as FlyttebilKalkulatorRouteImport } from './routes/flyttebil-kalkulator'
 import { Route as HjelpRouteImport } from './routes/hjelp'
 import { Route as KjopsvilkarRouteImport } from './routes/kjopsvilkar'
@@ -68,6 +69,11 @@ const DatabehandlingRoute = DatabehandlingRouteImport.update({
 const DemoRoute = DemoRouteImport.update({
   id: '/demo',
   path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DkRoute = DkRouteImport.update({
+  id: '/dk',
+  path: '/dk',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FlyttebilKalkulatorRoute = FlyttebilKalkulatorRouteImport.update({
@@ -169,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/databehandling': typeof DatabehandlingRoute
   '/demo': typeof DemoRoute
+  '/dk': typeof DkRoute
   '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
   '/hjelp': typeof HjelpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/cookies': typeof CookiesRoute
   '/databehandling': typeof DatabehandlingRoute
   '/demo': typeof DemoRoute
+  '/dk': typeof DkRoute
   '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
   '/hjelp': typeof HjelpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
@@ -223,6 +231,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/databehandling': typeof DatabehandlingRoute
   '/demo': typeof DemoRoute
+  '/dk': typeof DkRoute
   '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
   '/hjelp': typeof HjelpRoute
   '/kjopsvilkar': typeof KjopsvilkarRoute
@@ -252,6 +261,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/databehandling'
     | '/demo'
+    | '/dk'
     | '/flyttebil-kalkulator'
     | '/hjelp'
     | '/kjopsvilkar'
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/databehandling'
     | '/demo'
+    | '/dk'
     | '/flyttebil-kalkulator'
     | '/hjelp'
     | '/kjopsvilkar'
@@ -305,6 +316,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/databehandling'
     | '/demo'
+    | '/dk'
     | '/flyttebil-kalkulator'
     | '/hjelp'
     | '/kjopsvilkar'
@@ -333,6 +345,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   DatabehandlingRoute: typeof DatabehandlingRoute
   DemoRoute: typeof DemoRoute
+  DkRoute: typeof DkRoute
   FlyttebilKalkulatorRoute: typeof FlyttebilKalkulatorRoute
   HjelpRoute: typeof HjelpRoute
   KjopsvilkarRoute: typeof KjopsvilkarRoute
@@ -399,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/demo'
       fullPath: '/demo'
       preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dk': {
+      id: '/dk'
+      path: '/dk'
+      fullPath: '/dk'
+      preLoaderRoute: typeof DkRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/flyttebil-kalkulator': {
@@ -554,6 +574,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   DatabehandlingRoute: DatabehandlingRoute,
   DemoRoute: DemoRoute,
+  DkRoute: DkRoute,
   FlyttebilKalkulatorRoute: FlyttebilKalkulatorRoute,
   HjelpRoute: HjelpRoute,
   KjopsvilkarRoute: KjopsvilkarRoute,
