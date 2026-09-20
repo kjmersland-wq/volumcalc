@@ -198,7 +198,7 @@ function EstimatePage() {
 
   const patchItem = useMutation({
     mutationFn: async ({ item, patch }: { item: Item; patch: Partial<Item> }) => {
-      const payload: Record<string, unknown> = { ...patch };
+      const payload: TablesUpdate<"estimate_items"> = { ...patch };
       if (
         patch.length_cm !== undefined ||
         patch.width_cm !== undefined ||
