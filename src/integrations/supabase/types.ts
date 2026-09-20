@@ -24,11 +24,13 @@ export type Database = {
           currency: string
           default_language: string
           id: string
+          is_demo: boolean
           logo_url: string | null
           org_number: string | null
           phone: string | null
           price_per_m3: number
           updated_at: string
+          upload_token: string
           website: string | null
         }
         Insert: {
@@ -40,11 +42,13 @@ export type Database = {
           currency?: string
           default_language?: string
           id: string
+          is_demo?: boolean
           logo_url?: string | null
           org_number?: string | null
           phone?: string | null
           price_per_m3?: number
           updated_at?: string
+          upload_token?: string
           website?: string | null
         }
         Update: {
@@ -56,11 +60,13 @@ export type Database = {
           currency?: string
           default_language?: string
           id?: string
+          is_demo?: boolean
           logo_url?: string | null
           org_number?: string | null
           phone?: string | null
           price_per_m3?: number
           updated_at?: string
+          upload_token?: string
           website?: string | null
         }
         Relationships: []

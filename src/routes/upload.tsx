@@ -9,15 +9,21 @@ import { Label } from "@/components/ui/label";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useI18n } from "@/lib/i18n";
+import { useQuery } from "@tanstack/react-query";
 import { createEstimate } from "@/lib/estimates.functions";
+import { getCompanyByUploadToken } from "@/lib/admin.functions";
 import { blobToDataUrl, compressImage } from "@/lib/images";
 import { useUnlimitedPhotos } from "@/hooks/useCompany";
 
 export const Route = createFileRoute("/upload")({
   staticData: { sitemap: true },
-  validateSearch: (search: Record<string, unknown>): { c?: string } => {
+  validateSearch: (search: Record<string, unknown>): { c?: string; k?: string } => {
     const c = search['c'];
-    return typeof c === "string" && c ? { c } : {};
+    const k = search['k'];
+    return {
+      ...(typeof c === "string" && c ? { c } : {}),
+      ...(typeof k === "string" && k ? { k } : {}),
+    };
   },
   head: () => ({
     meta: [
@@ -45,7 +51,13 @@ function UploadPage() {
   const navigate = useNavigate();
   const submitEstimate = useServerFn(createEstimate);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { c: companyId } = Route.useSearch();
+  const { c: companyId, k: companyToken } = Route.useSearch();
+  const brandingFn = useServerFn(getCompanyByUploadToken);
+  const { data: branding } = useQuery({
+    queryKey: ["upload-branding", companyToken],
+    enabled: Boolean(companyToken),
+    queryFn: () => brandingFn({ data: { token: companyToken! } }),
+  });
   const unlimited = useUnlimitedPhotos();
   const maxPhotos = unlimited ? Infinity : 20;
 
@@ -94,6 +106,7 @@ function UploadPage() {
           ...(form.date ? { move_date: form.date } : {}),
           ...(form.address.trim() ? { address: form.address.trim() } : {}),
           ...(companyId ? { company_id: companyId } : {}),
+          ...(companyToken ? { company_token: companyToken } : {}),
         },
       });
 
@@ -118,6 +131,24 @@ function UploadPage() {
       <SiteHeader />
       <main className="flex-1">
         <div className="mx-auto max-w-3xl px-4 py-12">
+          {branding && (
+            <div className="mb-6 flex items-center gap-3 rounded-xl border border-border bg-card p-4">
+              {branding.logo_url ? (
+                <img src={branding.logo_url} alt="" className="h-10 w-auto max-w-32 object-contain" />
+              ) : (
+                <span
+                  className="flex size-10 items-center justify-center rounded-xl text-sm font-bold text-white"
+                  style={{ backgroundColor: branding.brand_color }}
+                >
+                  {branding.company_name.slice(0, 1).toUpperCase()}
+                </span>
+              )}
+              <div className="text-sm">
+                <p className="text-muted-foreground">{t("upload.forCompany")}</p>
+                <p className="font-semibold">{branding.company_name}</p>
+              </div>
+            </div>
+          )}
           <h1 className="text-3xl font-bold sm:text-4xl">{t("upload.title")}</h1>
           <p className="mt-3 text-muted-foreground">{t("upload.sub")}</p>
 

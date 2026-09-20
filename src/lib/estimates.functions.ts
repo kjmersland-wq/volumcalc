@@ -11,6 +11,7 @@ const createSchema = z.object({
   move_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   address: z.string().trim().max(240).optional(),
   company_id: z.string().uuid().optional(),
+  company_token: z.string().trim().min(8).max(64).regex(/^[a-f0-9]+$/i).optional(),
 });
 
 const sharedSchema = z.object({
@@ -41,7 +42,15 @@ export const createEstimate = createServerFn({ method: "POST" })
     // A company-specific upload link attributes the estimate to that company so
     // it lands in their dashboard; otherwise it stays unattributed.
     let companyId: string | null = null;
-    if (data.company_id) {
+    if (data.company_token) {
+      const { data: company } = await supabaseAdmin
+        .from("companies")
+        .select("id")
+        .eq("upload_token", data.company_token)
+        .maybeSingle();
+      companyId = company?.id ?? null;
+    }
+    if (!companyId && data.company_id) {
       const { data: company } = await supabaseAdmin
         .from("companies")
         .select("id")
