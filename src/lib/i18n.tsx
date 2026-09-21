@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { extraTranslations } from "./i18n.translations";
+import { localizedTranslations } from "./i18n.more";
 
 export type Lang =
   "no" | "en" | "sv" | "da" | "fi" | "de" | "nl" | "fr" | "pl" | "es" | "it" | "pt";
@@ -49,7 +50,7 @@ export const dict: Dict = {
     en: "Usually within one business day",
   },
   "contact.aside": {
-    no: "Er du flyttebyrå og vil teste VolumCalc med egne bilder? Nevn det i meldingen, så setter vi opp en gratis prøvekonto.",
+    no: "Er du flyttebyrå og vil teste VolumCalc med egen video- og sjekklisteflyt? Nevn det i meldingen, så setter vi opp en gratis prøvekonto.",
     en: "Running a moving company and want to test VolumCalc with your own video + checklist flow? Mention it and we will set up a free trial account.",
   },
   "contact.homeTitle": { no: "Har du spørsmål?", en: "Got a question?" },
@@ -103,7 +104,7 @@ export const dict: Dict = {
   "feat.title": { no: "Bygget for flyttebransjen", en: "Built for the moving industry" },
   "feat.1t": { no: "Nøyaktige kubikkmål", en: "Accurate cubic volume" },
   "feat.1d": {
-    no: "Realistiske standardmål per møbeltype, justert etter det AI-en ser på bildet.",
+    no: "Realistiske standardmål per møbeltype i en strukturert, romvis sjekkliste.",
     en: "Realistic reference dimensions per furniture type in a structured, room-by-room checklist.",
   },
   "feat.2t": { no: "Sikkerhetsgrad", en: "User-verified list" },
@@ -139,7 +140,7 @@ export const dict: Dict = {
   "upload.guideTitle": { no: "Slik gjør vi det sammen", en: "How it works" },
   "upload.guide": {
     no: "Slik gjør vi det sammen: Velg rommet du står i nå, og ta en rolig og behagelig runde med kameraet. Du har kjempegod tid og filmer helt i ditt eget tempo. Du trenger ikke å tenke på opptelling underveis – det fikser vi sammen på sjekklisten etterpå!",
-    en: "Choose the room you’re in and take a steady 15-second sweep on your phone. Afterwards, you can go through the checklist in peace and quiet.",
+    en: "Choose the room you’re in and take a steady, relaxed sweep on your phone. Afterwards, you can go through the checklist in peace and quiet.",
   },
   "upload.drop": {
     no: "Trykk her for å velge rom før du starter den koselige videorunden på mobilen din",
@@ -158,7 +159,7 @@ export const dict: Dict = {
     no: "Stopp filming og se sjekklisten",
     en: "Stop filming and view checklist",
   },
-  "upload.photos": { no: "bilder valgt", en: "items selected" },
+  "upload.photos": { no: "gjenstander valgt", en: "items selected" },
   "upload.details": { no: "Kontaktinformasjon (valgfritt)", en: "Contact details (optional)" },
   "upload.name": { no: "Navn", en: "Name" },
   "upload.phone": { no: "Telefon", en: "Phone" },
@@ -190,9 +191,21 @@ export const dict: Dict = {
     en: "The video + checklist flow is temporarily unavailable. Please try again shortly.",
   },
   "upload.aiBusy": {
-    no: "AI-tjenesten er travel akkurat nå. Prøv igjen om litt.",
+    no: "Tjenesten er travel akkurat nå. Prøv igjen om litt.",
     en: "The service is busy right now. Please try again shortly.",
   },
+  "upload.cameraUnsupported": {
+    no: "Det ser ut til at nettleseren din ikke støtter kamerabruk ennå.",
+    en: "Looks like your browser doesn’t support camera recording just yet.",
+  },
+  "upload.cameraFailed": {
+    no: "Vi fikk ikke startet kameraet akkurat nå — prøv gjerne én gang til.",
+    en: "We couldn’t start your camera just now — please try once more.",
+  },
+  "upload.cameraReady": { no: "Gjør kameraet klart …", en: "Getting your camera ready …" },
+  "upload.savingBusy": { no: "Lagrer beregningen din …", en: "Saving your estimate …" },
+  "upload.decreaseQty": { no: "Reduser antall", en: "Decrease quantity" },
+  "upload.increaseQty": { no: "Øk antall", en: "Increase quantity" },
 
   "res.title": { no: "Volumberegning", en: "Volume estimate" },
   "res.total": { no: "Totalt volum", en: "Total volume" },
@@ -205,7 +218,7 @@ export const dict: Dict = {
   "res.pdf": { no: "Last ned PDF", en: "Download PDF" },
   "res.share": { no: "Kopier delingslenke", en: "Copy share link" },
   "res.copied": { no: "Lenke kopiert", en: "Link copied" },
-  "res.photos": { no: "Bilder", en: "Photos" },
+  "res.photos": { no: "Registrering", en: "Photos" },
   "res.room": { no: "Rom", en: "Room" },
   "res.renameRoom": { no: "Gi rommet nytt navn", en: "Rename room" },
   "res.moveRoom": { no: "Flytt til rom", en: "Move to room" },
@@ -236,6 +249,7 @@ export const dict: Dict = {
   "auth.password": { no: "Passord", en: "Password" },
   "auth.company": { no: "Firmanavn", en: "Company name" },
   "auth.google": { no: "Fortsett med Google", en: "Continue with Google" },
+  "auth.or": { no: "eller", en: "or" },
   "auth.toSignup": { no: "Har du ikke konto? Opprett en", en: "No account? Create one" },
   "auth.toSignin": {
     no: "Har du allerede konto? Logg inn",
@@ -265,7 +279,7 @@ export const dict: Dict = {
   "dash.pending": { no: "Til gjennomgang", en: "Pending review" },
   "dash.saveItem": { no: "Lagre", en: "Save" },
   "dash.deleteItem": { no: "Slett", en: "Delete" },
-  "dash.editing": { no: "Rediger AI-resultatet", en: "Edit the checklist result" },
+  "dash.editing": { no: "Rediger sjekklistens resultat", en: "Edit the checklist result" },
 
   "set.title": { no: "Firmaprofil", en: "Company profile" },
   "set.name": { no: "Firmanavn", en: "Company name" },
@@ -534,6 +548,8 @@ export const dict: Dict = {
     en: "Purchase terms and right of withdrawal",
   },
   "footer.about": { no: "Om oss", en: "About us" },
+  "footer.inventoryGuide": { no: "Inventarliste-guide", en: "Inventory guide" },
+  "footer.vanCalculator": { no: "Flyttebil-kalkulator", en: "Van calculator" },
   "footer.builtBy": {
     no: "Utviklet og drevet av KM TECH LABS i Kristiansand, Norge · Org.nr. 934 044 029",
     en: "Developed and operated by KM TECH LABS in Kristiansand, Norway · Company no. 934 044 029",
@@ -624,10 +640,7 @@ export function translate(key: string, lang: Lang): string {
   const entry = dict[key];
   if (!entry) return key;
   if (lang === "no" || lang === "en") return entry[lang];
-  if (lang === "sv" || lang === "da" || lang === "pl") {
-    return extraTranslations[lang]?.[key] ?? entry.en;
-  }
-  return entry.en;
+  return localizedTranslations[lang]?.[key] ?? extraTranslations[(lang as "sv" | "da" | "pl")]?.[key] ?? entry.en;
 }
 
 export function useI18n() {

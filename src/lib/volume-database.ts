@@ -1,3 +1,5 @@
+import type { Lang } from "./i18n";
+
 export type VolumeRoom = "Office" | "Living room" | "Hallway" | "Garage" | "Bedroom";
 
 export type VolumeDatabaseItem = {
@@ -12,6 +14,60 @@ export type VolumeDatabaseItem = {
 };
 
 export const USER_VERIFIED_SECURITY_LABEL = "100% (Brukerverifisert)";
+
+const ROOM_LABELS: Record<VolumeRoom, Partial<Record<Lang, string>>> = {
+  Office: { no: "Kontor", sv: "Kontor", da: "Kontor", fi: "Työhuone", de: "Arbeitszimmer", nl: "Kantoor", fr: "Bureau", pl: "Biuro", es: "Despacho", it: "Studio", pt: "Escritório" },
+  "Living room": { no: "Stue", sv: "Vardagsrum", da: "Stue", fi: "Olohuone", de: "Wohnzimmer", nl: "Woonkamer", fr: "Salon", pl: "Salon", es: "Salón", it: "Soggiorno", pt: "Sala de estar" },
+  Hallway: { no: "Gang", sv: "Hall", da: "Gang", fi: "Eteinen", de: "Flur", nl: "Hal", fr: "Entrée", pl: "Przedpokój", es: "Pasillo", it: "Ingresso", pt: "Corredor" },
+  Garage: { no: "Garasje", sv: "Garage", da: "Garage", fi: "Autotalli", de: "Garage", nl: "Garage", fr: "Garage", pl: "Garaż", es: "Garaje", it: "Garage", pt: "Garagem" },
+  Bedroom: { no: "Soverom", sv: "Sovrum", da: "Soveværelse", fi: "Makuuhuone", de: "Schlafzimmer", nl: "Slaapkamer", fr: "Chambre", pl: "Sypialnia", es: "Dormitorio", it: "Camera da letto", pt: "Quarto" },
+};
+
+const ITEM_LABELS: Record<string, Partial<Record<Lang, string>>> = {
+  "office-chair-high-back": { no: "Kontorstol med høy rygg", sv: "Kontorsstol med hög rygg", da: "Kontorstol med høj ryg", fi: "Korkeaselkäinen toimistotuoli", de: "Bürostuhl mit hoher Rückenlehne", nl: "Bureaustoel met hoge rug", fr: "Chaise de bureau à haut dossier", pl: "Krzesło biurowe z wysokim oparciem", es: "Silla de oficina con respaldo alto", it: "Sedia da ufficio con schienale alto", pt: "Cadeira de escritório com encosto alto" },
+  "small-computer-desk": { no: "Lite databord", sv: "Litet skrivbord", da: "Lille skrivebord", fi: "Pieni työpöytä", de: "Kleiner Schreibtisch", nl: "Klein bureau", fr: "Petit bureau", pl: "Małe biurko komputerowe", es: "Escritorio pequeño", it: "Piccola scrivania", pt: "Secretária pequena" },
+  "electric-guitar": { no: "Elektrisk gitar", sv: "Elgitarr", da: "Elektrisk guitar", fi: "Sähkökitara", de: "E-Gitarre", nl: "Elektrische gitaar", fr: "Guitare électrique", pl: "Gitara elektryczna", es: "Guitarra eléctrica", it: "Chitarra elettrica", pt: "Guitarra elétrica" },
+  "corner-sofa": { no: "Hjørnesofa", sv: "Hörnsoffa", da: "Hjørnesofa", fi: "Kulmasohva", de: "Ecksofa", nl: "Hoekbank", fr: "Canapé d’angle", pl: "Sofa narożna", es: "Sofá rinconero", it: "Divano angolare", pt: "Sofá de canto" },
+  "antique-armchair": { no: "Antikk lenestol", sv: "Antik fåtölj", da: "Antik lænestol", fi: "Antiikkinen nojatuoli", de: "Antiker Sessel", nl: "Antieke fauteuil", fr: "Fauteuil ancien", pl: "Antyczny fotel", es: "Sillón antiguo", it: "Poltrona antica", pt: "Poltrona antiga" },
+  "coffee-table": { no: "Salongbord", sv: "Soffbord", da: "Sofabord", fi: "Sohvapöytä", de: "Couchtisch", nl: "Salontafel", fr: "Table basse", pl: "Stolik kawowy", es: "Mesa de centro", it: "Tavolino da salotto", pt: "Mesa de centro" },
+  "large-tv": { no: "Stor TV", sv: "Stor TV", da: "Stort tv", fi: "Suuri televisio", de: "Großer Fernseher", nl: "Grote tv", fr: "Grand téléviseur", pl: "Duży telewizor", es: "Televisor grande", it: "Televisore grande", pt: "Televisão grande" },
+  "white-dresser": { no: "Hvit kommode", sv: "Vit byrå", da: "Hvid kommode", fi: "Valkoinen lipasto", de: "Weiße Kommode", nl: "Witte ladekast", fr: "Commode blanche", pl: "Biała komoda", es: "Cómoda blanca", it: "Comò bianco", pt: "Cómoda branca" },
+  "free-standing-coat-rack": { no: "Frittstående stumtjener", sv: "Fristående klädhängare", da: "Fritstående stumtjener", fi: "Vapaasti seisova naulakko", de: "Freistehender Kleiderständer", nl: "Vrijstaande kapstok", fr: "Porte-manteau sur pied", pl: "Wolnostojący wieszak", es: "Perchero de pie", it: "Appendiabiti da terra", pt: "Cabide de pé" },
+  "filled-cardboard-box": { no: "Fylt pappeske", sv: "Fylld kartong", da: "Fyldt papkasse", fi: "Täytetty pahvilaatikko", de: "Gefüllter Umzugskarton", nl: "Gevulde kartonnen doos", fr: "Carton rempli", pl: "Wypełnione pudło kartonowe", es: "Caja de cartón llena", it: "Scatolone pieno", pt: "Caixa de cartão cheia" },
+  "bedding-bags": { no: "Sengetøy i poser", sv: "Sängkläder i säckar", da: "Sengelinned i poser", fi: "Vuodevaatteet pusseissa", de: "Bettwäsche in Säcken", nl: "Beddengoed in zakken", fr: "Linge de lit en sacs", pl: "Pościel w workach", es: "Ropa de cama en bolsas", it: "Biancheria da letto in sacchi", pt: "Roupa de cama em sacos" },
+  "moving-box": { no: "Flytteeske", sv: "Flyttkartong", da: "Flyttekasse", fi: "Muuttolaatikko", de: "Umzugskarton", nl: "Verhuisdoos", fr: "Carton de déménagement", pl: "Karton przeprowadzkowy", es: "Caja de mudanza", it: "Scatolone da trasloco", pt: "Caixa de mudança" },
+  "car-wheel": { no: "Bilhjul", sv: "Bilhjul", da: "Bilhjul", fi: "Autonrengas", de: "Autoreifen", nl: "Autowiel", fr: "Roue de voiture", pl: "Koło samochodowe", es: "Rueda de coche", it: "Ruota dell’auto", pt: "Roda de carro" },
+  "double-frame-bed": { no: "Dobbel rammeseng", sv: "Dubbelsäng med ram", da: "Dobbeltseng med ramme", fi: "Parivuoderunko", de: "Doppelbettgestell", nl: "Tweepersoons bedframe", fr: "Cadre de lit double", pl: "Rama łóżka dwuosobowego", es: "Estructura de cama doble", it: "Struttura letto matrimoniale", pt: "Estrutura de cama de casal" },
+  "wide-dresser": { no: "Bred kommode", sv: "Bred byrå", da: "Bred kommode", fi: "Leveä lipasto", de: "Breite Kommode", nl: "Brede ladekast", fr: "Grande commode", pl: "Szeroka komoda", es: "Cómoda ancha", it: "Comò largo", pt: "Cómoda larga" },
+};
+
+const USER_VERIFIED_SECURITY_LABELS: Partial<Record<Lang, string>> = {
+  no: "100 % (Brukerverifisert)",
+  en: "100% (User verified)",
+  sv: "100 % (Användarverifierad)",
+  da: "100 % (Brugerverificeret)",
+  fi: "100 % (Käyttäjän vahvistama)",
+  de: "100 % (Vom Nutzer bestätigt)",
+  nl: "100% (Door gebruiker bevestigd)",
+  fr: "100 % (Vérifié par l’utilisateur)",
+  pl: "100% (Zweryfikowane przez użytkownika)",
+  es: "100 % (Verificado por el usuario)",
+  it: "100% (Verificato dall’utente)",
+  pt: "100% (Verificado pelo utilizador)",
+};
+
+export function getRoomLabel(room: VolumeRoom, lang: Lang) {
+  return ROOM_LABELS[room][lang] ?? room;
+}
+
+export function getItemLabel(item: Pick<VolumeDatabaseItem, "key" | "name" | "name_no">, lang: Lang) {
+  if (lang === "no") return item.name_no;
+  return ITEM_LABELS[item.key]?.[lang] ?? item.name;
+}
+
+export function getUserVerifiedSecurityLabel(lang: Lang) {
+  return USER_VERIFIED_SECURITY_LABELS[lang] ?? USER_VERIFIED_SECURITY_LABEL;
+}
 
 export const VOLUME_DATABASE: Record<VolumeRoom, VolumeDatabaseItem[]> = {
   Office: [

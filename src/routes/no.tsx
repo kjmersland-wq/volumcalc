@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LanguageLanding } from "@/components/LanguageLanding";
 
-const TITLE = "VolumCalc — volumberegning fra bilder (m³)";
+const TITLE = "VolumCalc — volumberegning fra romvideo";
 const DESC =
-  "Last opp bilder av rommene, og få en romvis volumberegning i kubikkmeter til flyttetilbud og bilvalg.";
+  "Film rommene i ro og mak, gå gjennom en stressfri sjekkliste etterpå, og få en tydelig volumberegning rom for rom.";
 
 export const Route = createFileRoute("/no")({
   staticData: { sitemap: true },

@@ -23,26 +23,26 @@ const content: Record<
   no: {
     title: "Hjelp og ofte stilte spørsmål",
     intro:
-      "Alt du trenger for å komme i gang med VolumCalc – fra fotografering til ferdig rapport, pakking, lagring og deling.",
+      "Alt du trenger for å komme i gang med VolumCalc – fra romvideo og rolig sjekkliste til ferdig rapport, pakking, lagring og deling.",
     ctaTitle: "Fant du ikke svaret?",
     ctaText: "Send oss noen ord, så svarer vi vanligvis innen én virkedag.",
     cta: "Start en gratis beregning",
     contact: "Kontakt oss",
     groups: [
       {
-        heading: "Fotografering",
+        heading: "Romvideo",
         items: [
           {
-            q: "Hvor mange bilder bør jeg ta?",
-            a: "Ta 1–3 bilder per rom: ett oversiktsbilde av hele rommet, pluss 1–2 nærbilder av de største møblene. Du trenger ikke fotografere hver minste gjenstand. Maks 20 bilder per beregning.",
+            q: "Hvor lenge bør jeg filme hvert rom?",
+            a: "Ta en rolig runde gjennom rommet i ditt eget tempo, slik at de viktigste møblene kommer tydelig med. Du trenger ikke nærbilder av hver minste ting, siden du bekrefter innholdet i sjekklisten etterpå.",
           },
           {
             q: "Hva gir best resultat?",
-            a: "Godt lys, ryddige flater og bilder tatt fra døråpningen slik at hele rommet kommer med. Ta bildene i liggende format hvis du kan.",
+            a: "Godt lys, ryddige flater og en jevn kamerarunde fra døråpningen, slik at hele rommet kommer med. Hold mobilen stødig og ta den tiden du trenger.",
           },
           {
-            q: "Må jeg fotografere skap og skuffer innvendig?",
-            a: "Nei. Innholdet i skap og skuffer regnes normalt inn i flyttekasser. Skriv heller antall kasser som merknad i rapporten.",
+            q: "Må jeg filme inni skap og skuffer?",
+            a: "Nei. Innholdet regnes vanligvis som flyttekasser, så du kan heller bekrefte antall i sjekklisten etter at du er ferdig med videoen.",
           },
         ],
       },
@@ -50,16 +50,16 @@ const content: Record<
         heading: "Rom og redigering",
         items: [
           {
-            q: "Hvordan sorteres bildene i rom?",
-            a: "AI-en grupperer gjenstandene automatisk i rom som stue, kjøkken, soverom, bad, gang, kontor, garasje og annet.",
+            q: "Hvordan havner tingene i riktig rom?",
+            a: "Du velger rommet før du filmer, og går deretter gjennom en sjekkliste som er tilpasset akkurat det rommet.",
           },
           {
             q: "Kan jeg endre navn på rom og flytte ting?",
             a: "Ja. I rapporten kan du gi rom nytt navn, flytte en gjenstand til et annet rom, endre antall og mål, legge til merknader og merke ting som skjøre, tunge, til demontering eller som ikke skal være med.",
           },
           {
-            q: "Hva om AI-en bommer på noe?",
-            a: "Hver gjenstand har en sikkerhetsgrad i prosent. Gå gjennom det som har lav sikkerhet og juster målene – totalvolumet oppdateres med én gang.",
+            q: "Hva om noe mangler eller blir feil?",
+            a: "Ingen fare — juster antall direkte i sjekklisten. Totalene oppdateres med én gang, så du får ryddet opp på et øyeblikk.",
           },
         ],
       },
@@ -132,7 +132,7 @@ const content: Record<
           },
           {
             q: "Hva skjer med bildene mine?",
-            a: "Bildene ligger i et lukket lager og er ikke offentlige. De brukes ikke til å trene AI-modeller, og slettes senest 12 måneder etter siste aktivitet. Du kan be om sletting når som helst på kjell@volumcalc.com.",
+            a: "Romvideoen din oppbevares privat i et lukket lager og brukes ikke til å trene AI-modeller. Den slettes senest 12 måneder etter siste aktivitet, og du kan når som helst be om raskere sletting på kjell@volumcalc.com.",
           },
         ],
       },
@@ -152,7 +152,7 @@ const content: Record<
         items: [
           {
             q: "How long should each room video be?",
-            a: "A gentle 15-second sweep per room is usually spot on, so the main furniture is clearly visible. No need for close-ups of every little thing, as you’ll confirm items in the checklist afterwards.",
+            a: "A gentle sweep of each room at your own pace is usually perfect, so the main furniture is clearly visible. No need for close-ups of every little thing, as you’ll confirm items in the checklist afterwards.",
           },
           {
             q: "What gives the best result?",

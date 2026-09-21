@@ -13,8 +13,10 @@ import { useQuery } from "@tanstack/react-query";
 import { createEstimate } from "@/lib/estimates.functions";
 import { getCompanyByUploadToken } from "@/lib/admin.functions";
 import {
-  USER_VERIFIED_SECURITY_LABEL,
   VOLUME_DATABASE,
+  getItemLabel,
+  getRoomLabel,
+  getUserVerifiedSecurityLabel,
   type VolumeRoom,
 } from "@/lib/volume-database";
 import { recommendedVolume } from "@/lib/volume";
@@ -54,14 +56,6 @@ type Stage = "idle" | "saving";
 type QuantityByRoom = Record<VolumeRoom, Record<string, number>>;
 
 const ROOMS = Object.keys(VOLUME_DATABASE) as VolumeRoom[];
-const ROOM_LABELS: Record<VolumeRoom, string> = {
-  Office: "Office",
-  "Living room": "Living room",
-  Hallway: "Hallway",
-  Garage: "Garage",
-  Bedroom: "Bedroom",
-};
-
 function createInitialQuantities(): QuantityByRoom {
   return ROOMS.reduce(
     (acc, room) => ({
@@ -106,7 +100,7 @@ function UploadPage() {
         if (!navigator.mediaDevices?.getUserMedia) {
           setRecording(false);
           setCameraReady(true);
-          toast.error("Looks like your browser doesn’t support camera recording just yet.");
+          toast.error(t("upload.cameraUnsupported"));
           return;
         }
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -122,7 +116,7 @@ function UploadPage() {
         setRecording(true);
         setCameraReady(true);
       } catch {
-        toast.error("We couldn’t start your camera just now — please try once more.");
+        toast.error(t("upload.cameraFailed"));
         setRecording(false);
         setCameraReady(true);
       }
@@ -246,7 +240,7 @@ function UploadPage() {
 
           <h1 className="text-3xl font-bold sm:text-4xl">{t("upload.title")}</h1>
           <p className="mt-3 text-muted-foreground">
-            {t("upload.sub")} {t("upload.securityLabel")}: {USER_VERIFIED_SECURITY_LABEL}.
+            {t("upload.sub")} {t("upload.securityLabel")}: {getUserVerifiedSecurityLabel(lang)}.
           </p>
 
           {!cameraReady ? (
@@ -256,7 +250,7 @@ function UploadPage() {
               aria-live="polite"
             >
               <Loader2 className="size-5 animate-spin text-primary" />
-              <span className="text-sm text-muted-foreground">Getting your camera ready …</span>
+              <span className="text-sm text-muted-foreground">{t("upload.cameraReady")}</span>
             </div>
           ) : recording ? (
             <div className="mt-6 space-y-4">
@@ -270,7 +264,7 @@ function UploadPage() {
                 >
                   {ROOMS.map((room) => (
                     <option key={room} value={room}>
-                      {ROOM_LABELS[room]}
+                      {getRoomLabel(room, lang)}
                     </option>
                   ))}
                 </select>
@@ -306,7 +300,7 @@ function UploadPage() {
                 >
                   {ROOMS.map((room) => (
                     <option key={room} value={room}>
-                      {ROOM_LABELS[room]}
+                      {getRoomLabel(room, lang)}
                     </option>
                   ))}
                 </select>
@@ -331,7 +325,7 @@ function UploadPage() {
                       className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
                     >
                       <div>
-                        <p className="font-medium">{lang === "no" ? item.name_no : item.name}</p>
+                        <p className="font-medium">{getItemLabel(item, lang)}</p>
                         <p className="text-sm text-muted-foreground">
                           {item.length_cm}×{item.width_cm}×{item.height_cm} cm ·{" "}
                           {item.volume_m3.toFixed(2)} m³
@@ -344,7 +338,7 @@ function UploadPage() {
                           size="icon"
                           onClick={() => changeQuantity(item.key, -1)}
                           disabled={qty <= 0}
-                          aria-label={`Decrease quantity ${lang === "no" ? item.name_no : item.name}`}
+                          aria-label={`${t("upload.decreaseQty")} ${getItemLabel(item, lang)}`}
                         >
                           <Minus className="size-4" />
                         </Button>
@@ -356,7 +350,7 @@ function UploadPage() {
                           variant="outline"
                           size="icon"
                           onClick={() => changeQuantity(item.key, 1)}
-                          aria-label={`Increase quantity ${lang === "no" ? item.name_no : item.name}`}
+                          aria-label={`${t("upload.increaseQty")} ${getItemLabel(item, lang)}`}
                         >
                           <Plus className="size-4" />
                         </Button>
@@ -417,7 +411,7 @@ function UploadPage() {
 
               <Button size="lg" className="mt-8 w-full" disabled={busy} onClick={handleSubmit}>
                 {busy ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
-                {busy ? "Saving your estimate …" : t("upload.submit")}
+                {busy ? t("upload.savingBusy") : t("upload.submit")}
               </Button>
             </>
           )}

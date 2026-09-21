@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LanguageLanding } from "@/components/LanguageLanding";
 
-const TITLE = "VolumCalc — obliczanie kubatury ze zdjęć (m³)";
+const TITLE = "VolumCalc — obliczanie kubatury z nagrania pokoju";
 const DESC =
-  "Prześlij zdjęcia pomieszczeń i otrzymaj wyliczenie objętości w metrach sześciennych, pokój po pokoju.";
+  "Nagraj pokoje we własnym tempie, uzupełnij potem spokojną listę kontrolną i otrzymaj przejrzyste wyliczenie objętości pokój po pokoju.";
 
 export const Route = createFileRoute("/pl")({
   staticData: { sitemap: true },
