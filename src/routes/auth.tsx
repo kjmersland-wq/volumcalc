@@ -78,7 +78,7 @@ function AuthPage() {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
-      toast.error(t("auth.googleFailed"));
+      toast.error(result.error.message || t("auth.googleFailed"));
       return;
     }
     if (result.redirected) return;

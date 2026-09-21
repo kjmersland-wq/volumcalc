@@ -516,6 +516,7 @@ function EstimatePage() {
   const displayItemName = (item: Item) => getStoredItemLabel(item, reportLang);
   const editableItemName = (item: Item) => (lang === "no" ? item.name_no || item.name : item.name);
   const displayRoomName = (name: string) => getStoredRoomLabel(name, reportLang);
+  const editableRoomName = (name: string) => getStoredRoomLabel(name, lang);
 
   const groups = [
     ...rooms.map((room) => ({
@@ -1009,7 +1010,7 @@ function EstimatePage() {
                                 <option value="">{rt("res.other")}</option>
                                 {rooms.map((room) => (
                                   <option key={room.id} value={room.id}>
-                                    {displayRoomName(room.name)}
+                                    {editableRoomName(room.name)}
                                   </option>
                                 ))}
                               </select>
