@@ -20,6 +20,7 @@ import {
   type VolumeRoom,
 } from "@/lib/volume-database";
 import { recommendedVolume } from "@/lib/volume";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/upload")({
   staticData: { sitemap: true },
@@ -74,6 +75,7 @@ function UploadPage() {
   const navigate = useNavigate();
   const submitEstimate = useServerFn(createEstimate);
   const { c: companyId, k: companyToken } = Route.useSearch();
+  const { session } = useAuth();
   const brandingFn = useServerFn(getCompanyByUploadToken);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -194,7 +196,9 @@ function UploadPage() {
           ...(form.phone.trim() ? { customer_phone: form.phone.trim() } : {}),
           ...(form.date ? { move_date: form.date } : {}),
           ...(form.address.trim() ? { address: form.address.trim() } : {}),
-          ...(companyId ? { company_id: companyId } : {}),
+          ...(companyId ?? session?.user.id
+            ? { company_id: (companyId ?? session?.user.id) as string }
+            : {}),
           ...(companyToken ? { company_token: companyToken } : {}),
         },
       });

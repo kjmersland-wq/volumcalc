@@ -1,8 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpRight, Loader2 } from "lucide-react";
+import { ArrowUpRight, Loader2, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { m3, shortDate } from "@/lib/format";
@@ -61,6 +73,18 @@ function DashboardHome() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["quote-requests"] }),
   });
 
+  const deleteEstimate = useMutation({
+    mutationFn: async (estimateId: string) => {
+      const { error } = await supabase.from("estimates").delete().eq("id", estimateId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["estimates"] });
+      queryClient.invalidateQueries({ queryKey: ["quote-requests"] });
+    },
+    onError: () => toast.error(t("dash.deleteFailed")),
+  });
+
 
   if (isLoading) {
     return (
@@ -94,8 +118,12 @@ function DashboardHome() {
                 className="grid grid-cols-2 items-center gap-3 px-5 py-4 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:gap-4"
               >
                 <div className="col-span-2 sm:col-span-1">
-                  <p className="font-medium">{e.customer_name || `#${String(e.id).slice(0, 8).toUpperCase()}`}</p>
-                  <p className="text-xs text-muted-foreground">{e.address || e.customer_phone || ""}</p>
+                  <p className="font-medium">
+                    {e.report_title || e.customer_name || `#${String(e.id).slice(0, 8).toUpperCase()}`}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {[e.report_title ? e.customer_name : null, e.address || e.customer_phone].filter(Boolean).join(" · ")}
+                  </p>
                 </div>
                 <span className="text-sm text-muted-foreground">{shortDate(e.created_at, lang)}</span>
                 <span className="text-sm font-semibold">{m3(e.total_volume_m3)}</span>
@@ -109,12 +137,42 @@ function DashboardHome() {
                     {e.status === "approved" ? t("dash.approved") : t("dash.pending")}
                   </Badge>
                 </span>
-                <Button asChild size="sm" variant="ghost">
-                  <Link to="/estimate/$id" params={{ id: e.id }}>
-                    {t("dash.open")}
-                    <ArrowUpRight className="size-4" />
-                  </Link>
-                </Button>
+                <div className="flex items-center justify-end gap-1">
+                  <Button asChild size="sm" variant="ghost">
+                    <Link to="/estimate/$id" params={{ id: e.id }}>
+                      {t("dash.open")}
+                      <ArrowUpRight className="size-4" />
+                    </Link>
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label={t("dash.delete")}
+                        className="text-muted-foreground hover:text-destructive"
+                        disabled={deleteEstimate.isPending}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>{t("dash.deleteTitle")}</AlertDialogTitle>
+                        <AlertDialogDescription>{t("dash.deleteDesc")}</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{t("dash.cancel")}</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteEstimate.mutate(e.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          {t("dash.delete")}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </li>
             ))}
           </ul>

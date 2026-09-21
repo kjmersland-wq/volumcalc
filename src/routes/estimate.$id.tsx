@@ -35,7 +35,10 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ShareButtons } from "@/components/ShareButtons";
 import { QuoteRequestDialog } from "@/components/QuoteRequestDialog";
-import { useI18n, translate, type Lang } from "@/lib/i18n";
+import { useI18n, translate, SUPPORTED_LANGS, LANG_LABELS, type Lang } from "@/lib/i18n";
+import { reportLangs } from "@/lib/report-langs";
+import { MovePriceEstimator } from "@/components/MovePriceEstimator";
+import { MoverOutreach } from "@/components/MoverOutreach";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
@@ -150,11 +153,12 @@ function EstimatePage() {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const initialReportLang: Lang = String(lang) === "dk" ? "da" : lang;
   const [reportLang, setReportLang] = useState<Lang>(initialReportLang);
+  const [titleDraft, setTitleDraft] = useState<string | null>(null);
   const [tenderMode, setTenderMode] = useState(false);
   const [logistics, setLogistics] = useState<Logistics | null>(null);
 
   // Report labels follow the chosen report language; user-entered text is untouched.
-  const rt = (key: string) => translate(key, reportLang);
+  const rt = (key: string) => reportLangs[reportLang]?.[key] ?? translate(key, reportLang);
 
   const { data, isLoading } = useQuery({
     queryKey: ["estimate", id, session?.user.id ?? "guest"],
@@ -446,7 +450,7 @@ function EstimatePage() {
   });
 
   const saveReportSettings = useMutation({
-    mutationFn: async (patch: { report_language?: string; tender_mode?: boolean }) => {
+    mutationFn: async (patch: TablesUpdate<"estimates">) => {
       const { error } = await supabase.from("estimates").update(patch).eq("id", id);
       if (error) throw error;
     },
@@ -496,6 +500,10 @@ function EstimatePage() {
   const canEdit = Boolean(session) && !unclaimed;
   const businessView = canEdit && view === "business";
   const shareToken = (estimate.share_token as string | undefined) ?? token;
+  const reportTitle =
+    ((estimate as Record<string, unknown>)["report_title"] as string | null) ||
+    estimate.customer_name ||
+    rt("res.title");
 
   const statusKey =
     estimate.status === "approved"
@@ -617,9 +625,45 @@ function EstimatePage() {
                   {rt(statusKey)}
                 </Badge>
               </div>
-              <h1 className="mt-1 text-3xl font-bold tracking-tight">
-                {estimate.customer_name || rt("res.title")}
-              </h1>
+              {titleDraft !== null ? (
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <Input
+                    autoFocus
+                    value={titleDraft}
+                    placeholder={rt("rep.titlePlaceholder")}
+                    onChange={(event) => setTitleDraft(event.target.value)}
+                    className="h-11 max-w-md text-lg font-semibold"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      saveReportSettings.mutate({ report_title: titleDraft.trim() || null });
+                      toast.success(rt("rep.titleSaved"));
+                      setTitleDraft(null);
+                    }}
+                  >
+                    <Check className="size-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setTitleDraft(null)}>
+                    {rt("rep.cancel")}
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-1 flex items-center gap-2">
+                  <h1 className="text-3xl font-bold tracking-tight">{reportTitle}</h1>
+                  {canEdit && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="no-print"
+                      aria-label={rt("rep.titleEdit")}
+                      onClick={() => setTitleDraft(reportTitle)}
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                  )}
+                </div>
+              )}
               <p className="mt-1 text-sm text-muted-foreground">
                 {shortDate(estimate.created_at, lang)}
                 {estimate.address ? ` · ${estimate.address}` : ""}
@@ -677,18 +721,11 @@ function EstimatePage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="no">Norsk</SelectItem>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="sv">Svenska</SelectItem>
-                    <SelectItem value="da">Dansk</SelectItem>
-                    <SelectItem value="fi">Suomi</SelectItem>
-                    <SelectItem value="de">Deutsch</SelectItem>
-                    <SelectItem value="nl">Nederlands</SelectItem>
-                    <SelectItem value="fr">Français</SelectItem>
-                    <SelectItem value="pl">Polski</SelectItem>
-                    <SelectItem value="es">Español</SelectItem>
-                    <SelectItem value="it">Italiano</SelectItem>
-                    <SelectItem value="pt">Português</SelectItem>
+                    {SUPPORTED_LANGS.map((code) => (
+                      <SelectItem key={code} value={code}>
+                        {LANG_LABELS[code]}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">{rt("rep.reportLangHelp")}</p>
@@ -750,15 +787,31 @@ function EstimatePage() {
             </div>
           </div>
 
-          {company && !tenderMode && (
-            <div className="card-soft mt-4 flex items-center justify-between p-5">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                {rt("res.estimated")}
-              </p>
-              <p className="text-2xl font-bold">
-                {money(netVolume * Number(company.price_per_m3), company.currency, lang)}
-              </p>
-            </div>
+          {!businessView && !tenderMode && (
+            <MovePriceEstimator
+              volumeM3={gross}
+              currency={currency}
+              rt={rt}
+              defaults={{
+                from: ((estimate as Record<string, unknown>)["move_from"] as string) ?? "",
+                to: ((estimate as Record<string, unknown>)["move_to"] as string) ?? "",
+                distanceKm: Number((estimate as Record<string, unknown>)["move_distance_km"] ?? 0),
+              }}
+              {...(canEdit
+                ? {
+                    onChange: (value: { from: string; to: string; distanceKm: number }) =>
+                      saveReportSettings.mutate({
+                        move_from: value.from || null,
+                        move_to: value.to || null,
+                        move_distance_km: value.distanceKm || null,
+                      }),
+                  }
+                : {})}
+            />
+          )}
+
+          {!businessView && shareToken && (
+            <MoverOutreach estimateId={String(estimate.id)} token={shareToken} rt={rt} />
           )}
 
           <ShareButtons
