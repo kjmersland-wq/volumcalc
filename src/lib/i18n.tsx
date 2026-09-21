@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { extraTranslations } from "./i18n.translations";
 
@@ -260,7 +268,10 @@ export const dict: Dict = {
     en: "The estimate and all its rooms, items and requests will be permanently deleted.",
   },
   "dash.cancel": { no: "Avbryt", en: "Cancel" },
-  "dash.deleteFailed": { no: "Kunne ikke slette beregningen.", en: "Could not delete the estimate." },
+  "dash.deleteFailed": {
+    no: "Kunne ikke slette beregningen.",
+    en: "Could not delete the estimate.",
+  },
   "dash.link": { no: "Kopier opplastingslenke", en: "Copy upload link" },
   "dash.settings": { no: "Innstillinger", en: "Settings" },
   "dash.signout": { no: "Logg ut", en: "Sign out" },
@@ -554,7 +565,10 @@ export const dict: Dict = {
   "dash.handled": { no: "Behandlet", en: "Handled" },
 
   "rep.titleEdit": { no: "Endre rapportnavn", en: "Rename report" },
-  "rep.titlePlaceholder": { no: "F.eks. Flytting Møviklia 4 → Oslo", en: "E.g. Move from Møviklia 4 → Oslo" },
+  "rep.titlePlaceholder": {
+    no: "F.eks. Flytting Møviklia 4 → Oslo",
+    en: "E.g. Move from Møviklia 4 → Oslo",
+  },
   "rep.titleSaved": { no: "Rapportnavnet er lagret", en: "Report name saved" },
 
   "mprice.title": { no: "Grovt prisestimat for flyttingen", en: "Rough moving price estimate" },
@@ -593,7 +607,10 @@ export const dict: Dict = {
   "mov.send": { no: "Send rapport til valgte firma", en: "Send report to selected companies" },
   "mov.sent": { no: "Rapporten er sendt", en: "Report sent" },
   "mov.failed": { no: "Utsending feilet", en: "Sending failed" },
-  "mov.missing": { no: "Fyll inn navn, din e-post og minst én mottaker.", en: "Fill in your name, email and at least one recipient." },
+  "mov.missing": {
+    no: "Fyll inn navn, din e-post og minst én mottaker.",
+    en: "Fill in your name, email and at least one recipient.",
+  },
 };
 
 export const LANG_LABELS: Record<Lang, string> = {
@@ -666,7 +683,10 @@ function getSearchLang(search: unknown) {
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const search = useRouterState({ select: (state) => state.location.search });
-  const routeLang = useMemo(() => getSearchLang(search) ?? getPathLang(pathname), [pathname, search]);
+  const routeLang = useMemo(
+    () => getSearchLang(search) ?? getPathLang(pathname),
+    [pathname, search],
+  );
   const [lang, setLangState] = useState<Lang>(() => {
     if (routeLang) return routeLang;
     if (typeof window === "undefined") return "en";
