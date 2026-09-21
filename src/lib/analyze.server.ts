@@ -1,4 +1,6 @@
-import { USER_VERIFIED_CONFIDENCE, USER_VERIFIED_SECURITY_LABEL, type VolumeRoom } from "./volume-database";
+import { USER_VERIFIED_SECURITY_LABEL, type VolumeRoom } from "./volume-database";
+
+const USER_VERIFIED_CONFIDENCE = 1;
 
 export type DetectedItem = {
   name: string;
@@ -34,7 +36,9 @@ function normalizeManualItem(item: ManualItemInput): DetectedItem | null {
   const length = Math.max(0, Number(item.length_cm) || 0);
   const width = Math.max(0, Number(item.width_cm) || 0);
   const height = Math.max(0, Number(item.height_cm) || 0);
-  const baseVolume = Math.max(0, Number(item.volume_m3) || 0);
+  const dimensionVolume = (length * width * height) / 1_000_000;
+  const baseVolume =
+    dimensionVolume > 0 ? dimensionVolume : Math.max(0, Number(item.volume_m3) || 0);
   const volume = Math.round(baseVolume * quantity * 100) / 100;
   if (!volume) return null;
 
@@ -47,15 +51,18 @@ function normalizeManualItem(item: ManualItemInput): DetectedItem | null {
     width_cm: width,
     height_cm: height,
     volume_m3: volume,
-    confidence: item.security_label === USER_VERIFIED_SECURITY_LABEL ? USER_VERIFIED_CONFIDENCE : 0.7,
+    confidence:
+      item.security_label === USER_VERIFIED_SECURITY_LABEL ? USER_VERIFIED_CONFIDENCE : 0.7,
     photo_index: 0,
     room: String(item.room || "Other"),
   };
 }
 
-export function analyzeManualItems(items: ManualItemInput[]): { items: DetectedItem[]; total: number } {
+export function analyzeManualItems(items: ManualItemInput[]): {
+  items: DetectedItem[];
+  total: number;
+} {
   const parsed = items.map(normalizeManualItem).filter(Boolean) as DetectedItem[];
   const total = Math.round(parsed.reduce((sum, item) => sum + item.volume_m3, 0) * 100) / 100;
   return { items: parsed, total };
 }
-

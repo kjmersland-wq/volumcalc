@@ -3,7 +3,6 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { USER_VERIFIED_SECURITY_LABEL, VOLUME_DATABASE } from "./volume-database";
 
-const dataUrl = z.string().min(20).max(12_000_000).regex(/^data:image\/(jpeg|png|webp);base64,/);
 const roomNames = Object.keys(VOLUME_DATABASE) as Array<keyof typeof VOLUME_DATABASE>;
 const roomSchema = z.enum(roomNames as [string, ...string[]]);
 
@@ -21,28 +20,34 @@ const manualItemSchema = z.object({
 });
 
 const createSchema = z.object({
-  images: z.array(dataUrl).max(100).default([]), // kept for backward compatibility, no longer used for analysis
-  manual_items: z.array(manualItemSchema).min(1).max(300),
+  manual_items: z.array(manualItemSchema).max(300).default([]),
   customer_name: z.string().trim().max(120).optional(),
   customer_phone: z.string().trim().max(40).optional(),
-  move_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  move_date: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   address: z.string().trim().max(240).optional(),
   company_id: z.string().uuid().optional(),
-  company_token: z.string().trim().min(8).max(64).regex(/^[a-f0-9]+$/i).optional(),
+  company_token: z
+    .string()
+    .trim()
+    .min(8)
+    .max(64)
+    .regex(/^[a-f0-9]+$/i)
+    .optional(),
 });
 
 const sharedSchema = z.object({
   id: z.string().uuid(),
-  token: z.string().trim().min(8).max(64).regex(/^[a-f0-9]+$/i),
+  token: z
+    .string()
+    .trim()
+    .min(8)
+    .max(64)
+    .regex(/^[a-f0-9]+$/i),
 });
-
-function decodeDataUrl(url: string): Uint8Array {
-  const base64 = url.slice(url.indexOf(",") + 1);
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
-}
 
 /**
  * Creates an estimate on behalf of an (possibly anonymous) visitor.
@@ -89,33 +94,19 @@ export const createEstimate = createServerFn({ method: "POST" })
       .single();
     if (insertError || !estimate) throw new Error("Could not create the estimate");
 
-    const paths: string[] = [];
-    for (let i = 0; i < data.images.length; i++) {
-      const image = data.images[i];
-      if (!image) continue;
-      const path = `${estimate.id}/${i}.jpg`;
-      const { error } = await supabaseAdmin.storage
-        .from("estimate-photos")
-        .upload(path, decodeDataUrl(image), { contentType: "image/jpeg", upsert: true });
-      if (error) throw new Error("Could not store the photos");
-      paths.push(path);
-    }
-
-    const photoUrls = paths.length
-      ? (
-          await supabaseAdmin.storage
-            .from("estimate-photos")
-            .createSignedUrls(paths, 60 * 60 * 24 * 365)
-        ).data?.map((s) => s.signedUrl).filter(Boolean) ?? []
-      : [];
-
     const result = analyzeManualItems(data.manual_items);
 
     if (result.items.length) {
       const roomNames = Array.from(new Set(result.items.map((item) => item.room || "Other")));
       const { data: rooms } = await supabaseAdmin
         .from("estimate_rooms")
-        .insert(roomNames.map((name, sortOrder) => ({ estimate_id: estimate.id, name, sort_order: sortOrder })))
+        .insert(
+          roomNames.map((name, sortOrder) => ({
+            estimate_id: estimate.id,
+            name,
+            sort_order: sortOrder,
+          })),
+        )
         .select("id,name");
       const roomIds = new Map((rooms ?? []).map((room) => [room.name, room.id]));
 
@@ -131,7 +122,7 @@ export const createEstimate = createServerFn({ method: "POST" })
           height_cm: item.height_cm,
           volume_m3: item.volume_m3,
           confidence: item.confidence,
-          photo_url: photoUrls[item.photo_index] ?? photoUrls[0] ?? null,
+          photo_url: null,
           room_id: roomIds.get(item.room || "Other") ?? null,
         })),
       );
@@ -140,7 +131,7 @@ export const createEstimate = createServerFn({ method: "POST" })
 
     await supabaseAdmin
       .from("estimates")
-      .update({ photo_urls: photoUrls, total_volume_m3: result.total })
+      .update({ photo_urls: [], total_volume_m3: result.total })
       .eq("id", estimate.id);
 
     return { id: estimate.id as string, share_token: estimate.share_token as string };
@@ -189,7 +180,12 @@ export const getSharedEstimate = createServerFn({ method: "POST" })
 
 const quoteSchema = z.object({
   id: z.string().uuid(),
-  token: z.string().trim().min(8).max(64).regex(/^[a-f0-9]+$/i),
+  token: z
+    .string()
+    .trim()
+    .min(8)
+    .max(64)
+    .regex(/^[a-f0-9]+$/i),
   name: z.string().trim().min(1).max(120),
   phone: z.string().trim().max(40).optional(),
   email: z.string().trim().email().max(160).optional(),
@@ -227,7 +223,6 @@ export const requestQuote = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
-
 
 /**
  * A signed-in company takes ownership of an estimate that no company owns yet.

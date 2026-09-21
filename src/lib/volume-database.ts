@@ -11,7 +11,6 @@ export type VolumeDatabaseItem = {
   volume_m3: number;
 };
 
-export const USER_VERIFIED_CONFIDENCE = 1;
 export const USER_VERIFIED_SECURITY_LABEL = "100% (Brukerverifisert)";
 
 export const VOLUME_DATABASE: Record<VolumeRoom, VolumeDatabaseItem[]> = {
@@ -176,4 +175,3 @@ export const VOLUME_DATABASE: Record<VolumeRoom, VolumeDatabaseItem[]> = {
     },
   ],
 };
-

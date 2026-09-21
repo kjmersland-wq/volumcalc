@@ -22,8 +22,8 @@ import { recommendedVolume } from "@/lib/volume";
 export const Route = createFileRoute("/upload")({
   staticData: { sitemap: true },
   validateSearch: (search: Record<string, unknown>): { c?: string; k?: string } => {
-    const c = search['c'];
-    const k = search['k'];
+    const c = search["c"];
+    const k = search["k"];
     return {
       ...(typeof c === "string" && c ? { c } : {}),
       ...(typeof k === "string" && k ? { k } : {}),
@@ -31,15 +31,17 @@ export const Route = createFileRoute("/upload")({
   },
   head: () => ({
     meta: [
-      { title: "Upload photos — VolumCalc" },
+      { title: "Room video checklist — VolumCalc" },
       {
         name: "description",
-        content: "Upload photos of your furniture and get an itemised cubic metre estimate in seconds.",
+        content:
+          "Film each room and complete a local checklist to generate an itemised cubic metre estimate.",
       },
-      { property: "og:title", content: "Upload photos — VolumCalc" },
+      { property: "og:title", content: "Room video checklist — VolumCalc" },
       {
         property: "og:description",
-        content: "Snap your rooms, get the total cubic volume of your move.",
+        content:
+          "Record rooms and verify inventory locally before generating your move volume report.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -52,6 +54,13 @@ type Stage = "idle" | "saving";
 type QuantityByRoom = Record<VolumeRoom, Record<string, number>>;
 
 const ROOMS = Object.keys(VOLUME_DATABASE) as VolumeRoom[];
+const ROOM_LABELS: Record<VolumeRoom, string> = {
+  Office: "Kontor",
+  "Living room": "Stue",
+  Hallway: "Gang",
+  Garage: "Garasje",
+  Bedroom: "Soverom",
+};
 
 function createInitialQuantities(): QuantityByRoom {
   return ROOMS.reduce(
@@ -82,7 +91,8 @@ function UploadPage() {
   });
 
   const [selectedRoom, setSelectedRoom] = useState<VolumeRoom>("Living room");
-  const [recording, setRecording] = useState(true);
+  const [recording, setRecording] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
   const [stage, setStage] = useState<Stage>("idle");
   const [quantities, setQuantities] = useState<QuantityByRoom>(() => createInitialQuantities());
   const [form, setForm] = useState({ name: "", phone: "", date: "", address: "" });
@@ -93,6 +103,12 @@ function UploadPage() {
 
     async function startCamera() {
       try {
+        if (!navigator.mediaDevices?.getUserMedia) {
+          setRecording(false);
+          setCameraReady(true);
+          toast.error("Kamera støttes ikke i denne nettleseren.");
+          return;
+        }
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: "environment" } },
           audio: false,
@@ -103,8 +119,12 @@ function UploadPage() {
         }
         streamRef.current = stream;
         if (videoRef.current) videoRef.current.srcObject = stream;
+        setRecording(true);
+        setCameraReady(true);
       } catch {
         toast.error("Klarte ikke å starte kamera.");
+        setRecording(false);
+        setCameraReady(true);
       }
     }
 
@@ -163,17 +183,14 @@ function UploadPage() {
   );
 
   const netVolume = useMemo(
-    () => Math.round(manualItems.reduce((sum, item) => sum + item.quantity * item.volume_m3, 0) * 100) / 100,
+    () =>
+      Math.round(manualItems.reduce((sum, item) => sum + item.quantity * item.volume_m3, 0) * 100) /
+      100,
     [manualItems],
   );
   const grossVolume = recommendedVolume(netVolume);
 
   async function handleSubmit() {
-    if (!manualItems.length) {
-      toast.error("Legg til minst én gjenstand i sjekklisten.");
-      return;
-    }
-
     try {
       setStage("saving");
       const created = await submitEstimate({
@@ -187,7 +204,11 @@ function UploadPage() {
           ...(companyToken ? { company_token: companyToken } : {}),
         },
       });
-      navigate({ to: "/estimate/$id", params: { id: created.id }, search: { token: created.share_token } });
+      navigate({
+        to: "/estimate/$id",
+        params: { id: created.id },
+        search: { token: created.share_token },
+      });
     } catch (error) {
       console.error(error);
       setStage("idle");
@@ -203,7 +224,11 @@ function UploadPage() {
           {branding && (
             <div className="mb-6 flex items-center gap-3 rounded-xl border border-border bg-card p-4">
               {branding.logo_url ? (
-                <img src={branding.logo_url} alt="" className="h-10 w-auto max-w-32 object-contain" />
+                <img
+                  src={branding.logo_url}
+                  alt=""
+                  className="h-10 w-auto max-w-32 object-contain"
+                />
               ) : (
                 <span
                   className="flex size-10 items-center justify-center rounded-xl text-sm font-bold text-white"
@@ -224,7 +249,16 @@ function UploadPage() {
             Lokal videostrøm og lokal sjekkliste. Sikkerhet: {USER_VERIFIED_SECURITY_LABEL}.
           </p>
 
-          {recording ? (
+          {!cameraReady ? (
+            <div
+              className="mt-6 flex items-center justify-center gap-3 rounded-xl border border-border bg-card p-8"
+              role="status"
+              aria-live="polite"
+            >
+              <Loader2 className="size-5 animate-spin text-primary" />
+              <span className="text-sm text-muted-foreground">Starter kamera …</span>
+            </div>
+          ) : recording ? (
             <div className="mt-6 space-y-4">
               <div className="rounded-xl border border-border bg-card p-4">
                 <Label htmlFor="room">Velg rom</Label>
@@ -236,14 +270,20 @@ function UploadPage() {
                 >
                   {ROOMS.map((room) => (
                     <option key={room} value={room}>
-                      {room}
+                      {ROOM_LABELS[room]}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="overflow-hidden rounded-2xl border border-border bg-black">
-                <video ref={videoRef} autoPlay playsInline muted className="aspect-video w-full object-cover" />
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="aspect-video w-full object-cover"
+                />
               </div>
 
               <Button
@@ -256,6 +296,22 @@ function UploadPage() {
             </div>
           ) : (
             <>
+              <div className="mt-6 rounded-xl border border-border bg-card p-4">
+                <Label htmlFor="room-checklist">Velg rom</Label>
+                <select
+                  id="room-checklist"
+                  className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  value={selectedRoom}
+                  onChange={(event) => setSelectedRoom(event.target.value as VolumeRoom)}
+                >
+                  {ROOMS.map((room) => (
+                    <option key={room} value={room}>
+                      {ROOM_LABELS[room]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="mt-7 flex gap-4 rounded-xl border border-primary/20 bg-primary-soft/70 p-5">
                 <Info className="mt-0.5 size-5 shrink-0 text-primary" />
                 <div>
@@ -277,7 +333,8 @@ function UploadPage() {
                       <div>
                         <p className="font-medium">{item.name_no}</p>
                         <p className="text-sm text-muted-foreground">
-                          {item.length_cm}×{item.width_cm}×{item.height_cm} cm · {item.volume_m3.toFixed(2)} m³
+                          {item.length_cm}×{item.width_cm}×{item.height_cm} cm ·{" "}
+                          {item.volume_m3.toFixed(2)} m³
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -287,11 +344,20 @@ function UploadPage() {
                           size="icon"
                           onClick={() => changeQuantity(item.key, -1)}
                           disabled={qty <= 0}
+                          aria-label={`Reduser antall ${item.name_no}`}
                         >
                           <Minus className="size-4" />
                         </Button>
-                        <span className="inline-flex min-w-10 justify-center text-lg font-semibold">{qty}</span>
-                        <Button type="button" variant="outline" size="icon" onClick={() => changeQuantity(item.key, 1)}>
+                        <span className="inline-flex min-w-10 justify-center text-lg font-semibold">
+                          {qty}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => changeQuantity(item.key, 1)}
+                          aria-label={`Øk antall ${item.name_no}`}
+                        >
                           <Plus className="size-4" />
                         </Button>
                       </div>
@@ -301,7 +367,9 @@ function UploadPage() {
               </div>
 
               <div className="mt-6 rounded-xl border border-border bg-muted/30 p-4">
-                <p className="text-sm text-muted-foreground">Nettovolum: {netVolume.toFixed(2)} m³</p>
+                <p className="text-sm text-muted-foreground">
+                  Nettovolum: {netVolume.toFixed(2)} m³
+                </p>
                 <p className="text-sm text-muted-foreground">
                   Bilbehov (+25% stuefaktor): {grossVolume.toFixed(2)} m³
                 </p>
@@ -359,4 +427,3 @@ function UploadPage() {
     </div>
   );
 }
-
