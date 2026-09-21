@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { extraTranslations } from "./i18n.translations";
+import { landingRouteTranslations } from "./i18n.landing-translations";
 
 export type Lang =
   "no" | "en" | "sv" | "da" | "fi" | "de" | "nl" | "fr" | "pl" | "es" | "it" | "pt";
@@ -259,7 +260,10 @@ export const dict: Dict = {
     en: "The estimate and all its rooms, items and requests will be permanently deleted.",
   },
   "dash.cancel": { no: "Avbryt", en: "Cancel" },
-  "dash.deleteFailed": { no: "Kunne ikke slette beregningen.", en: "Could not delete the estimate." },
+  "dash.deleteFailed": {
+    no: "Kunne ikke slette beregningen.",
+    en: "Could not delete the estimate.",
+  },
   "dash.link": { no: "Kopier opplastingslenke", en: "Copy upload link" },
   "dash.settings": { no: "Innstillinger", en: "Settings" },
   "dash.signout": { no: "Logg ut", en: "Sign out" },
@@ -553,7 +557,10 @@ export const dict: Dict = {
   "dash.handled": { no: "Behandlet", en: "Handled" },
 
   "rep.titleEdit": { no: "Endre rapportnavn", en: "Rename report" },
-  "rep.titlePlaceholder": { no: "F.eks. Flytting Møviklia 4 → Oslo", en: "E.g. Move from Møviklia 4 → Oslo" },
+  "rep.titlePlaceholder": {
+    no: "F.eks. Flytting Møviklia 4 → Oslo",
+    en: "E.g. Move from Møviklia 4 → Oslo",
+  },
   "rep.titleSaved": { no: "Rapportnavnet er lagret", en: "Report name saved" },
 
   "mprice.title": { no: "Grovt prisestimat for flyttingen", en: "Rough moving price estimate" },
@@ -592,7 +599,10 @@ export const dict: Dict = {
   "mov.send": { no: "Send rapport til valgte firma", en: "Send report to selected companies" },
   "mov.sent": { no: "Rapporten er sendt", en: "Report sent" },
   "mov.failed": { no: "Utsending feilet", en: "Sending failed" },
-  "mov.missing": { no: "Fyll inn navn, din e-post og minst én mottaker.", en: "Fill in your name, email and at least one recipient." },
+  "mov.missing": {
+    no: "Fyll inn navn, din e-post og minst én mottaker.",
+    en: "Fill in your name, email and at least one recipient.",
+  },
 };
 
 export const LANG_LABELS: Record<Lang, string> = {
@@ -629,48 +639,69 @@ export const SUPPORTED_LANGS: Lang[] = [
   "pt",
 ];
 
+const PATH_LANGS: Partial<Record<string, Lang>> = {
+  "/no": "no",
+  "/se": "sv",
+  "/dk": "da",
+  "/fi": "fi",
+  "/de": "de",
+  "/nl": "nl",
+  "/fr": "fr",
+  "/pl": "pl",
+  "/es": "es",
+  "/it": "it",
+  "/pt": "pt",
+};
+
+const LOCALE_OVERRIDES: Partial<Record<Lang, Record<string, string>>> = {
+  ...extraTranslations,
+  ...landingRouteTranslations,
+};
+
 function isLang(value: unknown): value is Lang {
   return typeof value === "string" && (SUPPORTED_LANGS as string[]).includes(value);
 }
 
+function normalizePathname(pathname: string) {
+  if (!pathname || pathname === "/") return "/";
+  return pathname.replace(/\/$/, "");
+}
+
+function getPathLang(pathname: string) {
+  return PATH_LANGS[normalizePathname(pathname)];
+}
+
+function getInitialLang(): Lang {
+  if (typeof window === "undefined") return "en";
+
+  const syncedUrlLang = getUrlOrPathLang();
+  if (syncedUrlLang) return syncedUrlLang;
+
+  const stored = window.localStorage.getItem("volumcalc-lang");
+  if (isLang(stored)) return stored;
+
+  return window.location.hostname.endsWith(".no") ? "no" : "en";
+}
+
+function getUrlOrPathLang(): Lang | undefined {
+  if (typeof window === "undefined") return undefined;
+
+  const params = new URLSearchParams(window.location.search);
+  const urlLang = params.get("lang");
+  if (isLang(urlLang)) return urlLang;
+
+  const pathLang = getPathLang(window.location.pathname);
+  if (pathLang) return pathLang;
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("en");
+  const [lang, setLangState] = useState<Lang>(() => getInitialLang());
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const urlLang = params.get("lang");
-    if (isLang(urlLang)) {
-      setLangState(urlLang);
-      window.localStorage.setItem("volumcalc-lang", urlLang);
-      return;
-    }
-    const pathLang: Record<string, Lang> = {
-      "/no": "no",
-      "/se": "sv",
-      "/dk": "da",
-      "/fi": "fi",
-      "/de": "de",
-      "/nl": "nl",
-      "/fr": "fr",
-      "/pl": "pl",
-      "/es": "es",
-      "/it": "it",
-      "/pt": "pt",
-    };
-    const fromPath = pathLang[window.location.pathname.replace(/\/$/, "")];
-    if (fromPath) {
-      setLangState(fromPath);
-      window.localStorage.setItem("volumcalc-lang", fromPath);
-      return;
-    }
-    const stored = window.localStorage.getItem("volumcalc-lang");
-    if (isLang(stored)) {
-      setLangState(stored);
-      return;
-    }
-    // No saved choice: .com and other hosts start in English, .no starts in Norwegian
-    const host = window.location.hostname;
-    if (host.endsWith(".no")) setLangState("no");
+    const syncedUrlLang = getUrlOrPathLang();
+    if (!syncedUrlLang) return;
+    setLangState(syncedUrlLang);
+    window.localStorage.setItem("volumcalc-lang", syncedUrlLang);
   }, []);
 
   const setLang = useCallback((l: Lang) => {
@@ -689,8 +720,11 @@ export function translate(key: string, lang: Lang): string {
   const entry = dict[key];
   if (!entry) return key;
   if (lang === "no" || lang === "en") return entry[lang];
-  if (lang === "sv" || lang === "da" || lang === "pl") {
-    return extraTranslations[lang]?.[key] ?? entry.en;
+  const localizedEntry = (entry as Partial<Record<Lang, string>>)[lang];
+  if (localizedEntry) return localizedEntry;
+  const override = LOCALE_OVERRIDES[lang];
+  if (override) {
+    return override[key] ?? entry.en;
   }
   return entry.en;
 }
