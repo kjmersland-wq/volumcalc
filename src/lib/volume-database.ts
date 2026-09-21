@@ -515,6 +515,6 @@ export function getStoredRoomLabel(name: string, lang: Lang) {
 
 export function getStoredItemLabel(item: Pick<VolumeDatabaseItem, "name" | "name_no">, lang: Lang) {
   const match = findItemByStoredName(item.name, item.name_no);
-  if (!match) return lang === "no" ? item.name_no : item.name;
+  if (!match) return lang === "no" ? item.name_no || item.name : item.name;
   return getItemLabel(match, lang);
 }

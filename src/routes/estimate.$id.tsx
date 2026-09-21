@@ -514,6 +514,8 @@ function EstimatePage() {
         : "rep.status.draft";
 
   const displayItemName = (item: Item) => getStoredItemLabel(item, reportLang);
+  const editableItemName = (item: Item) =>
+    reportLang === "no" ? item.name_no || item.name : item.name;
   const displayRoomName = (name: string) => getStoredRoomLabel(name, reportLang);
 
   const groups = [
@@ -907,17 +909,17 @@ function EstimatePage() {
                         <div className="min-w-0 flex-1">
                           {canEdit ? (
                             <Input
-                              defaultValue={displayItemName(item)}
+                              defaultValue={editableItemName(item)}
                               maxLength={120}
                               className="h-9 max-w-xs font-medium"
                               aria-label={rt("res.item")}
                               onBlur={(e) => {
                                 const value = e.target.value.trim();
                                 if (!value) {
-                                  e.target.value = displayItemName(item);
+                                  e.target.value = editableItemName(item);
                                   return;
                                 }
-                                const current = displayItemName(item);
+                                const current = editableItemName(item);
                                 if (value === current) return;
                                 patchItem.mutate({
                                   item,
