@@ -124,7 +124,13 @@ export function ShareButtons({ title, text, langOverride }: ShareButtonsProps) {
           >
             <Copy className="size-4" />
           </Button>
-          <Button type="button" size="sm" onClick={nativeShare}>
+          <Button
+            type="button"
+            size="sm"
+            onClick={nativeShare}
+            aria-label={shareText("share.more")}
+            title={shareText("share.more")}
+          >
             <Share2 className="size-4" />
             {shareText("share.more")}
           </Button>
