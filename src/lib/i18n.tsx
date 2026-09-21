@@ -674,12 +674,8 @@ function getPathLang(pathname: string) {
 function getInitialLang(): Lang {
   if (typeof window === "undefined") return "en";
 
-  const params = new URLSearchParams(window.location.search);
-  const urlLang = params.get("lang");
-  if (isLang(urlLang)) return urlLang;
-
-  const pathLang = getPathLang(window.location.pathname);
-  if (pathLang) return pathLang;
+  const syncedUrlLang = getUrlOrPathLang();
+  if (syncedUrlLang) return syncedUrlLang;
 
   const stored = window.localStorage.getItem("volumcalc-lang");
   if (isLang(stored)) return stored;
@@ -687,13 +683,25 @@ function getInitialLang(): Lang {
   return window.location.hostname.endsWith(".no") ? "no" : "en";
 }
 
+function getUrlOrPathLang(): Lang | undefined {
+  if (typeof window === "undefined") return undefined;
+
+  const params = new URLSearchParams(window.location.search);
+  const urlLang = params.get("lang");
+  if (isLang(urlLang)) return urlLang;
+
+  const pathLang = getPathLang(window.location.pathname);
+  if (pathLang) return pathLang;
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(getInitialLang);
 
   useEffect(() => {
-    const initialLang = getInitialLang();
-    setLangState(initialLang);
-    window.localStorage.setItem("volumcalc-lang", initialLang);
+    const syncedUrlLang = getUrlOrPathLang();
+    if (!syncedUrlLang) return;
+    setLangState(syncedUrlLang);
+    window.localStorage.setItem("volumcalc-lang", syncedUrlLang);
   }, []);
 
   const setLang = useCallback((l: Lang) => {
