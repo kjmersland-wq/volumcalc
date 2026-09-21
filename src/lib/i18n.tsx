@@ -694,7 +694,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       "/it": "it",
       "/pt": "pt",
     };
-    const fromPath = pathLang[window.location.pathname.replace(/\/$/, "")];
+    const normalizedPath = window.location.pathname.replace(/\/$/, "");
+    const firstSegment = `/${normalizedPath.split("/").filter(Boolean)[0] ?? ""}`;
+    const fromPath = pathLang[normalizedPath] ?? pathLang[firstSegment];
     if (fromPath) {
       setLangState(fromPath);
       window.localStorage.setItem("volumcalc-lang", fromPath);
