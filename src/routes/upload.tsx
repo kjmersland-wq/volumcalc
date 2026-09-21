@@ -15,7 +15,6 @@ import { getCompanyByUploadToken } from "@/lib/admin.functions";
 import {
   USER_VERIFIED_SECURITY_LABEL,
   VOLUME_DATABASE,
-  type VolumeRoom,
 } from "@/lib/volume-database";
 import { recommendedVolume } from "@/lib/volume";
 import { useAuth } from "@/hooks/useAuth";
@@ -85,6 +84,10 @@ function syncRoomQuantities(prev: QuantityByRoom, roomNames: string[]): Quantity
   }, {} as QuantityByRoom);
 }
 
+function firstRoomName(roomNames: string[]) {
+  return roomNames[0] ?? "Living room";
+}
+
 function UploadPage() {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
@@ -105,12 +108,13 @@ function UploadPage() {
     },
   });
 
+  const linkedRoomNames = (branding as { room_names?: string[] } | null | undefined)?.room_names;
   const roomNames = useMemo(
-    () => sanitizeRoomNames(branding?.room_names ?? ownCompany?.room_names, defaultRoomNames(lang)),
-    [branding?.room_names, ownCompany?.room_names, lang],
+    () => sanitizeRoomNames(linkedRoomNames ?? ownCompany?.room_names, defaultRoomNames(lang)),
+    [linkedRoomNames, ownCompany?.room_names, lang],
   );
 
-  const [selectedRoom, setSelectedRoom] = useState<string>(() => defaultRoomNames("en")[0]);
+  const [selectedRoom, setSelectedRoom] = useState<string>(() => firstRoomName(defaultRoomNames("en")));
   const [recording, setRecording] = useState(false);
   const [startingCamera, setStartingCamera] = useState(false);
   const [stage, setStage] = useState<Stage>("idle");
@@ -121,7 +125,7 @@ function UploadPage() {
   const busy = stage !== "idle";
 
   useEffect(() => {
-    setSelectedRoom((current) => (roomNames.includes(current) ? current : roomNames[0]));
+    setSelectedRoom((current) => (roomNames.includes(current) ? current : firstRoomName(roomNames)));
     setQuantities((current) => syncRoomQuantities(current, roomNames));
   }, [roomNames]);
 
@@ -178,12 +182,12 @@ function UploadPage() {
 
   function changeQuantity(itemKey: string, delta: number) {
     setQuantities((prev) => {
-      const current = prev[selectedRoom][itemKey] ?? 0;
+      const current = prev[selectedRoom]?.[itemKey] ?? 0;
       const next = Math.max(0, current + delta);
       return {
         ...prev,
         [selectedRoom]: {
-          ...prev[selectedRoom],
+          ...(prev[selectedRoom] ?? {}),
           [itemKey]: next,
         },
       };
