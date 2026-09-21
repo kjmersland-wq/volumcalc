@@ -46,7 +46,8 @@ export function useLocalizedMeta({
     }
 
     return () => {
-      if (node?.parentNode) node.parentNode.removeChild(node);
+      const existing = node ?? (document.getElementById(jsonLdId) as HTMLScriptElement | null);
+      if (existing?.parentNode) existing.parentNode.removeChild(existing);
     };
   }, [description, jsonLd, jsonLdId, ogDescription, ogTitle, title]);
 }

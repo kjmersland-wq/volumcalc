@@ -57,7 +57,7 @@ function AdminPage() {
   const { t } = useI18n();
   useLocalizedMeta({
     title: `${t("admin.nav")} — VolumCalc`,
-    description: t("dash.metaDescription"),
+    description: t("admin.sub"),
   });
   const isAdmin = useIsAdmin();
   const queryClient = useQueryClient();
