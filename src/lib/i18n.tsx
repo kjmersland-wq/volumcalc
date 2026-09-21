@@ -645,6 +645,20 @@ export const dict: Dict = {
   "mov.sent": { no: "Rapporten er sendt", en: "Report sent" },
   "mov.failed": { no: "Utsending feilet", en: "Sending failed" },
   "mov.missing": { no: "Fyll inn navn, din e-post og minst én mottaker.", en: "Fill in your name, email and at least one recipient." },
+
+  "upload.freeLeft": { no: "Gratis demo – sekunder igjen", en: "Free demo — seconds left" },
+  "upload.freeNote": {
+    no: "I gratisversjonen kan du filme i 20 sekunder per rom. Full pakke gir ubegrenset filming av alle rom.",
+    en: "The free version films for 20 seconds per room. The full package gives unlimited filming of every room.",
+  },
+  "upload.freeOverTitle": { no: "Gratisdemoen er ferdig", en: "Your free demo has ended" },
+  "upload.freeOverBody": {
+    no: "Du har sett hvordan det virker. Med full pakke filmer du alle rom så lenge du vil, får AI-gjenkjenning av møbler, komplett rapport, PDF og delelenke.",
+    en: "You have seen how it works. With the full package you film every room for as long as you like, with AI furniture recognition, a complete report, PDF and share link.",
+  },
+  "upload.freeOverCta": { no: "Se priser og kjøp full pakke", en: "See pricing and get the full package" },
+  "upload.freeOverDismiss": { no: "Fortsett med gratis sjekkliste", en: "Continue with the free checklist" },
+  "upload.unlimitedFilming": { no: "Ubegrenset filming på din konto", en: "Unlimited filming on your account" },
 };
 
 export const LANG_LABELS: Record<Lang, string> = {

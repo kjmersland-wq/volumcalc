@@ -18,7 +18,8 @@ import {
 } from "@/lib/volume-database";
 import { recommendedVolume } from "@/lib/volume";
 import { useAuth } from "@/hooks/useAuth";
-import { useCompany } from "@/hooks/useCompany";
+import { useCompany, useUnlimitedPhotos } from "@/hooks/useCompany";
+import { Link } from "@tanstack/react-router";
 import {
   defaultRoomNames,
   localizedTemplateName,
@@ -56,6 +57,8 @@ export const Route = createFileRoute("/upload")({
   }),
   component: UploadPage,
 });
+
+const FREE_RECORDING_SECONDS = 20;
 
 type Stage = "idle" | "saving";
 type QuantityByRoom = Record<string, Record<string, number>>;
@@ -128,6 +131,29 @@ function UploadPage() {
   );
   const [form, setForm] = useState({ name: "", phone: "", date: "", address: "" });
   const busy = stage !== "idle";
+
+  const unlimitedAccount = useUnlimitedPhotos();
+  const freePlan = !unlimitedAccount && !companyToken && !companyId;
+  const [secondsLeft, setSecondsLeft] = useState(FREE_RECORDING_SECONDS);
+  const [showUpsell, setShowUpsell] = useState(false);
+
+  useEffect(() => {
+    if (!recording || !freePlan) return;
+    setSecondsLeft(FREE_RECORDING_SECONDS);
+    const timer = window.setInterval(() => {
+      setSecondsLeft((current) => {
+        if (current <= 1) {
+          window.clearInterval(timer);
+          stopVideoCapture();
+          setShowUpsell(true);
+          return 0;
+        }
+        return current - 1;
+      });
+    }, 1000);
+    return () => window.clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recording, freePlan, selectedRoom]);
 
   useEffect(() => {
     try {
@@ -354,6 +380,21 @@ function UploadPage() {
             {t("upload.sub")} {t("upload.securityLabel")}: {USER_VERIFIED_SECURITY_LABEL}.
           </p>
 
+          {showUpsell && (
+            <div className="mt-6 rounded-2xl border-2 border-primary bg-primary/5 p-6">
+              <h2 className="text-xl font-bold">{t("upload.freeOverTitle")}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{t("upload.freeOverBody")}</p>
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                <Button asChild size="lg">
+                  <Link to="/pricing">{t("upload.freeOverCta")}</Link>
+                </Button>
+                <Button variant="ghost" size="lg" onClick={() => setShowUpsell(false)}>
+                  {t("upload.freeOverDismiss")}
+                </Button>
+              </div>
+            </div>
+          )}
+
           {recording ? (
             <div className="mt-6 space-y-4">
               <div className="rounded-xl border border-border bg-card p-4">
@@ -404,7 +445,16 @@ function UploadPage() {
                   <span className="size-2 animate-pulse rounded-full bg-red-500" />
                   {t("upload.filmingRoom")}: {selectedRoom}
                 </span>
+                {freePlan && (
+                  <span className="absolute right-3 top-3 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground tabular-nums">
+                    {t("upload.freeLeft")}: {secondsLeft}s
+                  </span>
+                )}
               </div>
+
+              <p className="text-xs text-muted-foreground">
+                {freePlan ? t("upload.freeNote") : t("upload.unlimitedFilming")}
+              </p>
 
               <Button
                 size="lg"
