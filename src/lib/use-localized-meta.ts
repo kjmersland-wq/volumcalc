@@ -34,6 +34,7 @@ export function useLocalizedMeta({
     upsertMeta("property", "og:description", ogDescription ?? description);
 
     let node: HTMLScriptElement | null = null;
+    let createdNode = false;
     if (jsonLd) {
       node = document.getElementById(jsonLdId) as HTMLScriptElement | null;
       if (!node) {
@@ -41,13 +42,13 @@ export function useLocalizedMeta({
         node.id = jsonLdId;
         node.type = "application/ld+json";
         document.head.appendChild(node);
+        createdNode = true;
       }
       node.textContent = JSON.stringify(jsonLd);
     }
 
     return () => {
-      const existing = node ?? (document.getElementById(jsonLdId) as HTMLScriptElement | null);
-      if (existing?.parentNode) existing.parentNode.removeChild(existing);
+      if (createdNode && node?.parentNode) node.parentNode.removeChild(node);
     };
   }, [description, jsonLd, jsonLdId, ogDescription, ogTitle, title]);
 }

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -1461,6 +1462,12 @@ export const Route = createFileRoute("/hjelp")({
 function HelpPage() {
   const { lang } = useI18n();
   const c = content[lang] ?? content.en;
+  useEffect(
+    () => () => {
+      document.getElementById("faq-schema")?.remove();
+    },
+    [],
+  );
   useLocalizedMeta({
     title: `${c.title} — VolumCalc`,
     description: c.intro,
