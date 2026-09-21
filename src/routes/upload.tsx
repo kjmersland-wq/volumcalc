@@ -241,6 +241,11 @@ function UploadPage() {
 
   async function startVideoCapture() {
     if (recording || startingCamera) return;
+    if (freePlan && secondsLeft <= 0) {
+      setShowUpsell(true);
+      toast.error(t("upload.freeUsedUp"));
+      return;
+    }
     try {
       setStartingCamera(true);
       if (!navigator.mediaDevices?.getUserMedia) {
