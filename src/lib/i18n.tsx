@@ -270,8 +270,16 @@ export const dict: Dict = {
     no: "Google-innloggingen mislyktes. Prøv igjen.",
     en: "Google sign-in failed. Please try again.",
   },
+  "auth.metaDescription": {
+    no: "Logg inn og administrer videolenkene, sjekklistene og volumrapportene dine i VolumCalc.",
+    en: "Sign in to manage your video links, checklists and volume reports in VolumCalc.",
+  },
 
   "dash.title": { no: "Innkomne beregninger", en: "Incoming estimates" },
+  "dash.metaDescription": {
+    no: "Se innkomne beregninger, følg opp kunder og del VolumCalc-rapporter fra dashbordet.",
+    en: "Review incoming estimates, follow up customers and share VolumCalc reports from your dashboard.",
+  },
   "dash.empty": { no: "Ingen beregninger ennå.", en: "No estimates yet." },
   "dash.customer": { no: "Kunde", en: "Customer" },
   "dash.date": { no: "Mottatt", en: "Received" },
@@ -631,6 +639,18 @@ export const dict: Dict = {
     no: "Fyll inn navn, din e-post og minst én mottaker.",
     en: "Fill in your name, email and at least one recipient.",
   },
+  "root.notFoundTitle": { no: "Fant ikke siden", en: "Page not found" },
+  "root.notFoundBody": {
+    no: "Denne siden finnes ikke, men du kan enkelt gå tilbake og fortsette der du slapp.",
+    en: "That page does not exist, but you can head back and carry on from there.",
+  },
+  "root.goHome": { no: "Gå til forsiden", en: "Go to homepage" },
+  "root.errorTitle": { no: "Noe gikk galt", en: "Something went wrong" },
+  "root.errorBody": {
+    no: "Vi klarte ikke å laste denne siden akkurat nå. Prøv igjen om et lite øyeblikk.",
+    en: "We could not load this page just now. Please try again in a moment.",
+  },
+  "root.tryAgain": { no: "Prøv igjen", en: "Try again" },
 };
 
 export const LANG_LABELS: Record<Lang, string> = {
@@ -710,6 +730,24 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const host = window.location.hostname;
     if (host.endsWith(".no")) setLangState("no");
   }, []);
+
+  useEffect(() => {
+    const htmlLang: Record<Lang, string> = {
+      en: "en",
+      no: "nb-NO",
+      sv: "sv-SE",
+      da: "da-DK",
+      fi: "fi-FI",
+      de: "de-DE",
+      nl: "nl-NL",
+      fr: "fr-FR",
+      pl: "pl-PL",
+      es: "es-ES",
+      it: "it-IT",
+      pt: "pt-PT",
+    };
+    document.documentElement.lang = htmlLang[lang];
+  }, [lang]);
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
