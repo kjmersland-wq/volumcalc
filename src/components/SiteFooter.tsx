@@ -58,11 +58,6 @@ export function SiteFooter() {
                   {t("nav.contact")}
                 </Link>
               </li>
-              <li>
-                <Link to="/auth" className="transition-colors hover:text-foreground">
-                  {t("nav.login")}
-                </Link>
-              </li>
             </ul>
           </div>
 

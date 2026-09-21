@@ -50,14 +50,9 @@ export function SiteHeader() {
               <Link to="/dashboard">{t("nav.dashboard")}</Link>
             </Button>
           ) : (
-            <>
-              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-                <Link to="/auth">{t("nav.login")}</Link>
-              </Button>
-              <Button asChild size="sm">
-                <Link to="/upload">{t("nav.tryFree")}</Link>
-              </Button>
-            </>
+            <Button asChild size="sm">
+              <Link to="/upload">{t("nav.tryFree")}</Link>
+            </Button>
           )}
         </div>
       </div>
