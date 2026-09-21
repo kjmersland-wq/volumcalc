@@ -34,6 +34,9 @@ export function useLocalizedMeta({
     upsertMeta("property", "og:description", ogDescription ?? description);
 
     let node: HTMLScriptElement | null = null;
+    let createdNode = false;
+    let restoreText: string | null = null;
+    let restoreManagedFlag = false;
     if (jsonLd) {
       node = document.getElementById(jsonLdId) as HTMLScriptElement | null;
       if (!node) {
@@ -41,16 +44,30 @@ export function useLocalizedMeta({
         node.id = jsonLdId;
         node.type = "application/ld+json";
         document.head.appendChild(node);
+        createdNode = true;
+      } else {
+        restoreText = node.textContent;
+        restoreManagedFlag = node.dataset.localizedMeta === "true";
       }
       node.dataset.localizedMeta = "true";
       node.textContent = JSON.stringify(jsonLd);
     } else {
-      document.getElementById(jsonLdId)?.remove();
+      const existing = document.getElementById(jsonLdId) as HTMLScriptElement | null;
+      if (existing?.dataset.localizedMeta === "true") existing.remove();
     }
 
     return () => {
-      if (node?.dataset.localizedMeta === "true" && node.parentNode)
-        node.parentNode.removeChild(node);
+      if (!node) return;
+      if (createdNode) {
+        if (node.parentNode) node.parentNode.removeChild(node);
+        return;
+      }
+      if (restoreManagedFlag) {
+        node.dataset.localizedMeta = "true";
+      } else {
+        delete node.dataset.localizedMeta;
+      }
+      node.textContent = restoreText;
     };
   }, [description, jsonLd, jsonLdId, ogDescription, ogTitle, title]);
 }

@@ -15,6 +15,8 @@ import { LanguageProvider, SUPPORTED_LANGS, useI18n, type Lang } from "@/lib/i18
 import { Toaster } from "@/components/ui/sonner";
 import { useLocalizedMeta } from "@/lib/use-localized-meta";
 
+const supportedLangSet = new Set<string>(SUPPORTED_LANGS);
+
 function NotFoundComponent() {
   const { t } = useI18n();
   useLocalizedMeta({
@@ -86,9 +88,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   staticData: { sitemap: false },
   validateSearch: (search: Record<string, unknown>): { lang?: Lang } => {
     const value = search["lang"];
-    return typeof value === "string" && (SUPPORTED_LANGS as string[]).includes(value)
-      ? { lang: value as Lang }
-      : {};
+    return typeof value === "string" && supportedLangSet.has(value) ? { lang: value as Lang } : {};
   },
   head: ({ match }) => {
     const norwegian = match.search.lang === "no";
