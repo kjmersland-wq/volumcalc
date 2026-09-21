@@ -9,6 +9,8 @@ type Dict = Record<string, { no: string; en: string }>;
 
 export const dict: Dict = {
   "nav.contact": { no: "Kontakt", en: "Contact" },
+  "nav.home": { no: "VolumCalc hjem", en: "VolumCalc home" },
+  "nav.chooseLanguage": { no: "Velg språk", en: "Choose language" },
   "contact.badge": { no: "Kontakt oss", en: "Contact us" },
   "contact.title": { no: "Snakk med VolumCalc", en: "Talk to VolumCalc" },
   "contact.sub": {
@@ -259,6 +261,15 @@ export const dict: Dict = {
     no: "Sjekk e-posten din for å bekrefte kontoen.",
     en: "Check your email to confirm your account.",
   },
+  "auth.companyFallback": { no: "Mitt flyttefirma", en: "My moving company" },
+  "auth.errorGeneric": {
+    no: "Noe gikk galt under innloggingen. Prøv igjen.",
+    en: "Something went wrong while signing in. Please try again.",
+  },
+  "auth.googleFailed": {
+    no: "Google-innloggingen mislyktes. Prøv igjen.",
+    en: "Google sign-in failed. Please try again.",
+  },
 
   "dash.title": { no: "Innkomne beregninger", en: "Incoming estimates" },
   "dash.empty": { no: "Ingen beregninger ennå.", en: "No estimates yet." },
@@ -273,7 +284,10 @@ export const dict: Dict = {
     en: "The estimate and all its rooms, items and requests will be permanently deleted.",
   },
   "dash.cancel": { no: "Avbryt", en: "Cancel" },
-  "dash.deleteFailed": { no: "Kunne ikke slette beregningen.", en: "Could not delete the estimate." },
+  "dash.deleteFailed": {
+    no: "Kunne ikke slette beregningen.",
+    en: "Could not delete the estimate.",
+  },
   "dash.link": { no: "Kopier opplastingslenke", en: "Copy upload link" },
   "dash.settings": { no: "Innstillinger", en: "Settings" },
   "dash.signout": { no: "Logg ut", en: "Sign out" },
@@ -309,6 +323,8 @@ export const dict: Dict = {
   },
   "price.private": { no: "For privatpersoner", en: "For private individuals" },
   "price.business": { no: "For flyttebyråer", en: "For moving companies" },
+  "price.businessName": { no: "Bedrift", en: "Business" },
+  "price.enterpriseName": { no: "Enterprise", en: "Enterprise" },
   "price.month": { no: "/mnd", en: "/mo" },
   "price.cta": { no: "Kom i gang", en: "Get started" },
   "price.popular": { no: "Mest populær", en: "Most popular" },
@@ -569,7 +585,10 @@ export const dict: Dict = {
   "dash.handled": { no: "Behandlet", en: "Handled" },
 
   "rep.titleEdit": { no: "Endre rapportnavn", en: "Rename report" },
-  "rep.titlePlaceholder": { no: "F.eks. Flytting Møviklia 4 → Oslo", en: "E.g. Move from Møviklia 4 → Oslo" },
+  "rep.titlePlaceholder": {
+    no: "F.eks. Flytting Møviklia 4 → Oslo",
+    en: "E.g. Move from Møviklia 4 → Oslo",
+  },
   "rep.titleSaved": { no: "Rapportnavnet er lagret", en: "Report name saved" },
 
   "mprice.title": { no: "Grovt prisestimat for flyttingen", en: "Rough moving price estimate" },
@@ -608,7 +627,10 @@ export const dict: Dict = {
   "mov.send": { no: "Send rapport til valgte firma", en: "Send report to selected companies" },
   "mov.sent": { no: "Rapporten er sendt", en: "Report sent" },
   "mov.failed": { no: "Utsending feilet", en: "Sending failed" },
-  "mov.missing": { no: "Fyll inn navn, din e-post og minst én mottaker.", en: "Fill in your name, email and at least one recipient." },
+  "mov.missing": {
+    no: "Fyll inn navn, din e-post og minst én mottaker.",
+    en: "Fill in your name, email and at least one recipient.",
+  },
 };
 
 export const LANG_LABELS: Record<Lang, string> = {

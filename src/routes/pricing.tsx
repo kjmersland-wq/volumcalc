@@ -46,7 +46,7 @@ function Pricing() {
 
   const plans = [
     {
-      name: "Business",
+      name: pricingCopy.businessName,
       price: "1 490",
       desc: pricingCopy.businessDesc,
       features: pricingCopy.businessFeatures,
@@ -54,7 +54,7 @@ function Pricing() {
       priceId: "volumcalc_business_monthly_nok",
     },
     {
-      name: "Enterprise",
+      name: pricingCopy.enterpriseName,
       price: pricingCopy.enterprisePrice,
       desc: pricingCopy.enterpriseDesc,
       features: pricingCopy.enterpriseFeatures,

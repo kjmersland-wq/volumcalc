@@ -45,6 +45,7 @@ import type { TablesUpdate } from "@/integrations/supabase/types";
 import { claimEstimate, getSharedEstimate } from "@/lib/estimates.functions";
 import { m3, money, shortDate } from "@/lib/format";
 import { recommendVehicle, recommendedVolume, storageUnitM2 } from "@/lib/volume";
+import { getStoredItemLabel, getStoredRoomLabel } from "@/lib/volume-database";
 
 export const Route = createFileRoute("/estimate/$id")({
   staticData: { sitemap: false },
@@ -512,13 +513,21 @@ function EstimatePage() {
         ? "rep.status.ready"
         : "rep.status.draft";
 
+  const displayItemName = (item: Item) => getStoredItemLabel(item, reportLang);
+  const displayRoomName = (name: string) => getStoredRoomLabel(name, reportLang);
+
   const groups = [
-    ...rooms.map((room) => ({ ...room, items: items.filter((item) => item.room_id === room.id) })),
+    ...rooms.map((room) => ({
+      ...room,
+      displayName: displayRoomName(room.name),
+      items: items.filter((item) => item.room_id === room.id),
+    })),
     ...(items.some((item) => !item.room_id)
       ? [
           {
             id: "other",
             name: rt("res.other"),
+            displayName: rt("res.other"),
             sort_order: 999,
             items: items.filter((item) => !item.room_id),
           },
@@ -537,8 +546,8 @@ function EstimatePage() {
       ["Room", "Item", "Qty", "L cm", "W cm", "H cm", "m3", "Included", "Tags", "Notes"],
       ...groups.flatMap((group) =>
         group.items.map((item) => [
-          group.name,
-          lang === "no" ? item.name_no || item.name : item.name,
+          group.displayName,
+          displayItemName(item),
           item.quantity,
           Math.round(item.length_cm),
           Math.round(item.width_cm),
@@ -665,7 +674,7 @@ function EstimatePage() {
                 </div>
               )}
               <p className="mt-1 text-sm text-muted-foreground">
-                {shortDate(estimate.created_at, lang)}
+                {shortDate(estimate.created_at, reportLang)}
                 {estimate.address ? ` · ${estimate.address}` : ""}
                 {estimate.customer_phone ? ` · ${estimate.customer_phone}` : ""}
               </p>
@@ -848,7 +857,7 @@ function EstimatePage() {
                     </form>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-bold">{group.name}</h2>
+                      <h2 className="text-lg font-bold">{group.displayName}</h2>
                       {canEdit && group.id !== "other" && (
                         <Button
                           size="icon"
@@ -898,30 +907,26 @@ function EstimatePage() {
                         <div className="min-w-0 flex-1">
                           {canEdit ? (
                             <Input
-                              defaultValue={lang === "no" ? item.name_no || item.name : item.name}
+                              defaultValue={displayItemName(item)}
                               maxLength={120}
                               className="h-9 max-w-xs font-medium"
                               aria-label={rt("res.item")}
                               onBlur={(e) => {
                                 const value = e.target.value.trim();
                                 if (!value) {
-                                  e.target.value =
-                                    lang === "no" ? item.name_no || item.name : item.name;
+                                  e.target.value = displayItemName(item);
                                   return;
                                 }
-                                const current =
-                                  lang === "no" ? item.name_no || item.name : item.name;
+                                const current = displayItemName(item);
                                 if (value === current) return;
                                 patchItem.mutate({
                                   item,
-                                  patch: lang === "no" ? { name_no: value } : { name: value },
+                                  patch: reportLang === "no" ? { name_no: value } : { name: value },
                                 });
                               }}
                             />
                           ) : (
-                            <p className="truncate font-medium">
-                              {lang === "no" ? item.name_no || item.name : item.name}
-                            </p>
+                            <p className="truncate font-medium">{displayItemName(item)}</p>
                           )}
 
                           <p className="mt-1 text-xs text-muted-foreground">
@@ -1003,7 +1008,7 @@ function EstimatePage() {
                                 <option value="">{rt("res.other")}</option>
                                 {rooms.map((room) => (
                                   <option key={room.id} value={room.id}>
-                                    {room.name}
+                                    {displayRoomName(room.name)}
                                   </option>
                                 ))}
                               </select>
@@ -1460,7 +1465,7 @@ function EstimatePage() {
                       {rt("rep.hourly")}
                     </p>
                     <p className="text-xl font-bold">
-                      {money(Number(hourly || 0) * Number(hours || 0), currency, lang)}
+                      {money(Number(hourly || 0) * Number(hours || 0), currency, reportLang)}
                     </p>
                     {company && !tenderMode && (
                       <>
@@ -1468,7 +1473,7 @@ function EstimatePage() {
                           {rt("rep.fixed")}
                         </p>
                         <p className="text-xl font-bold">
-                          {money(netVolume * Number(company.price_per_m3), currency, lang)}
+                          {money(netVolume * Number(company.price_per_m3), currency, reportLang)}
                         </p>
                       </>
                     )}

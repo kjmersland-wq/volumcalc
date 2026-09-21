@@ -54,7 +54,7 @@ function AuthPage() {
           password: form.password,
           options: {
             emailRedirectTo: `${window.location.origin}/dashboard`,
-            data: { company_name: form.company || "My Moving Company" },
+            data: { company_name: form.company || t("auth.companyFallback") },
           },
         });
         if (error) throw error;
@@ -66,8 +66,8 @@ function AuthPage() {
         });
         if (error) throw error;
       }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error");
+    } catch {
+      toast.error(t("auth.errorGeneric"));
     } finally {
       setBusy(false);
     }
@@ -78,7 +78,7 @@ function AuthPage() {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
-      toast.error(result.error.message ?? "Google sign-in failed");
+      toast.error(t("auth.googleFailed"));
       return;
     }
     if (result.redirected) return;

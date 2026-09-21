@@ -2,6 +2,21 @@ import type { Lang } from "./i18n";
 
 export function getPricingCopy(lang: Lang) {
   return {
+    businessName:
+      {
+        no: "Bedrift",
+        en: "Business",
+        sv: "Företag",
+        da: "Erhverv",
+        fi: "Yritys",
+        de: "Business",
+        nl: "Zakelijk",
+        fr: "Entreprise",
+        pl: "Biznes",
+        es: "Empresa",
+        it: "Business",
+        pt: "Empresas",
+      }[lang] ?? "Business",
     businessDesc:
       {
         no: "300 beregninger per måned",
@@ -116,18 +131,33 @@ export function getPricingCopy(lang: Lang) {
         it: "Volume illimitato",
         pt: "Volume ilimitado",
       }[lang] ?? "Unlimited volume",
+    enterpriseName:
+      {
+        no: "Enterprise",
+        en: "Enterprise",
+        sv: "Enterprise",
+        da: "Enterprise",
+        fi: "Enterprise",
+        de: "Enterprise",
+        nl: "Enterprise",
+        fr: "Enterprise",
+        pl: "Enterprise",
+        es: "Enterprise",
+        it: "Enterprise",
+        pt: "Enterprise",
+      }[lang] ?? "Enterprise",
     enterpriseFeatures: {
-      no: ["Alt i Business", "Flere avdelinger", "API og integrasjoner", "Egen kundekontakt"],
+      no: ["Alt i Bedrift", "Flere avdelinger", "API og integrasjoner", "Egen kundekontakt"],
       en: [
         "Everything in Business",
         "Multiple branches",
         "API and integrations",
         "Dedicated contact",
       ],
-      sv: ["Allt i Business", "Flera kontor", "API och integrationer", "Egen kontaktperson"],
-      da: ["Alt i Business", "Flere afdelinger", "API og integrationer", "Fast kontaktperson"],
+      sv: ["Allt i Företag", "Flera kontor", "API och integrationer", "Egen kontaktperson"],
+      da: ["Alt i Erhverv", "Flere afdelinger", "API og integrationer", "Fast kontaktperson"],
       fi: [
-        "Kaikki Business-paketista",
+        "Kaikki Yritys-paketista",
         "Useita toimipisteitä",
         "API ja integraatiot",
         "Oma yhteyshenkilö",
@@ -139,25 +169,25 @@ export function getPricingCopy(lang: Lang) {
         "Persönliche Ansprechperson",
       ],
       nl: [
-        "Alles uit Business",
+        "Alles uit Zakelijk",
         "Meerdere vestigingen",
         "API en integraties",
         "Vaste contactpersoon",
       ],
       fr: [
-        "Tout le contenu de Business",
+        "Tout ce qui est inclus dans Entreprise",
         "Plusieurs agences",
         "API et intégrations",
         "Interlocuteur dédié",
       ],
       pl: [
-        "Wszystko z pakietu Business",
+        "Wszystko z pakietu Biznes",
         "Wiele oddziałów",
         "API i integracje",
         "Dedykowany opiekun",
       ],
       es: [
-        "Todo lo de Business",
+        "Todo lo de Empresa",
         "Varias sucursales",
         "API e integraciones",
         "Persona de contacto dedicada",
@@ -169,7 +199,7 @@ export function getPricingCopy(lang: Lang) {
         "Referente dedicato",
       ],
       pt: [
-        "Tudo o que está no Business",
+        "Tudo o que está no plano Empresas",
         "Várias filiais",
         "API e integrações",
         "Contacto dedicado",

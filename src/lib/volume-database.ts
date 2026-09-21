@@ -474,3 +474,47 @@ export const VOLUME_DATABASE: Record<VolumeRoom, VolumeDatabaseItem[]> = {
     },
   ],
 };
+
+const ALL_ITEMS = Object.values(VOLUME_DATABASE).flat();
+
+function normalizeLabel(value: string) {
+  return value.trim().toLocaleLowerCase();
+}
+
+function findRoomByStoredName(name: string) {
+  const normalized = normalizeLabel(name);
+  return (Object.keys(ROOM_LABELS) as VolumeRoom[]).find((room) => {
+    if (normalizeLabel(room) === normalized) return true;
+    return Object.values(ROOM_LABELS[room]).some(
+      (label) => typeof label === "string" && normalizeLabel(label) === normalized,
+    );
+  });
+}
+
+function findItemByStoredName(name: string, nameNo?: string | null) {
+  const labels = [name, nameNo].filter(
+    (value): value is string => typeof value === "string" && value.length > 0,
+  );
+  return ALL_ITEMS.find((item) =>
+    labels.some((label) => {
+      const normalized = normalizeLabel(label);
+      if (normalizeLabel(item.name) === normalized || normalizeLabel(item.name_no) === normalized) {
+        return true;
+      }
+      return Object.values(ITEM_LABELS[item.key] ?? {}).some(
+        (translated) => typeof translated === "string" && normalizeLabel(translated) === normalized,
+      );
+    }),
+  );
+}
+
+export function getStoredRoomLabel(name: string, lang: Lang) {
+  const room = findRoomByStoredName(name);
+  return room ? getRoomLabel(room, lang) : name;
+}
+
+export function getStoredItemLabel(item: Pick<VolumeDatabaseItem, "name" | "name_no">, lang: Lang) {
+  const match = findItemByStoredName(item.name, item.name_no);
+  if (!match) return lang === "no" ? item.name_no : item.name;
+  return getItemLabel(match, lang);
+}
