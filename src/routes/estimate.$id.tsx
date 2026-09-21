@@ -514,8 +514,7 @@ function EstimatePage() {
         : "rep.status.draft";
 
   const displayItemName = (item: Item) => getStoredItemLabel(item, reportLang);
-  const editableItemName = (item: Item) =>
-    reportLang === "no" ? item.name_no || item.name : item.name;
+  const editableItemName = (item: Item) => (lang === "no" ? item.name_no || item.name : item.name);
   const displayRoomName = (name: string) => getStoredRoomLabel(name, reportLang);
 
   const groups = [
@@ -923,7 +922,7 @@ function EstimatePage() {
                                 if (value === current) return;
                                 patchItem.mutate({
                                   item,
-                                  patch: reportLang === "no" ? { name_no: value } : { name: value },
+                                  patch: lang === "no" ? { name_no: value } : { name: value },
                                 });
                               }}
                             />
