@@ -28,13 +28,19 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link to="/moving-inventory-list" className="transition-colors hover:text-foreground">
-                  {lang === "no" ? "Inventarliste-guide" : "Inventory guide"}
+                <Link
+                  to="/moving-inventory-list"
+                  className="transition-colors hover:text-foreground"
+                >
+                  {t("footer.inventoryGuide")}
                 </Link>
               </li>
               <li>
-                <Link to={lang === "no" ? "/flyttebil-kalkulator" : "/en/moving-van-calculator"} className="transition-colors hover:text-foreground">
-                  {lang === "no" ? "Flyttebil-kalkulator" : "Van calculator"}
+                <Link
+                  to={lang === "no" ? "/flyttebil-kalkulator" : "/en/moving-van-calculator"}
+                  className="transition-colors hover:text-foreground"
+                >
+                  {t("footer.vanCalculator")}
                 </Link>
               </li>
             </ul>

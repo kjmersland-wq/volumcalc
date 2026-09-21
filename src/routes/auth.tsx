@@ -10,15 +10,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
 import { VolumCalcLogo } from "@/components/VolumCalcLogo";
+import { useLocalizedMeta } from "@/lib/use-localized-meta";
 
 export const Route = createFileRoute("/auth")({
   staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Company login — VolumCalc" },
-      { name: "description", content: "Sign in to manage incoming video/checklist estimates and quotes." },
+      {
+        name: "description",
+        content: "Sign in to manage incoming video/checklist estimates and quotes.",
+      },
       { property: "og:title", content: "Company login — VolumCalc" },
-      { property: "og:description", content: "Sign in to manage incoming video/checklist estimates and quotes." },
+      {
+        property: "og:description",
+        content: "Sign in to manage incoming video/checklist estimates and quotes.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -28,6 +35,10 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const { t } = useI18n();
+  useLocalizedMeta({
+    title: `${t("auth.title")} — VolumCalc`,
+    description: t("auth.metaDescription"),
+  });
   const navigate = useNavigate();
   const { session } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -48,7 +59,7 @@ function AuthPage() {
           password: form.password,
           options: {
             emailRedirectTo: `${window.location.origin}/dashboard`,
-            data: { company_name: form.company || "My Moving Company" },
+            data: { company_name: form.company || t("auth.companyFallback") },
           },
         });
         if (error) throw error;
@@ -61,7 +72,7 @@ function AuthPage() {
         if (error) throw error;
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error");
+      toast.error(error instanceof Error && error.message ? error.message : t("auth.errorGeneric"));
     } finally {
       setBusy(false);
     }
@@ -72,7 +83,7 @@ function AuthPage() {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
-      toast.error(result.error.message ?? "Google sign-in failed");
+      toast.error(result.error.message || t("auth.googleFailed"));
       return;
     }
     if (result.redirected) return;
@@ -125,7 +136,7 @@ function AuthPage() {
 
         <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
           <span className="h-px flex-1 bg-border" />
-          or
+          {t("auth.or")}
           <span className="h-px flex-1 bg-border" />
         </div>
 

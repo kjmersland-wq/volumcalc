@@ -15,9 +15,15 @@ export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — VolumCalc" },
-      { name: "description", content: "Review incoming room video/checklist submissions and volume estimates." },
+      {
+        name: "description",
+        content: "Review incoming room video/checklist submissions and volume estimates.",
+      },
       { property: "og:title", content: "Dashboard — VolumCalc" },
-      { property: "og:description", content: "Review incoming room video/checklist submissions and volume estimates." },
+      {
+        property: "og:description",
+        content: "Review incoming room video/checklist submissions and volume estimates.",
+      },
       { name: "robots", content: "noindex" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -50,31 +56,35 @@ function DashboardLayout() {
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
           <div className="flex items-center">
-          <Link to="/" aria-label="VolumCalc home">
-            <VolumCalcLogo markClassName="size-9" />
-          </Link>
-          {company?.company_name && (
-            <div className="ml-3 hidden items-center gap-2 border-l border-border pl-3 sm:flex">
-              {company.logo_url ? (
-                <img src={company.logo_url} alt="" className="h-7 w-auto max-w-24 object-contain" />
-              ) : (
-                <span
-                  className="flex size-7 items-center justify-center rounded-lg text-xs font-bold text-white"
-                  style={{ backgroundColor: company.brand_color }}
-                >
-                  {company.company_name.slice(0, 1).toUpperCase()}
-                </span>
-              )}
-              <div className="leading-tight">
-                <p className="max-w-44 truncate text-sm font-semibold">{company.company_name}</p>
-                {(company.org_number || company.phone) && (
-                  <p className="max-w-44 truncate text-xs text-muted-foreground">
-                    {[company.org_number, company.phone].filter(Boolean).join(" · ")}
-                  </p>
+            <Link to="/" aria-label={t("nav.home")}>
+              <VolumCalcLogo markClassName="size-9" />
+            </Link>
+            {company?.company_name && (
+              <div className="ml-3 hidden items-center gap-2 border-l border-border pl-3 sm:flex">
+                {company.logo_url ? (
+                  <img
+                    src={company.logo_url}
+                    alt=""
+                    className="h-7 w-auto max-w-24 object-contain"
+                  />
+                ) : (
+                  <span
+                    className="flex size-7 items-center justify-center rounded-lg text-xs font-bold text-white"
+                    style={{ backgroundColor: company.brand_color }}
+                  >
+                    {company.company_name.slice(0, 1).toUpperCase()}
+                  </span>
                 )}
+                <div className="leading-tight">
+                  <p className="max-w-44 truncate text-sm font-semibold">{company.company_name}</p>
+                  {(company.org_number || company.phone) && (
+                    <p className="max-w-44 truncate text-xs text-muted-foreground">
+                      {[company.org_number, company.phone].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
           </div>
           <div className="flex items-center gap-2">
             <LanguageToggle className="mr-1" />
@@ -84,7 +94,11 @@ function DashboardLayout() {
               onClick={() => {
                 navigator.clipboard.writeText(
                   `${window.location.origin}/upload${
-                    company?.upload_token ? `?k=${company.upload_token}` : session ? `?c=${session.user.id}` : ""
+                    company?.upload_token
+                      ? `?k=${company.upload_token}`
+                      : session
+                        ? `?c=${session.user.id}`
+                        : ""
                   }`,
                 );
                 toast.success(t("res.copied"));
@@ -99,7 +113,7 @@ function DashboardLayout() {
               </Link>
             </Button>
             {isAdmin && (
-              <Button asChild variant="ghost" size="sm" title="Admin">
+              <Button asChild variant="ghost" size="sm" title={t("admin.nav")}>
                 <Link to="/dashboard/admin">
                   <ShieldCheck className="size-4" />
                 </Link>

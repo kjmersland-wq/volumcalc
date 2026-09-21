@@ -63,7 +63,7 @@ export function MovePriceEstimator({ volumeM3, currency, rt, defaults, onChange 
             value={from}
             onChange={(e) => setFrom(e.target.value)}
             onBlur={() => push({})}
-            placeholder="Kristiansand"
+            placeholder={rt("mprice.fromPlaceholder")}
           />
         </div>
         <div className="space-y-1.5">
@@ -73,7 +73,7 @@ export function MovePriceEstimator({ volumeM3, currency, rt, defaults, onChange 
             value={to}
             onChange={(e) => setTo(e.target.value)}
             onBlur={() => push({})}
-            placeholder="Oslo"
+            placeholder={rt("mprice.toPlaceholder")}
           />
         </div>
         <div className="space-y-1.5">
@@ -89,7 +89,12 @@ export function MovePriceEstimator({ volumeM3, currency, rt, defaults, onChange 
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="mv-floors">{rt("mprice.floors")}</Label>
-          <Input id="mv-floors" inputMode="numeric" value={floors} onChange={(e) => setFloors(e.target.value)} />
+          <Input
+            id="mv-floors"
+            inputMode="numeric"
+            value={floors}
+            onChange={(e) => setFloors(e.target.value)}
+          />
         </div>
         <div className="flex items-center gap-2 pt-6">
           <Switch id="mv-pack" checked={packing} onCheckedChange={setPacking} />
@@ -98,7 +103,9 @@ export function MovePriceEstimator({ volumeM3, currency, rt, defaults, onChange 
       </div>
 
       <div className="mt-5 rounded-lg bg-primary/5 p-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{rt("mprice.range")}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {rt("mprice.range")}
+        </p>
         <p className="mt-1 text-3xl font-bold text-primary">
           {fmt(low)} – {fmt(high)}
         </p>

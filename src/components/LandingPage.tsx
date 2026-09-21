@@ -4,11 +4,16 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ContactForm, ContactDetails } from "@/components/ContactForm";
 import { useI18n } from "@/lib/i18n";
+import { useLocalizedMeta } from "@/lib/use-localized-meta";
 import heroRoom from "@/assets/hero-room.jpg";
 import { Link } from "@tanstack/react-router";
 
 export function LandingPage() {
   const { t } = useI18n();
+  useLocalizedMeta({
+    title: `VolumCalc — ${t("hero.badge")}`,
+    description: t("hero.sub"),
+  });
 
   const steps = [
     { icon: Camera, title: t("how.1t"), body: t("how.1d") },
@@ -69,7 +74,7 @@ export function LandingPage() {
             <div className="relative">
               <img
                 src={heroRoom}
-                alt="Living room with furniture and moving boxes ready to be measured"
+                alt={t("hero.imageAlt")}
                 width={1408}
                 height={1008}
                 className="w-full rounded-2xl border border-border object-cover shadow-[var(--shadow-lift)]"
@@ -145,7 +150,9 @@ export function LandingPage() {
         <section id="kontakt" className="border-t border-border bg-muted/30">
           <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 lg:grid-cols-[1fr_1.2fr]">
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t("contact.homeTitle")}</h2>
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                {t("contact.homeTitle")}
+              </h2>
               <p className="mt-3 text-muted-foreground">{t("contact.homeSub")}</p>
               <div className="mt-6">
                 <ContactDetails />

@@ -13,6 +13,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { useI18n } from "@/lib/i18n";
+import { getPricingCopy } from "@/lib/pricing-copy";
+import { useLocalizedMeta } from "@/lib/use-localized-meta";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/pricing")({
@@ -40,33 +42,27 @@ export const Route = createFileRoute("/pricing")({
 
 function Pricing() {
   const { t, lang } = useI18n();
+  useLocalizedMeta({
+    title: `${t("price.title")} — VolumCalc`,
+    description: t("price.sub"),
+  });
   const [checkout, setCheckout] = useState<{ priceId: string; name: string } | null>(null);
+  const pricingCopy = getPricingCopy(lang);
 
   const plans = [
     {
-      name: "Business",
+      name: pricingCopy.businessName,
       price: "1 490",
-      desc: lang === "no" ? "300 beregninger per måned" : "300 estimates per month",
-      features:
-        lang === "no"
-          ? ["Alle basisfunksjoner", "Egen logo og farger", "Pris per m³ og tilbud", "PDF-rapport"]
-          : ["All core features", "Your logo and colours", "Rate per m³ and quotes", "PDF report"],
+      desc: pricingCopy.businessDesc,
+      features: pricingCopy.businessFeatures,
       featured: true,
       priceId: "volumcalc_business_monthly_nok",
     },
     {
-      name: "Enterprise",
-      price: lang === "no" ? "Kontakt oss" : "Talk to us",
-      desc: lang === "no" ? "Ubegrenset volum" : "Unlimited volume",
-      features:
-        lang === "no"
-          ? ["Alt i Business", "Flere avdelinger", "API og integrasjoner", "Egen kundekontakt"]
-          : [
-              "Everything in Business",
-              "Multiple branches",
-              "API and integrations",
-              "Dedicated contact",
-            ],
+      name: pricingCopy.enterpriseName,
+      price: pricingCopy.enterprisePrice,
+      desc: pricingCopy.enterpriseDesc,
+      features: pricingCopy.enterpriseFeatures,
       featured: false,
       priceId: null,
     },
@@ -74,23 +70,17 @@ function Pricing() {
 
   const privatePlans = [
     {
-      name: lang === "no" ? "Én beregning" : "Single estimate",
+      name: pricingCopy.singleName,
       price: "129",
-      desc: lang === "no" ? "For én flytting" : "For one move",
-      features:
-        lang === "no"
-          ? ["Romvideo + sjekkliste", "Romvis sortering", "PDF-rapport"]
-          : ["Room video + checklist", "Room grouping", "PDF report"],
+      desc: pricingCopy.singleDesc,
+      features: pricingCopy.singleFeatures,
       priceId: "volumcalc_single_estimate_nok",
     },
     {
-      name: lang === "no" ? "3 beregninger" : "3 estimates",
+      name: pricingCopy.bundleName,
       price: "299",
-      desc: lang === "no" ? "Spar 88 NOK" : "Save 88 NOK",
-      features:
-        lang === "no"
-          ? ["3 komplette beregninger", "Romvideo + sjekkliste", "PDF-rapporter"]
-          : ["3 complete estimates", "Room video + checklist", "PDF reports"],
+      desc: pricingCopy.bundleDesc,
+      features: pricingCopy.bundleFeatures,
       priceId: "volumcalc_three_estimates_nok",
     },
   ];

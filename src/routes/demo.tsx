@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useI18n } from "@/lib/i18n";
+import { useLocalizedMeta } from "@/lib/use-localized-meta";
 
 export const Route = createFileRoute("/demo")({
   staticData: { sitemap: true },
@@ -39,13 +40,74 @@ const DEMO = {
 };
 
 const ROWS = [
-  { id: "A91F20C4", customer: "Familien Hansen", address: "Skippergata 8, Kristiansand", volume: "34,2 m³", status: "approved" },
-  { id: "77D3B0A1", customer: "Ingrid Lie", address: "Vestre Strandgate 2, Kristiansand", volume: "18,6 m³", status: "pending" },
-  { id: "5C8E1AB9", customer: "Bergli Eiendom", address: "Setesdalsveien 41, Vennesla", volume: "62,9 m³", status: "pending" },
+  {
+    id: "A91F20C4",
+    customer: "Familien Hansen",
+    address: "Skippergata 8, Kristiansand",
+    volume: "34,2 m³",
+    status: "approved",
+  },
+  {
+    id: "77D3B0A1",
+    customer: "Ingrid Lie",
+    address: "Vestre Strandgate 2, Kristiansand",
+    volume: "18,6 m³",
+    status: "pending",
+  },
+  {
+    id: "5C8E1AB9",
+    customer: "Bergli Eiendom",
+    address: "Setesdalsveien 41, Vennesla",
+    volume: "62,9 m³",
+    status: "pending",
+  },
 ];
 
 function DemoPage() {
   const { t, lang } = useI18n();
+  useLocalizedMeta({
+    title: `${t("set.title")} demo — VolumCalc`,
+    description: t("set.brandingHelp"),
+  });
+  const orgNumberLabel =
+    {
+      no: "Org.nr.",
+      en: "Reg. no.",
+      sv: "Org.nr.",
+      da: "CVR-nr.",
+      fi: "Y-tunnus",
+      de: "Reg.-Nr.",
+      nl: "KvK-nr.",
+      fr: "N° d’entreprise",
+      pl: "Nr rej.",
+      es: "N.º reg.",
+      it: "N. reg.",
+      pt: "N.º reg.",
+    }[lang] ?? "Reg. no.";
+
+  const intlLocale =
+    {
+      no: "nb-NO",
+      en: "en-GB",
+      sv: "sv-SE",
+      da: "da-DK",
+      dk: "da-DK",
+      fi: "fi-FI",
+      de: "de-DE",
+      nl: "nl-NL",
+      fr: "fr-FR",
+      pl: "pl-PL",
+      es: "es-ES",
+      it: "it-IT",
+      pt: "pt-PT",
+    }[lang] ?? "en-GB";
+
+  const formatDemoDate = (day: number) =>
+    new Intl.DateTimeFormat(intlLocale, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(Date.UTC(2026, 8, day)));
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
@@ -61,7 +123,7 @@ function DemoPage() {
             <div className="leading-tight">
               <p className="text-sm font-semibold">{DEMO.name}</p>
               <p className="text-xs text-muted-foreground">
-                {lang === "no" ? "Org.nr." : "Reg. no."} {DEMO.org} · {DEMO.phone}
+                {orgNumberLabel} {DEMO.org} · {DEMO.phone}
               </p>
             </div>
             <Badge variant="secondary" className="ml-1">
@@ -92,7 +154,9 @@ function DemoPage() {
           <Lock className="size-5 text-primary" />
           <div className="flex-1 text-sm">
             <p className="font-medium">{t("admin.link")}</p>
-            <p className="truncate text-muted-foreground">https://volumcalc.com/upload?k={DEMO.token}</p>
+            <p className="truncate text-muted-foreground">
+              https://volumcalc.com/upload?k={DEMO.token}
+            </p>
           </div>
           <Button
             size="sm"
@@ -116,20 +180,23 @@ function DemoPage() {
           </div>
           <ul className="divide-y divide-border">
             {ROWS.map((row, index) => (
-              <li key={row.id} className="grid grid-cols-2 items-center gap-3 px-5 py-4 sm:grid-cols-[2fr_1fr_1fr_1fr]">
+              <li
+                key={row.id}
+                className="grid grid-cols-2 items-center gap-3 px-5 py-4 sm:grid-cols-[2fr_1fr_1fr_1fr]"
+              >
                 <div className="col-span-2 sm:col-span-1">
                   <p className="font-medium">{row.customer}</p>
                   <p className="text-xs text-muted-foreground">{row.address}</p>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  {lang === "no" ? `0${index + 3}.09.2026` : `Sep 0${index + 3}, 2026`}
-                </span>
+                <span className="text-sm text-muted-foreground">{formatDemoDate(index + 3)}</span>
                 <span className="text-sm font-semibold">{row.volume}</span>
                 <span>
                   <Badge
                     variant="secondary"
                     className={
-                      row.status === "approved" ? "bg-success/15 text-success" : "bg-warning/20 text-warning-foreground"
+                      row.status === "approved"
+                        ? "bg-success/15 text-success"
+                        : "bg-warning/20 text-warning-foreground"
                     }
                   >
                     {row.status === "approved" ? t("dash.approved") : t("dash.pending")}

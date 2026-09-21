@@ -1,19 +1,22 @@
 import { Copy, Facebook, Linkedin, Mail, MessageCircle, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useI18n } from "@/lib/i18n";
+import { translate, useI18n, type Lang } from "@/lib/i18n";
 
 type ShareButtonsProps = {
   title: string;
   text: string;
+  langOverride?: Lang;
 };
 
-export function ShareButtons({ title, text }: ShareButtonsProps) {
+export function ShareButtons({ title, text, langOverride }: ShareButtonsProps) {
   const { t, lang } = useI18n();
+  const activeLang = langOverride ?? lang;
+  const shareText = (key: string) => translate(key, activeLang);
 
   function getShareUrl() {
     const url = new URL(window.location.href);
-    url.searchParams.set("lang", lang);
+    url.searchParams.set("lang", activeLang);
     return url.toString();
   }
 
@@ -23,7 +26,7 @@ export function ShareButtons({ title, text }: ShareButtonsProps) {
 
   async function copyLink() {
     await navigator.clipboard.writeText(getShareUrl());
-    toast.success(t("res.copied"));
+    toast.success(langOverride ? translate("res.copied", activeLang) : t("res.copied"));
   }
 
   async function nativeShare() {
@@ -49,31 +52,87 @@ export function ShareButtons({ title, text }: ShareButtonsProps) {
     <section className="no-print mt-6 border-y border-border py-5" aria-labelledby="share-heading">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 id="share-heading" className="font-semibold">{t("share.title")}</h2>
-          <p className="text-sm text-muted-foreground">{t("share.sub")}</p>
+          <h2 id="share-heading" className="font-semibold">
+            {shareText("share.title")}
+          </h2>
+          <p className="text-sm text-muted-foreground">{shareText("share.sub")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" size="icon" onClick={() => shareUrl("https://wa.me/?text=", true)} aria-label={t("share.whatsapp")} title={t("share.whatsapp")}>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => shareUrl("https://wa.me/?text=", true)}
+            aria-label={shareText("share.whatsapp")}
+            title={shareText("share.whatsapp")}
+          >
             <MessageCircle className="size-4" />
           </Button>
-          <Button type="button" variant="outline" size="icon" onClick={() => shareUrl("https://www.facebook.com/sharer/sharer.php?u=")} aria-label={t("share.facebook")} title={t("share.facebook")}>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => shareUrl("https://www.facebook.com/sharer/sharer.php?u=")}
+            aria-label={shareText("share.facebook")}
+            title={shareText("share.facebook")}
+          >
             <Facebook className="size-4" />
           </Button>
-          <Button type="button" variant="outline" size="icon" onClick={() => shareUrl("https://www.linkedin.com/sharing/share-offsite/?url=")} aria-label={t("share.linkedin")} title={t("share.linkedin")}>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => shareUrl("https://www.linkedin.com/sharing/share-offsite/?url=")}
+            aria-label={shareText("share.linkedin")}
+            title={shareText("share.linkedin")}
+          >
             <Linkedin className="size-4" />
           </Button>
-          <Button type="button" variant="outline" size="icon" onClick={() => openShare(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(getShareUrl())}`)} aria-label={t("share.x")} title={t("share.x")}>
-            <span className="text-sm font-bold" aria-hidden="true">X</span>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() =>
+              openShare(
+                `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(getShareUrl())}`,
+              )
+            }
+            aria-label={shareText("share.x")}
+            title={shareText("share.x")}
+          >
+            <span className="text-sm font-bold" aria-hidden="true">
+              X
+            </span>
           </Button>
-          <Button type="button" variant="outline" size="icon" onClick={shareByEmail} aria-label={t("share.email")} title={t("share.email")}>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={shareByEmail}
+            aria-label={shareText("share.email")}
+            title={shareText("share.email")}
+          >
             <Mail className="size-4" />
           </Button>
-          <Button type="button" variant="outline" size="icon" onClick={copyLink} aria-label={t("res.share")} title={t("res.share")}>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={copyLink}
+            aria-label={shareText("res.share")}
+            title={shareText("res.share")}
+          >
             <Copy className="size-4" />
           </Button>
-          <Button type="button" size="sm" onClick={nativeShare}>
+          <Button
+            type="button"
+            size="sm"
+            onClick={nativeShare}
+            aria-label={shareText("share.more")}
+            title={shareText("share.more")}
+          >
             <Share2 className="size-4" />
-            {t("share.more")}
+            {shareText("share.more")}
           </Button>
         </div>
       </div>

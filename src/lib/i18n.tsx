@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { extraTranslations } from "./i18n.translations";
+import { localizedTranslations } from "./i18n.more";
 
 export type Lang =
   "no" | "en" | "sv" | "da" | "fi" | "de" | "nl" | "fr" | "pl" | "es" | "it" | "pt";
@@ -8,6 +9,25 @@ type Dict = Record<string, { no: string; en: string }>;
 
 export const dict: Dict = {
   "nav.contact": { no: "Kontakt", en: "Contact" },
+  "nav.home": { no: "VolumCalc hjem", en: "VolumCalc home" },
+  "nav.chooseLanguage": { no: "Velg språk", en: "Choose language" },
+  "ui.close": { no: "Lukk", en: "Close" },
+  "ui.breadcrumb": { no: "Brødsmuler", en: "Breadcrumb" },
+  "ui.more": { no: "Flere", en: "More" },
+  "ui.pagination": { no: "Sidenavigasjon", en: "Pagination" },
+  "ui.previous": { no: "Forrige", en: "Previous" },
+  "ui.next": { no: "Neste", en: "Next" },
+  "ui.previousPage": { no: "Gå til forrige side", en: "Go to previous page" },
+  "ui.nextPage": { no: "Gå til neste side", en: "Go to next page" },
+  "ui.morePages": { no: "Flere sider", en: "More pages" },
+  "ui.previousSlide": { no: "Forrige lysbilde", en: "Previous slide" },
+  "ui.nextSlide": { no: "Neste lysbilde", en: "Next slide" },
+  "ui.toggleSidebar": { no: "Veksle sidepanel", en: "Toggle sidebar" },
+  "ui.sidebar": { no: "Sidepanel", en: "Sidebar" },
+  "ui.mobileSidebarDescription": {
+    no: "Viser sidepanelet på mobil.",
+    en: "Displays the sidebar on mobile.",
+  },
   "contact.badge": { no: "Kontakt oss", en: "Contact us" },
   "contact.title": { no: "Snakk med VolumCalc", en: "Talk to VolumCalc" },
   "contact.sub": {
@@ -49,7 +69,7 @@ export const dict: Dict = {
     en: "Usually within one business day",
   },
   "contact.aside": {
-    no: "Er du flyttebyrå og vil teste VolumCalc med egne bilder? Nevn det i meldingen, så setter vi opp en gratis prøvekonto.",
+    no: "Er du flyttebyrå og vil teste VolumCalc med egen video- og sjekklisteflyt? Nevn det i meldingen, så setter vi opp en gratis prøvekonto.",
     en: "Running a moving company and want to test VolumCalc with your own video + checklist flow? Mention it and we will set up a free trial account.",
   },
   "contact.homeTitle": { no: "Har du spørsmål?", en: "Got a question?" },
@@ -77,6 +97,10 @@ export const dict: Dict = {
     no: "VolumCalc hjelper deg med å gjøre en rolig runde gjennom rommene, og gjør det om til en tydelig, rominndelt volumberegning. Perfekt når du vil planlegge flyttingen i fred og ro.",
     en: "VolumCalc helps you turn a quick wander through your rooms into a beautifully clear, room-by-room volume estimate. Perfectly sorted for your moving plans.",
   },
+  "hero.imageAlt": {
+    no: "Stue med møbler og flyttekasser klar for volumberegning",
+    en: "Living room with furniture and moving boxes ready for a volume estimate",
+  },
   "hero.cta": { no: "Start en gratis beregning", en: "Start a free estimate" },
   "hero.cta2": { no: "For flyttebyråer", en: "For moving companies" },
   "hero.stat1": { no: "raskere enn befaring", en: "faster than a survey" },
@@ -103,7 +127,7 @@ export const dict: Dict = {
   "feat.title": { no: "Bygget for flyttebransjen", en: "Built for the moving industry" },
   "feat.1t": { no: "Nøyaktige kubikkmål", en: "Accurate cubic volume" },
   "feat.1d": {
-    no: "Realistiske standardmål per møbeltype, justert etter det AI-en ser på bildet.",
+    no: "Realistiske standardmål per møbeltype i en strukturert, romvis sjekkliste.",
     en: "Realistic reference dimensions per furniture type in a structured, room-by-room checklist.",
   },
   "feat.2t": { no: "Sikkerhetsgrad", en: "User-verified list" },
@@ -139,7 +163,7 @@ export const dict: Dict = {
   "upload.guideTitle": { no: "Slik gjør vi det sammen", en: "How it works" },
   "upload.guide": {
     no: "Slik gjør vi det sammen: Velg rommet du står i nå, og ta en rolig og behagelig runde med kameraet. Du har kjempegod tid og filmer helt i ditt eget tempo. Du trenger ikke å tenke på opptelling underveis – det fikser vi sammen på sjekklisten etterpå!",
-    en: "Choose the room you’re in and take a steady 15-second sweep on your phone. Afterwards, you can go through the checklist in peace and quiet.",
+    en: "Choose the room you’re in and take a steady, relaxed sweep on your phone. Afterwards, you can go through the checklist in peace and quiet.",
   },
   "upload.drop": {
     no: "Trykk her for å velge rom før du starter den koselige videorunden på mobilen din",
@@ -158,7 +182,7 @@ export const dict: Dict = {
     no: "Stopp filming og se sjekklisten",
     en: "Stop filming and view checklist",
   },
-  "upload.photos": { no: "bilder valgt", en: "items selected" },
+  "upload.photos": { no: "gjenstander valgt", en: "items selected" },
   "upload.details": { no: "Kontaktinformasjon (valgfritt)", en: "Contact details (optional)" },
   "upload.name": { no: "Navn", en: "Name" },
   "upload.phone": { no: "Telefon", en: "Phone" },
@@ -190,9 +214,21 @@ export const dict: Dict = {
     en: "The video + checklist flow is temporarily unavailable. Please try again shortly.",
   },
   "upload.aiBusy": {
-    no: "AI-tjenesten er travel akkurat nå. Prøv igjen om litt.",
+    no: "Tjenesten er travel akkurat nå. Prøv igjen om litt.",
     en: "The service is busy right now. Please try again shortly.",
   },
+  "upload.cameraUnsupported": {
+    no: "Det ser ut til at nettleseren din ikke støtter kamerabruk ennå.",
+    en: "Looks like your browser doesn’t support camera recording just yet.",
+  },
+  "upload.cameraFailed": {
+    no: "Vi fikk ikke startet kameraet akkurat nå — prøv gjerne én gang til.",
+    en: "We couldn’t start your camera just now — please try once more.",
+  },
+  "upload.cameraReady": { no: "Gjør kameraet klart …", en: "Getting your camera ready …" },
+  "upload.savingBusy": { no: "Lagrer beregningen din …", en: "Saving your estimate …" },
+  "upload.decreaseQty": { no: "Reduser antall", en: "Decrease quantity" },
+  "upload.increaseQty": { no: "Øk antall", en: "Increase quantity" },
 
   "res.title": { no: "Volumberegning", en: "Volume estimate" },
   "res.total": { no: "Totalt volum", en: "Total volume" },
@@ -205,7 +241,7 @@ export const dict: Dict = {
   "res.pdf": { no: "Last ned PDF", en: "Download PDF" },
   "res.share": { no: "Kopier delingslenke", en: "Copy share link" },
   "res.copied": { no: "Lenke kopiert", en: "Link copied" },
-  "res.photos": { no: "Bilder", en: "Photos" },
+  "res.photos": { no: "Registrering", en: "Photos" },
   "res.room": { no: "Rom", en: "Room" },
   "res.renameRoom": { no: "Gi rommet nytt navn", en: "Rename room" },
   "res.moveRoom": { no: "Flytt til rom", en: "Move to room" },
@@ -236,6 +272,7 @@ export const dict: Dict = {
   "auth.password": { no: "Passord", en: "Password" },
   "auth.company": { no: "Firmanavn", en: "Company name" },
   "auth.google": { no: "Fortsett med Google", en: "Continue with Google" },
+  "auth.or": { no: "eller", en: "or" },
   "auth.toSignup": { no: "Har du ikke konto? Opprett en", en: "No account? Create one" },
   "auth.toSignin": {
     no: "Har du allerede konto? Logg inn",
@@ -245,8 +282,25 @@ export const dict: Dict = {
     no: "Sjekk e-posten din for å bekrefte kontoen.",
     en: "Check your email to confirm your account.",
   },
+  "auth.companyFallback": { no: "Mitt flyttefirma", en: "My moving company" },
+  "auth.errorGeneric": {
+    no: "Noe gikk galt under innloggingen. Prøv igjen.",
+    en: "Something went wrong while signing in. Please try again.",
+  },
+  "auth.googleFailed": {
+    no: "Google-innloggingen mislyktes. Prøv igjen.",
+    en: "Google sign-in failed. Please try again.",
+  },
+  "auth.metaDescription": {
+    no: "Logg inn og administrer videolenkene, sjekklistene og volumrapportene dine i VolumCalc.",
+    en: "Sign in to manage your video links, checklists and volume reports in VolumCalc.",
+  },
 
   "dash.title": { no: "Innkomne beregninger", en: "Incoming estimates" },
+  "dash.metaDescription": {
+    no: "Se innkomne beregninger, følg opp kunder og del VolumCalc-rapporter fra dashbordet.",
+    en: "Review incoming estimates, follow up customers and share VolumCalc reports from your dashboard.",
+  },
   "dash.empty": { no: "Ingen beregninger ennå.", en: "No estimates yet." },
   "dash.customer": { no: "Kunde", en: "Customer" },
   "dash.date": { no: "Mottatt", en: "Received" },
@@ -259,7 +313,10 @@ export const dict: Dict = {
     en: "The estimate and all its rooms, items and requests will be permanently deleted.",
   },
   "dash.cancel": { no: "Avbryt", en: "Cancel" },
-  "dash.deleteFailed": { no: "Kunne ikke slette beregningen.", en: "Could not delete the estimate." },
+  "dash.deleteFailed": {
+    no: "Kunne ikke slette beregningen.",
+    en: "Could not delete the estimate.",
+  },
   "dash.link": { no: "Kopier opplastingslenke", en: "Copy upload link" },
   "dash.settings": { no: "Innstillinger", en: "Settings" },
   "dash.signout": { no: "Logg ut", en: "Sign out" },
@@ -273,7 +330,7 @@ export const dict: Dict = {
   "dash.pending": { no: "Til gjennomgang", en: "Pending review" },
   "dash.saveItem": { no: "Lagre", en: "Save" },
   "dash.deleteItem": { no: "Slett", en: "Delete" },
-  "dash.editing": { no: "Rediger AI-resultatet", en: "Edit the checklist result" },
+  "dash.editing": { no: "Rediger sjekklistens resultat", en: "Edit the checklist result" },
 
   "set.title": { no: "Firmaprofil", en: "Company profile" },
   "set.name": { no: "Firmanavn", en: "Company name" },
@@ -295,6 +352,8 @@ export const dict: Dict = {
   },
   "price.private": { no: "For privatpersoner", en: "For private individuals" },
   "price.business": { no: "For flyttebyråer", en: "For moving companies" },
+  "price.businessName": { no: "Bedrift", en: "Business" },
+  "price.enterpriseName": { no: "Enterprise", en: "Enterprise" },
   "price.month": { no: "/mnd", en: "/mo" },
   "price.cta": { no: "Kom i gang", en: "Get started" },
   "price.popular": { no: "Mest populær", en: "Most popular" },
@@ -542,6 +601,8 @@ export const dict: Dict = {
     en: "Purchase terms and right of withdrawal",
   },
   "footer.about": { no: "Om oss", en: "About us" },
+  "footer.inventoryGuide": { no: "Inventarliste-guide", en: "Inventory guide" },
+  "footer.vanCalculator": { no: "Flyttebil-kalkulator", en: "Van calculator" },
   "footer.builtBy": {
     no: "Utviklet og drevet av KM TECH LABS i Kristiansand, Norge · Org.nr. 934 044 029",
     en: "Developed and operated by KM TECH LABS in Kristiansand, Norway · Company no. 934 044 029",
@@ -553,7 +614,10 @@ export const dict: Dict = {
   "dash.handled": { no: "Behandlet", en: "Handled" },
 
   "rep.titleEdit": { no: "Endre rapportnavn", en: "Rename report" },
-  "rep.titlePlaceholder": { no: "F.eks. Flytting Møviklia 4 → Oslo", en: "E.g. Move from Møviklia 4 → Oslo" },
+  "rep.titlePlaceholder": {
+    no: "F.eks. Flytting Møviklia 4 → Oslo",
+    en: "E.g. Move from Møviklia 4 → Oslo",
+  },
   "rep.titleSaved": { no: "Rapportnavnet er lagret", en: "Report name saved" },
 
   "mprice.title": { no: "Grovt prisestimat for flyttingen", en: "Rough moving price estimate" },
@@ -566,6 +630,8 @@ export const dict: Dict = {
   "mprice.km": { no: "Avstand (km)", en: "Distance (km)" },
   "mprice.floors": { no: "Etasjer uten heis", en: "Floors without lift" },
   "mprice.packing": { no: "Pakking av innbo", en: "Packing service" },
+  "mprice.fromPlaceholder": { no: "Kristiansand", en: "Kristiansand" },
+  "mprice.toPlaceholder": { no: "Oslo", en: "Oslo" },
   "mprice.range": { no: "Estimert prisspenn", en: "Estimated price range" },
   "mprice.disclaimer": {
     no: "Estimatet er veiledende og avhenger av avstand, tidspunkt, adkomst og hva som avtales med flyttefirmaet.",
@@ -586,13 +652,29 @@ export const dict: Dict = {
   },
   "mov.manual": { no: "Eget firma", en: "Own contact" },
   "mov.addManual": { no: "Legg til adresse manuelt", en: "Add address manually" },
+  "mov.emailPlaceholder": { no: "navn@firma.no", en: "name@company.com" },
   "mov.yourName": { no: "Ditt navn", en: "Your name" },
   "mov.yourEmail": { no: "Din e-post (svaradresse)", en: "Your email (reply-to)" },
   "mov.message": { no: "Melding (valgfritt)", en: "Message (optional)" },
   "mov.send": { no: "Send rapport til valgte firma", en: "Send report to selected companies" },
   "mov.sent": { no: "Rapporten er sendt", en: "Report sent" },
   "mov.failed": { no: "Utsending feilet", en: "Sending failed" },
-  "mov.missing": { no: "Fyll inn navn, din e-post og minst én mottaker.", en: "Fill in your name, email and at least one recipient." },
+  "mov.missing": {
+    no: "Fyll inn navn, din e-post og minst én mottaker.",
+    en: "Fill in your name, email and at least one recipient.",
+  },
+  "root.notFoundTitle": { no: "Fant ikke siden", en: "Page not found" },
+  "root.notFoundBody": {
+    no: "Denne siden finnes ikke, men du kan enkelt gå tilbake og fortsette der du slapp.",
+    en: "That page does not exist, but you can head back and carry on from there.",
+  },
+  "root.goHome": { no: "Gå til forsiden", en: "Go to homepage" },
+  "root.errorTitle": { no: "Noe gikk galt", en: "Something went wrong" },
+  "root.errorBody": {
+    no: "Vi klarte ikke å laste denne siden akkurat nå. Prøv igjen om et lite øyeblikk.",
+    en: "We could not load this page just now. Please try again in a moment.",
+  },
+  "root.tryAgain": { no: "Prøv igjen", en: "Try again" },
 };
 
 export const LANG_LABELS: Record<Lang, string> = {
@@ -673,6 +755,24 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (host.endsWith(".no")) setLangState("no");
   }, []);
 
+  useEffect(() => {
+    const htmlLang: Record<Lang, string> = {
+      en: "en",
+      no: "nb-NO",
+      sv: "sv-SE",
+      da: "da-DK",
+      fi: "fi-FI",
+      de: "de-DE",
+      nl: "nl-NL",
+      fr: "fr-FR",
+      pl: "pl-PL",
+      es: "es-ES",
+      it: "it-IT",
+      pt: "pt-PT",
+    };
+    document.documentElement.lang = htmlLang[lang];
+  }, [lang]);
+
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
     window.localStorage.setItem("volumcalc-lang", l);
@@ -690,9 +790,9 @@ export function translate(key: string, lang: Lang): string {
   if (!entry) return key;
   if (lang === "no" || lang === "en") return entry[lang];
   if (lang === "sv" || lang === "da" || lang === "pl") {
-    return extraTranslations[lang]?.[key] ?? entry.en;
+    return extraTranslations[lang]?.[key] ?? localizedTranslations[lang]?.[key] ?? entry.en;
   }
-  return entry.en;
+  return localizedTranslations[lang]?.[key] ?? entry.en;
 }
 
 export function useI18n() {

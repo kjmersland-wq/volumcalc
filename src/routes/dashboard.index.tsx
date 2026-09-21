@@ -18,15 +18,22 @@ import {
 import { useI18n } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { m3, shortDate } from "@/lib/format";
+import { useLocalizedMeta } from "@/lib/use-localized-meta";
 
 export const Route = createFileRoute("/dashboard/")({
   staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Estimates dashboard — VolumCalc" },
-      { name: "description", content: "Review and manage room video + checklist moving volume estimates." },
+      {
+        name: "description",
+        content: "Review and manage room video + checklist moving volume estimates.",
+      },
       { property: "og:title", content: "Estimates dashboard — VolumCalc" },
-      { property: "og:description", content: "Review and manage room video + checklist moving volume estimates." },
+      {
+        property: "og:description",
+        content: "Review and manage room video + checklist moving volume estimates.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "robots", content: "noindex" },
@@ -37,6 +44,10 @@ export const Route = createFileRoute("/dashboard/")({
 
 function DashboardHome() {
   const { t, lang } = useI18n();
+  useLocalizedMeta({
+    title: `${t("dash.title")} — VolumCalc`,
+    description: t("dash.metaDescription"),
+  });
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -67,7 +78,10 @@ function DashboardHome() {
 
   const markHandled = useMutation({
     mutationFn: async (quoteId: string) => {
-      const { error } = await supabase.from("quote_requests").update({ handled: true }).eq("id", quoteId);
+      const { error } = await supabase
+        .from("quote_requests")
+        .update({ handled: true })
+        .eq("id", quoteId);
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["quote-requests"] }),
@@ -85,7 +99,6 @@ function DashboardHome() {
     onError: () => toast.error(t("dash.deleteFailed")),
   });
 
-
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
@@ -101,7 +114,9 @@ function DashboardHome() {
       <h1 className="text-2xl font-bold">{t("dash.title")}</h1>
 
       {estimates.length === 0 ? (
-        <div className="card-soft mt-8 p-10 text-center text-muted-foreground">{t("dash.empty")}</div>
+        <div className="card-soft mt-8 p-10 text-center text-muted-foreground">
+          {t("dash.empty")}
+        </div>
       ) : (
         <div className="card-soft mt-8 overflow-hidden">
           <div className="hidden grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 border-b border-border px-5 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:grid">
@@ -119,19 +134,27 @@ function DashboardHome() {
               >
                 <div className="col-span-2 sm:col-span-1">
                   <p className="font-medium">
-                    {e.report_title || e.customer_name || `#${String(e.id).slice(0, 8).toUpperCase()}`}
+                    {e.report_title ||
+                      e.customer_name ||
+                      `#${String(e.id).slice(0, 8).toUpperCase()}`}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {[e.report_title ? e.customer_name : null, e.address || e.customer_phone].filter(Boolean).join(" · ")}
+                    {[e.report_title ? e.customer_name : null, e.address || e.customer_phone]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </p>
                 </div>
-                <span className="text-sm text-muted-foreground">{shortDate(e.created_at, lang)}</span>
+                <span className="text-sm text-muted-foreground">
+                  {shortDate(e.created_at, lang)}
+                </span>
                 <span className="text-sm font-semibold">{m3(e.total_volume_m3)}</span>
                 <span>
                   <Badge
                     variant="secondary"
                     className={
-                      e.status === "approved" ? "bg-success/15 text-success" : "bg-warning/20 text-warning-foreground"
+                      e.status === "approved"
+                        ? "bg-success/15 text-success"
+                        : "bg-warning/20 text-warning-foreground"
                     }
                   >
                     {e.status === "approved" ? t("dash.approved") : t("dash.pending")}
@@ -181,7 +204,9 @@ function DashboardHome() {
 
       <h2 className="mt-12 text-xl font-bold">{t("dash.quotes")}</h2>
       {(quotes ?? []).length === 0 ? (
-        <div className="card-soft mt-4 p-8 text-center text-muted-foreground">{t("dash.quotesEmpty")}</div>
+        <div className="card-soft mt-4 p-8 text-center text-muted-foreground">
+          {t("dash.quotesEmpty")}
+        </div>
       ) : (
         <ul className="card-soft mt-4 divide-y divide-border">
           {(quotes ?? []).map((q) => (
@@ -214,7 +239,6 @@ function DashboardHome() {
           ))}
         </ul>
       )}
-
     </div>
   );
 }
