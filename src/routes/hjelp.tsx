@@ -98,7 +98,7 @@ const content: Record<
         items: [
           {
             q: "Kan jeg lagre rapporten på flere språk?",
-            a: "Ja. Velg rapportspråk norsk, engelsk eller polsk. Alt du har redigert selv beholdes – det er kun de faste tekstene som byttes. Deretter kan du dele lenken eller lagre PDF på det språket.",
+            a: "Ja. Velg rapportspråket som passer deg best. Alt du har redigert selv beholdes – det er kun de faste tekstene som byttes. Deretter kan du dele lenken eller lagre PDF på det språket.",
           },
           {
             q: "Hvordan deler jeg rapporten?",
@@ -216,7 +216,7 @@ const content: Record<
         items: [
           {
             q: "Can I save the report in several languages?",
-            a: "Yes. Choose Norwegian, English or Polish as the report language. Everything you edited yourself is kept — only the fixed labels change. Then share the link or save the PDF in that language.",
+            a: "Yes. Choose the report language that suits you best. Everything you edited yourself is kept — only the fixed labels change. Then share the link or save the PDF in that language.",
           },
           {
             q: "How do I share the report?",
@@ -334,7 +334,7 @@ const content: Record<
         items: [
           {
             q: "Kan jag spara rapporten på flera språk?",
-            a: "Ja. Välj rapportspråk norska, engelska eller polska. Allt du själv har redigerat behålls — bara de fasta texterna byts ut.",
+            a: "Ja. Välj det rapportspråk som passar bäst. Allt du själv har redigerat behålls — bara de fasta texterna byts ut.",
           },
           {
             q: "Hur delar jag rapporten?",
@@ -452,7 +452,7 @@ const content: Record<
         items: [
           {
             q: "Kan jeg gemme rapporten på flere sprog?",
-            a: "Ja. Vælg rapportsprog norsk, engelsk eller polsk. Alt, du selv har redigeret, bliver bevaret — det er kun de faste tekster, der skifter.",
+            a: "Ja. Vælg det rapportsprog, der passer bedst. Alt, du selv har redigeret, bliver bevaret — det er kun de faste tekster, der skifter.",
           },
           {
             q: "Hvordan deler jeg rapporten?",
@@ -570,7 +570,7 @@ const content: Record<
         items: [
           {
             q: "Voinko tallentaa raportin useilla kielillä?",
-            a: "Kyllä. Valitse raportin kieleksi norja, englanti tai puola. Kaikki itse muokkaamasi säilyy — vain kiinteät tekstit vaihtuvat.",
+            a: "Kyllä. Valitse raportille sinulle parhaiten sopiva kieli. Kaikki itse muokkaamasi säilyy — vain kiinteät tekstit vaihtuvat.",
           },
           {
             q: "Miten jaan raportin?",
@@ -688,7 +688,7 @@ const content: Record<
         items: [
           {
             q: "Kann ich den Bericht in mehreren Sprachen speichern?",
-            a: "Ja. Wählen Sie Norwegisch, Englisch oder Polnisch als Berichtssprache. Alles, was Sie selbst bearbeitet haben, bleibt erhalten — nur die festen Texte wechseln.",
+            a: "Ja. Wählen Sie einfach die Berichtssprache, die am besten passt. Alles, was Sie selbst bearbeitet haben, bleibt erhalten — nur die festen Texte wechseln.",
           },
           {
             q: "Wie teile ich den Bericht?",
@@ -806,7 +806,7 @@ const content: Record<
         items: [
           {
             q: "Kan ik het rapport in meerdere talen opslaan?",
-            a: "Ja. Kies Noors, Engels of Pools als rapporttaal. Alles wat je zelf hebt aangepast blijft staan — alleen de vaste teksten veranderen.",
+            a: "Ja. Kies gewoon de rapporttaal die het beste past. Alles wat je zelf hebt aangepast blijft staan — alleen de vaste teksten veranderen.",
           },
           {
             q: "Hoe deel ik het rapport?",
@@ -924,7 +924,7 @@ const content: Record<
         items: [
           {
             q: "Puis-je enregistrer le rapport dans plusieurs langues ?",
-            a: "Oui. Choisissez le norvégien, l’anglais ou le polonais comme langue du rapport. Tout ce que vous avez modifié vous-même est conservé — seuls les textes fixes changent.",
+            a: "Oui. Choisissez simplement la langue du rapport qui vous convient le mieux. Tout ce que vous avez modifié vous-même est conservé — seuls les textes fixes changent.",
           },
           {
             q: "Comment partager le rapport ?",
@@ -1042,7 +1042,7 @@ const content: Record<
         items: [
           {
             q: "Czy mogę zapisać raport w kilku językach?",
-            a: "Tak. Wybierz język raportu: norweski, angielski lub polski. Wszystko, co edytujesz samodzielnie, zostaje zachowane — zmieniają się tylko stałe teksty.",
+            a: "Tak. Wybierz język raportu, który najbardziej Ci odpowiada. Wszystko, co edytujesz samodzielnie, zostaje zachowane — zmieniają się tylko stałe teksty.",
           },
           {
             q: "Jak udostępnić raport?",
@@ -1160,7 +1160,7 @@ const content: Record<
         items: [
           {
             q: "¿Puedo guardar el informe en varios idiomas?",
-            a: "Sí. Elige noruego, inglés o polaco como idioma del informe. Todo lo que hayas editado tú se mantiene; solo cambian los textos fijos.",
+            a: "Sí. Elige el idioma del informe que mejor te encaje. Todo lo que hayas editado tú se mantiene; solo cambian los textos fijos.",
           },
           {
             q: "¿Cómo comparto el informe?",
@@ -1278,7 +1278,7 @@ const content: Record<
         items: [
           {
             q: "Posso salvare il report in più lingue?",
-            a: "Sì. Scegli norvegese, inglese o polacco come lingua del report. Tutto ciò che hai modificato tu rimane invariato — cambiano solo i testi fissi.",
+            a: "Sì. Scegli semplicemente la lingua del report che preferisci. Tutto ciò che hai modificato tu rimane invariato — cambiano solo i testi fissi.",
           },
           {
             q: "Come condivido il report?",
@@ -1396,7 +1396,7 @@ const content: Record<
         items: [
           {
             q: "Posso guardar o relatório em vários idiomas?",
-            a: "Sim. Escolha norueguês, inglês ou polaco como idioma do relatório. Tudo o que editar manualmente fica preservado — só os textos fixos mudam.",
+            a: "Sim. Escolha o idioma do relatório que fizer mais sentido para si. Tudo o que editar manualmente fica preservado — só os textos fixos mudam.",
           },
           {
             q: "Como partilho o relatório?",
