@@ -408,7 +408,7 @@ function EstimatePage() {
   });
 
   const saveReportSettings = useMutation({
-    mutationFn: async (patch: { report_language?: string; tender_mode?: boolean; report_title?: string | null }) => {
+    mutationFn: async (patch: TablesUpdate<"estimates">) => {
       const { error } = await supabase.from("estimates").update(patch).eq("id", id);
       if (error) throw error;
     },
