@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -16,6 +17,7 @@ import {
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { DEFAULT_ROOM_NAMES_NO, sanitizeRoomNames } from "@/lib/rooms";
 
 export const Route = createFileRoute("/dashboard/settings")({
   staticData: { sitemap: false },
@@ -45,6 +47,7 @@ type Form = {
   phone: string;
   website: string;
   contact_email: string;
+  room_names: string;
 };
 
 function SettingsPage() {
@@ -83,6 +86,7 @@ function SettingsPage() {
         phone: data.phone ?? "",
         website: data.website ?? "",
         contact_email: data.contact_email ?? "",
+        room_names: sanitizeRoomNames(data.room_names, DEFAULT_ROOM_NAMES_NO).join("\n"),
       });
     }
   }, [data]);
@@ -103,6 +107,7 @@ function SettingsPage() {
       phone: form.phone.trim() || null,
       website: form.website.trim() || null,
       contact_email: form.contact_email.trim() || null,
+      room_names: sanitizeRoomNames(form.room_names, DEFAULT_ROOM_NAMES_NO),
     });
     setSaving(false);
     if (error) toast.error(error.message);
@@ -226,6 +231,16 @@ function SettingsPage() {
               onChange={(e) => setForm({ ...form, website: e.target.value })}
             />
           </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="room_names">{t("set.rooms")}</Label>
+          <Textarea
+            id="room_names"
+            rows={7}
+            value={form.room_names}
+            onChange={(e) => setForm({ ...form, room_names: e.target.value })}
+          />
+          <p className="text-sm text-muted-foreground">{t("set.roomsHelp")}</p>
         </div>
         <Button onClick={save} disabled={saving}>
           {saving && <Loader2 className="size-4 animate-spin" />}

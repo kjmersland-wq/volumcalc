@@ -165,7 +165,7 @@ export const getCompanyByUploadToken = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: company } = await supabaseAdmin
       .from("companies")
-      .select("company_name,logo_url,brand_color,phone,website,is_demo")
+      .select("company_name,logo_url,brand_color,phone,website,is_demo,room_names")
       .eq("upload_token", data.token)
       .maybeSingle();
     return company ?? null;

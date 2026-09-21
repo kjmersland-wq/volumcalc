@@ -1,13 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { USER_VERIFIED_SECURITY_LABEL, VOLUME_DATABASE, type VolumeRoom } from "./volume-database";
-
-const roomNames = Object.keys(VOLUME_DATABASE) as Array<keyof typeof VOLUME_DATABASE>;
-const roomSchema = z.enum(roomNames as [VolumeRoom, ...VolumeRoom[]]);
+import { USER_VERIFIED_SECURITY_LABEL } from "./volume-database";
 
 const manualItemSchema = z.object({
-  room: roomSchema,
+  room: z.string().trim().min(1).max(50),
   name: z.string().trim().min(1).max(120),
   name_no: z.string().trim().min(1).max(120),
   category: z.string().trim().min(1).max(80),
