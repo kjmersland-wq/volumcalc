@@ -39,6 +39,7 @@ import { Route as UploadRouteImport } from './routes/upload'
 import { Route as VilkarRouteImport } from './routes/vilkar'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as DashboardAccountRouteImport } from './routes/dashboard.account'
 import { Route as DashboardAdminRouteImport } from './routes/dashboard.admin'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as EnMovingVanCalculatorRouteImport } from './routes/en.moving-van-calculator'
@@ -194,6 +195,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardAccountRoute = DashboardAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAdminRoute = DashboardAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -245,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/upload': typeof UploadRoute
   '/vilkar': typeof VilkarRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/dashboard/account': typeof DashboardAccountRoute
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
@@ -280,6 +287,7 @@ export interface FileRoutesByTo {
   '/upload': typeof UploadRoute
   '/vilkar': typeof VilkarRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/dashboard/account': typeof DashboardAccountRoute
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/upload': typeof UploadRoute
   '/vilkar': typeof VilkarRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/dashboard/account': typeof DashboardAccountRoute
   '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
@@ -355,6 +364,7 @@ export interface FileRouteTypes {
     | '/upload'
     | '/vilkar'
     | '/checkout/return'
+    | '/dashboard/account'
     | '/dashboard/admin'
     | '/dashboard/settings'
     | '/en/moving-van-calculator'
@@ -390,6 +400,7 @@ export interface FileRouteTypes {
     | '/upload'
     | '/vilkar'
     | '/checkout/return'
+    | '/dashboard/account'
     | '/dashboard/admin'
     | '/dashboard/settings'
     | '/en/moving-van-calculator'
@@ -426,6 +437,7 @@ export interface FileRouteTypes {
     | '/upload'
     | '/vilkar'
     | '/checkout/return'
+    | '/dashboard/account'
     | '/dashboard/admin'
     | '/dashboard/settings'
     | '/en/moving-van-calculator'
@@ -679,6 +691,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/account': {
+      id: '/dashboard/account'
+      path: '/account'
+      fullPath: '/dashboard/account'
+      preLoaderRoute: typeof DashboardAccountRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/admin': {
       id: '/dashboard/admin'
       path: '/admin'
@@ -711,12 +730,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface DashboardRouteChildren {
+  DashboardAccountRoute: typeof DashboardAccountRoute
   DashboardAdminRoute: typeof DashboardAdminRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardAccountRoute: DashboardAccountRoute,
   DashboardAdminRoute: DashboardAdminRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardIndexRoute: DashboardIndexRoute,

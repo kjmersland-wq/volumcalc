@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
-import { LayoutGrid, Link2, Loader2, LogOut, Settings, ShieldCheck } from "lucide-react";
+import { LayoutGrid, Link2, Loader2, LogOut, Settings, ShieldCheck, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -96,6 +96,12 @@ function DashboardLayout() {
             <Button asChild variant="ghost" size="sm">
               <Link to="/dashboard">
                 <LayoutGrid className="size-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm" title="My page">
+              <Link to="/dashboard/account">
+                <UserRound className="size-4" />
+                <span className="hidden sm:inline">My page</span>
               </Link>
             </Button>
             {isAdmin && (
