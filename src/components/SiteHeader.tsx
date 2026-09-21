@@ -15,7 +15,7 @@ export function SiteHeader() {
     <header className="no-print sticky top-0 z-40 w-full border-b border-border/70 bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <Link to="/" aria-label="VolumCalc home">
+          <Link to="/" aria-label={t("nav.home")}>
             <VolumCalcLogo markClassName="size-9" />
           </Link>
           {session && company?.company_name && (

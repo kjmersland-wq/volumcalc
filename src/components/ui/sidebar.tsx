@@ -3,6 +3,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { PanelLeft } from "lucide-react";
 
+import { useI18n } from "@/lib/i18n";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,7 @@ const SidebarProvider = React.forwardRef<
     },
     ref,
   ) => {
+    const { t } = useI18n();
     const isMobile = useIsMobile();
     const [openMobile, setOpenMobile] = React.useState(false);
 
@@ -201,8 +203,8 @@ const Sidebar = React.forwardRef<
             side={side}
           >
             <SheetHeader className="sr-only">
-              <SheetTitle>Sidebar</SheetTitle>
-              <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+              <SheetTitle>{t("ui.sidebar")}</SheetTitle>
+              <SheetDescription>{t("ui.mobileSidebarDescription")}</SheetDescription>
             </SheetHeader>
             <div className="flex h-full w-full flex-col">{children}</div>
           </SheetContent>
@@ -261,6 +263,7 @@ const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
+  const { t } = useI18n();
   const { toggleSidebar } = useSidebar();
 
   return (
@@ -277,7 +280,7 @@ const SidebarTrigger = React.forwardRef<
       {...props}
     >
       <PanelLeft />
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only">{t("ui.toggleSidebar")}</span>
     </Button>
   );
 });
@@ -285,16 +288,17 @@ SidebarTrigger.displayName = "SidebarTrigger";
 
 const SidebarRail = React.forwardRef<HTMLButtonElement, React.ComponentProps<"button">>(
   ({ className, ...props }, ref) => {
+    const { t } = useI18n();
     const { toggleSidebar } = useSidebar();
 
     return (
       <button
         ref={ref}
         data-sidebar="rail"
-        aria-label="Toggle Sidebar"
+        aria-label={t("ui.toggleSidebar")}
         tabIndex={-1}
         onClick={toggleSidebar}
-        title="Toggle Sidebar"
+        title={t("ui.toggleSidebar")}
         className={cn(
           "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex",
           "[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize",

@@ -40,7 +40,9 @@ export function MoverOutreach({ estimateId, token, rt }: Props) {
   );
 
   function addRow(company: string) {
-    setRows((prev) => (prev.some((r) => r.company === company) ? prev : [...prev, { company, email: "" }]));
+    setRows((prev) =>
+      prev.some((r) => r.company === company) ? prev : [...prev, { company, email: "" }],
+    );
   }
 
   async function submit() {
@@ -53,7 +55,15 @@ export function MoverOutreach({ estimateId, token, rt }: Props) {
     try {
       const reportUrl = `${window.location.origin}/estimate/${estimateId}?token=${token}`;
       const result = await send({
-        data: { estimateId, token, recipients, replyTo: replyTo.trim(), senderName: name.trim(), message, reportUrl },
+        data: {
+          estimateId,
+          token,
+          recipients,
+          replyTo: replyTo.trim(),
+          senderName: name.trim(),
+          message,
+          reportUrl,
+        },
       });
       if (result.sent > 0) toast.success(`${rt("mov.sent")} (${result.sent})`);
       if (result.failed.length) toast.error(`${rt("mov.failed")}: ${result.failed.join(", ")}`);
@@ -123,10 +133,12 @@ export function MoverOutreach({ estimateId, token, rt }: Props) {
             <span className="w-44 shrink-0 truncate text-sm">{row.company}</span>
             <Input
               type="email"
-              placeholder="post@firma.no"
+              placeholder={rt("mov.emailPlaceholder")}
               value={row.email}
               onChange={(e) =>
-                setRows((prev) => prev.map((r, i) => (i === index ? { ...r, email: e.target.value } : r)))
+                setRows((prev) =>
+                  prev.map((r, i) => (i === index ? { ...r, email: e.target.value } : r)),
+                )
               }
             />
             <Button
@@ -138,7 +150,11 @@ export function MoverOutreach({ estimateId, token, rt }: Props) {
             </Button>
           </div>
         ))}
-        <Button variant="outline" size="sm" onClick={() => setRows((prev) => [...prev, { company: rt("mov.manual"), email: "" }])}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setRows((prev) => [...prev, { company: rt("mov.manual"), email: "" }])}
+        >
           <Plus className="size-4" />
           {rt("mov.addManual")}
         </Button>
@@ -151,11 +167,21 @@ export function MoverOutreach({ estimateId, token, rt }: Props) {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="mov-email">{rt("mov.yourEmail")}</Label>
-          <Input id="mov-email" type="email" value={replyTo} onChange={(e) => setReplyTo(e.target.value)} />
+          <Input
+            id="mov-email"
+            type="email"
+            value={replyTo}
+            onChange={(e) => setReplyTo(e.target.value)}
+          />
         </div>
         <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="mov-msg">{rt("mov.message")}</Label>
-          <Textarea id="mov-msg" rows={3} value={message} onChange={(e) => setMessage(e.target.value)} />
+          <Textarea
+            id="mov-msg"
+            rows={3}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
         </div>
       </div>
 

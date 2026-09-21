@@ -133,7 +133,7 @@ function itemVolume(item: Item, patch: Partial<Item> = {}) {
 function EstimatePage() {
   const { id } = Route.useParams();
   const { token } = Route.useSearch();
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
   const { session, loading: authLoading } = useAuth();
   const loadShared = useServerFn(getSharedEstimate);
   const claim = useServerFn(claimEstimate);
@@ -948,7 +948,7 @@ function EstimatePage() {
                                   size="icon"
                                   variant="ghost"
                                   className="size-8"
-                                  aria-label="-"
+                                  aria-label={t("upload.decreaseQty")}
                                   disabled={item.quantity <= 1}
                                   onClick={() =>
                                     patchItem.mutate({
@@ -966,7 +966,7 @@ function EstimatePage() {
                                   size="icon"
                                   variant="ghost"
                                   className="size-8"
-                                  aria-label="+"
+                                  aria-label={t("upload.increaseQty")}
                                   onClick={() =>
                                     patchItem.mutate({
                                       item,
