@@ -158,6 +158,22 @@ export const dict: Dict = {
     no: "Stopp filming og se sjekklisten",
     en: "Stop filming and view checklist",
   },
+  "upload.startRecording": {
+    no: "Start filming",
+    en: "Start filming",
+  },
+  "upload.startingCamera": {
+    no: "Gjør kameraet klart …",
+    en: "Getting your camera ready …",
+  },
+  "upload.recordingLive": {
+    no: "Filmer nå",
+    en: "Recording now",
+  },
+  "upload.skipToChecklist": {
+    no: "Hopp over filming – gå rett til sjekklisten",
+    en: "Skip filming – go straight to the checklist",
+  },
   "upload.photos": { no: "bilder valgt", en: "items selected" },
   "upload.details": { no: "Kontaktinformasjon (valgfritt)", en: "Contact details (optional)" },
   "upload.name": { no: "Navn", en: "Name" },

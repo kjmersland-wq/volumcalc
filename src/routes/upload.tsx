@@ -94,46 +94,14 @@ function UploadPage() {
 
   const [selectedRoom, setSelectedRoom] = useState<VolumeRoom>("Living room");
   const [recording, setRecording] = useState(false);
-  const [cameraReady, setCameraReady] = useState(false);
+  const [startingCamera, setStartingCamera] = useState(false);
   const [stage, setStage] = useState<Stage>("idle");
   const [quantities, setQuantities] = useState<QuantityByRoom>(() => createInitialQuantities());
   const [form, setForm] = useState({ name: "", phone: "", date: "", address: "" });
   const busy = stage !== "idle";
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function startCamera() {
-      try {
-        if (!navigator.mediaDevices?.getUserMedia) {
-          setRecording(false);
-          setCameraReady(true);
-          toast.error("Looks like your browser doesn’t support camera recording just yet.");
-          return;
-        }
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
-          audio: false,
-        });
-        if (cancelled) {
-          stream.getTracks().forEach((track) => track.stop());
-          return;
-        }
-        streamRef.current = stream;
-        if (videoRef.current) videoRef.current.srcObject = stream;
-        setRecording(true);
-        setCameraReady(true);
-      } catch {
-        toast.error("We couldn’t start your camera just now — please try once more.");
-        setRecording(false);
-        setCameraReady(true);
-      }
-    }
-
-    void startCamera();
-
     return () => {
-      cancelled = true;
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
@@ -141,11 +109,45 @@ function UploadPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (recording && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      void videoRef.current.play().catch(() => undefined);
+    }
+  }, [recording]);
+
+  async function startVideoCapture() {
+    if (recording || startingCamera) return;
+    try {
+      setStartingCamera(true);
+      if (!navigator.mediaDevices?.getUserMedia) {
+        toast.error("Looks like your browser doesn’t support camera recording just yet.");
+        return;
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      setRecording(true);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        void videoRef.current.play().catch(() => undefined);
+      }
+    } catch {
+      toast.error("We couldn’t start your camera just now — please try once more.");
+      setRecording(false);
+    } finally {
+      setStartingCamera(false);
+    }
+  }
+
   function stopVideoCapture() {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
+    if (videoRef.current) videoRef.current.srcObject = null;
     setRecording(false);
   }
 
@@ -253,16 +255,7 @@ function UploadPage() {
             {t("upload.sub")} {t("upload.securityLabel")}: {USER_VERIFIED_SECURITY_LABEL}.
           </p>
 
-          {!cameraReady ? (
-            <div
-              className="mt-6 flex items-center justify-center gap-3 rounded-xl border border-border bg-card p-8"
-              role="status"
-              aria-live="polite"
-            >
-              <Loader2 className="size-5 animate-spin text-primary" />
-              <span className="text-sm text-muted-foreground">Getting your camera ready …</span>
-            </div>
-          ) : recording ? (
+          {recording ? (
             <div className="mt-6 space-y-4">
               <div className="rounded-xl border border-border bg-card p-4">
                 <Label htmlFor="room">{t("upload.roomSelectorLabel")}</Label>
@@ -315,6 +308,23 @@ function UploadPage() {
                   ))}
                 </select>
               </div>
+
+              <Button
+                size="lg"
+                className="mt-4 h-14 w-full text-base font-bold"
+                disabled={startingCamera}
+                onClick={startVideoCapture}
+              >
+                {startingCamera ? (
+                  <Loader2 className="size-5 animate-spin" />
+                ) : (
+                  <Camera className="size-5" />
+                )}
+                {startingCamera ? t("upload.startingCamera") : t("upload.startRecording")}
+              </Button>
+              <p className="mt-2 text-center text-sm text-muted-foreground">
+                {t("upload.skipToChecklist")}
+              </p>
 
               <div className="mt-7 flex gap-4 rounded-xl border border-primary/20 bg-primary-soft/70 p-5">
                 <Info className="mt-0.5 size-5 shrink-0 text-primary" />
