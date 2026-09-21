@@ -36,7 +36,6 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { ShareButtons } from "@/components/ShareButtons";
 import { QuoteRequestDialog } from "@/components/QuoteRequestDialog";
 import { useI18n, translate, type Lang } from "@/lib/i18n";
-import { reportPl, type ReportLang } from "@/lib/report-pl";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
@@ -47,15 +46,22 @@ import { recommendVehicle, recommendedVolume, storageUnitM2 } from "@/lib/volume
 export const Route = createFileRoute("/estimate/$id")({
   staticData: { sitemap: false },
   validateSearch: (search: Record<string, unknown>): { token?: string } => {
-    const token = search['token'];
+    const token = search["token"];
     return typeof token === "string" && token ? { token } : {};
   },
   head: () => ({
     meta: [
       { title: "Estimate report — VolumCalc" },
-      { name: "description", content: "Itemised cubic metre estimate and inventory review generated from room video and checklist." },
+      {
+        name: "description",
+        content:
+          "Itemised cubic metre estimate and inventory review generated from room video and checklist.",
+      },
       { property: "og:title", content: "Estimate report — VolumCalc" },
-      { property: "og:description", content: "Itemised cubic metre estimate and inventory review." },
+      {
+        property: "og:description",
+        content: "Itemised cubic metre estimate and inventory review.",
+      },
       { name: "robots", content: "noindex" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -142,22 +148,23 @@ function EstimatePage() {
   const [hourly, setHourly] = useState("1200");
   const [hours, setHours] = useState("5");
   const [checked, setChecked] = useState<Record<string, boolean>>({});
-  const [reportLang, setReportLang] = useState<ReportLang>(lang === "no" || lang === "pl" ? lang : "en");
+  const [reportLang, setReportLang] = useState<Lang>(lang);
   const [tenderMode, setTenderMode] = useState(false);
   const [logistics, setLogistics] = useState<Logistics | null>(null);
 
   // Report labels follow the chosen report language; user-entered text is untouched.
-  const rt = (key: string) =>
-    reportLang === "pl" ? (reportPl[key] ?? translate(key, "en")) : translate(key, reportLang as Lang);
+  const rt = (key: string) => translate(key, reportLang);
 
   const { data, isLoading } = useQuery({
     queryKey: ["estimate", id, session?.user.id ?? "guest"],
     enabled: !authLoading,
     queryFn: async () => {
       if (!session) {
-        if (!token) return { estimate: null, items: [] as Item[], rooms: [] as Room[], company: null };
+        if (!token)
+          return { estimate: null, items: [] as Item[], rooms: [] as Room[], company: null };
         const shared = await loadShared({ data: { id, token } });
-        if (!shared) return { estimate: null, items: [] as Item[], rooms: [] as Room[], company: null };
+        if (!shared)
+          return { estimate: null, items: [] as Item[], rooms: [] as Room[], company: null };
         return {
           estimate: shared.estimate,
           items: shared.items as unknown as Item[],
@@ -165,17 +172,22 @@ function EstimatePage() {
           company: null,
         };
       }
-      const [{ data: estimate }, { data: items }, { data: rooms }, { data: company }] = await Promise.all([
-        supabase.from("estimates").select("*").eq("id", id).maybeSingle(),
-        supabase
-          .from("estimate_items")
-          .select("*")
-          .eq("estimate_id", id)
-          .is("deleted_at", null)
-          .order("volume_m3", { ascending: false }),
-        supabase.from("estimate_rooms").select("id,name,sort_order").eq("estimate_id", id).order("sort_order"),
-        supabase.from("companies").select("*").eq("id", session.user.id).maybeSingle(),
-      ]);
+      const [{ data: estimate }, { data: items }, { data: rooms }, { data: company }] =
+        await Promise.all([
+          supabase.from("estimates").select("*").eq("id", id).maybeSingle(),
+          supabase
+            .from("estimate_items")
+            .select("*")
+            .eq("estimate_id", id)
+            .is("deleted_at", null)
+            .order("volume_m3", { ascending: false }),
+          supabase
+            .from("estimate_rooms")
+            .select("id,name,sort_order")
+            .eq("estimate_id", id)
+            .order("sort_order"),
+          supabase.from("companies").select("*").eq("id", session.user.id).maybeSingle(),
+        ]);
       // An estimate that no company owns yet is only reachable through its share
       // link; the company can take ownership of it from here.
       if (!estimate && token) {
@@ -190,7 +202,12 @@ function EstimatePage() {
           };
         }
       }
-      return { estimate, items: (items ?? []) as unknown as Item[], rooms: (rooms ?? []) as Room[], company };
+      return {
+        estimate,
+        items: (items ?? []) as unknown as Item[],
+        rooms: (rooms ?? []) as Room[],
+        company,
+      };
     },
   });
 
@@ -215,37 +232,55 @@ function EstimatePage() {
 
   useEffect(() => {
     if (!estimate) return;
-    setAccess((prev) =>
-      prev ?? {
-        access_floor: estimate.access_floor != null ? String(estimate.access_floor) : "",
-        has_elevator: Boolean(estimate.has_elevator),
-        carry_distance_m: estimate.carry_distance_m != null ? String(estimate.carry_distance_m) : "",
-        access_notes: estimate.access_notes ?? "",
-      },
+    setAccess(
+      (prev) =>
+        prev ?? {
+          access_floor: estimate.access_floor != null ? String(estimate.access_floor) : "",
+          has_elevator: Boolean(estimate.has_elevator),
+          carry_distance_m:
+            estimate.carry_distance_m != null ? String(estimate.carry_distance_m) : "",
+          access_notes: estimate.access_notes ?? "",
+        },
     );
     setInternalNotes((prev) => prev ?? estimate.internal_notes ?? "");
     const e = estimate as Record<string, unknown>;
-    setLogistics((prev) =>
-      prev ?? {
-        storage_enabled: Boolean(e['storage_enabled']),
-        storage_company: (e['storage_company'] as string) ?? "",
-        storage_address: (e['storage_address'] as string) ?? "",
-        storage_contact: (e['storage_contact'] as string) ?? "",
-        storage_phone: (e['storage_phone'] as string) ?? "",
-        delivery_address: (e['delivery_address'] as string) ?? "",
-        delivery_floor: (e['delivery_floor'] as string) ?? "",
-        delivery_elevator: Boolean(e['delivery_elevator']),
-        delivery_carry_distance: (e['delivery_carry_distance'] as string) ?? "",
-        delivery_notes: (e['delivery_notes'] as string) ?? "",
-        packing_requested: Boolean(e['packing_requested']),
-        packing_level: (e['packing_level'] as string) ?? "fragile",
-        packing_materials: (e['packing_materials'] as Record<string, number>) ?? {},
-        packing_notes: (e['packing_notes'] as string) ?? "",
-      },
+    setLogistics(
+      (prev) =>
+        prev ?? {
+          storage_enabled: Boolean(e["storage_enabled"]),
+          storage_company: (e["storage_company"] as string) ?? "",
+          storage_address: (e["storage_address"] as string) ?? "",
+          storage_contact: (e["storage_contact"] as string) ?? "",
+          storage_phone: (e["storage_phone"] as string) ?? "",
+          delivery_address: (e["delivery_address"] as string) ?? "",
+          delivery_floor: (e["delivery_floor"] as string) ?? "",
+          delivery_elevator: Boolean(e["delivery_elevator"]),
+          delivery_carry_distance: (e["delivery_carry_distance"] as string) ?? "",
+          delivery_notes: (e["delivery_notes"] as string) ?? "",
+          packing_requested: Boolean(e["packing_requested"]),
+          packing_level: (e["packing_level"] as string) ?? "fragile",
+          packing_materials: (e["packing_materials"] as Record<string, number>) ?? {},
+          packing_notes: (e["packing_notes"] as string) ?? "",
+        },
     );
-    setTenderMode(Boolean(e['tender_mode']));
-    const saved = e['report_language'];
-    if (saved === "no" || saved === "en" || saved === "pl") setReportLang(saved);
+    setTenderMode(Boolean(e["tender_mode"]));
+    const saved = e["report_language"];
+    if (
+      saved === "no" ||
+      saved === "en" ||
+      saved === "sv" ||
+      saved === "da" ||
+      saved === "fi" ||
+      saved === "de" ||
+      saved === "nl" ||
+      saved === "fr" ||
+      saved === "pl" ||
+      saved === "es" ||
+      saved === "it" ||
+      saved === "pt"
+    ) {
+      setReportLang(saved);
+    }
   }, [estimate]);
 
   useEffect(() => {
@@ -332,7 +367,10 @@ function EstimatePage() {
     mutationFn: async ({ roomId, name }: { roomId: string; name: string }) => {
       const cleanName = name.trim();
       if (!cleanName) throw new Error("empty");
-      const { error } = await supabase.from("estimate_rooms").update({ name: cleanName }).eq("id", roomId);
+      const { error } = await supabase
+        .from("estimate_rooms")
+        .update({ name: cleanName })
+        .eq("id", roomId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -343,7 +381,10 @@ function EstimatePage() {
 
   const moveItem = useMutation({
     mutationFn: async ({ itemId, roomId }: { itemId: string; roomId: string | null }) => {
-      const { error } = await supabase.from("estimate_items").update({ room_id: roomId }).eq("id", itemId);
+      const { error } = await supabase
+        .from("estimate_items")
+        .update({ room_id: roomId })
+        .eq("id", itemId);
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -413,7 +454,8 @@ function EstimatePage() {
   const items = useMemo(() => data?.items ?? [], [data]);
   const rooms = data?.rooms ?? [];
   const included = items.filter((item) => item.is_included !== false);
-  const netVolume = Math.round(included.reduce((sum, i) => sum + Number(i.volume_m3), 0) * 100) / 100;
+  const netVolume =
+    Math.round(included.reduce((sum, i) => sum + Number(i.volume_m3), 0) * 100) / 100;
   const gross = recommendedVolume(netVolume);
 
   if (isLoading || authLoading) {
@@ -428,25 +470,25 @@ function EstimatePage() {
     return (
       <div className="flex min-h-screen flex-col">
         <SiteHeader />
-        <main className="flex flex-1 items-center justify-center p-8 text-muted-foreground">{rt("res.notFound")}</main>
+        <main className="flex flex-1 items-center justify-center p-8 text-muted-foreground">
+          {rt("res.notFound")}
+        </main>
         <SiteFooter />
       </div>
     );
   }
 
-  const company = data?.company as
-    | {
-        price_per_m3: number;
-        currency: string;
-        company_name: string;
-        logo_url?: string | null;
-        org_number?: string | null;
-        address?: string | null;
-        phone?: string | null;
-        contact_email?: string | null;
-        website?: string | null;
-      }
-    | null;
+  const company = data?.company as {
+    price_per_m3: number;
+    currency: string;
+    company_name: string;
+    logo_url?: string | null;
+    org_number?: string | null;
+    address?: string | null;
+    phone?: string | null;
+    contact_email?: string | null;
+    website?: string | null;
+  } | null;
   const currency = company?.currency ?? "NOK";
   const unclaimed = Boolean((data as { unclaimed?: boolean } | undefined)?.unclaimed);
   const canEdit = Boolean(session) && !unclaimed;
@@ -454,12 +496,23 @@ function EstimatePage() {
   const shareToken = (estimate.share_token as string | undefined) ?? token;
 
   const statusKey =
-    estimate.status === "approved" ? "rep.status.processed" : items.length ? "rep.status.ready" : "rep.status.draft";
+    estimate.status === "approved"
+      ? "rep.status.processed"
+      : items.length
+        ? "rep.status.ready"
+        : "rep.status.draft";
 
   const groups = [
     ...rooms.map((room) => ({ ...room, items: items.filter((item) => item.room_id === room.id) })),
     ...(items.some((item) => !item.room_id)
-      ? [{ id: "other", name: rt("res.other"), sort_order: 999, items: items.filter((item) => !item.room_id) }]
+      ? [
+          {
+            id: "other",
+            name: rt("res.other"),
+            sort_order: 999,
+            items: items.filter((item) => !item.room_id),
+          },
+        ]
       : []),
   ].filter((group) => group.items.length > 0);
 
@@ -487,7 +540,9 @@ function EstimatePage() {
         ]),
       ),
     ];
-    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
+    const csv = rows
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";"))
+      .join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const a = document.createElement("a");
     a.href = url;
@@ -505,7 +560,11 @@ function EstimatePage() {
             <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-muted/30 p-5">
               <div className="flex items-center gap-4">
                 {company.logo_url && (
-                  <img src={company.logo_url} alt="" className="h-12 w-auto max-w-40 object-contain" />
+                  <img
+                    src={company.logo_url}
+                    alt=""
+                    className="h-12 w-auto max-w-40 object-contain"
+                  />
                 )}
                 <div>
                   <p className="text-lg font-bold">{company.company_name}</p>
@@ -576,7 +635,9 @@ function EstimatePage() {
                 <Download className="size-4" />
                 {rt("rep.pdf")}
               </Button>
-              {!businessView && shareToken && <QuoteRequestDialog id={String(estimate.id)} token={shareToken} />}
+              {!businessView && shareToken && (
+                <QuoteRequestDialog id={String(estimate.id)} token={shareToken} />
+              )}
               {canEdit && estimate.status !== "approved" && (
                 <Button size="sm" onClick={() => approve.mutate()}>
                   <Check className="size-4" />
@@ -606,7 +667,7 @@ function EstimatePage() {
                 <Select
                   value={reportLang}
                   onValueChange={(value) => {
-                    setReportLang(value as ReportLang);
+                    setReportLang(value as Lang);
                     saveReportSettings.mutate({ report_language: value });
                   }}
                 >
@@ -616,7 +677,16 @@ function EstimatePage() {
                   <SelectContent>
                     <SelectItem value="no">Norsk</SelectItem>
                     <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="sv">Svenska</SelectItem>
+                    <SelectItem value="da">Dansk</SelectItem>
+                    <SelectItem value="fi">Suomi</SelectItem>
+                    <SelectItem value="de">Deutsch</SelectItem>
+                    <SelectItem value="nl">Nederlands</SelectItem>
+                    <SelectItem value="fr">Français</SelectItem>
                     <SelectItem value="pl">Polski</SelectItem>
+                    <SelectItem value="es">Español</SelectItem>
+                    <SelectItem value="it">Italiano</SelectItem>
+                    <SelectItem value="pt">Português</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">{rt("rep.reportLangHelp")}</p>
@@ -641,14 +711,18 @@ function EstimatePage() {
           {/* Summary cards */}
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             <div className="card-soft p-6">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{rt("rep.netVolume")}</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                {rt("rep.netVolume")}
+              </p>
               <p className="mt-2 flex items-center gap-2 text-3xl font-extrabold text-primary">
                 <Boxes className="size-6" />
                 {m3(netVolume)}
               </p>
             </div>
             <div className="card-soft p-6">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{rt("rep.recommended")}</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                {rt("rep.recommended")}
+              </p>
               <p className="mt-2 flex items-center gap-2 text-3xl font-extrabold">
                 <Truck className="size-6 text-primary" />
                 {m3(gross)}
@@ -661,7 +735,9 @@ function EstimatePage() {
               )}
             </div>
             <div className="card-soft p-6">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{rt("rep.counts")}</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                {rt("rep.counts")}
+              </p>
               <p className="mt-2 flex items-center gap-2 text-3xl font-extrabold">
                 <Package className="size-6 text-primary" />
                 {included.length}
@@ -674,7 +750,9 @@ function EstimatePage() {
 
           {company && !tenderMode && (
             <div className="card-soft mt-4 flex items-center justify-between p-5">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{rt("res.estimated")}</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                {rt("res.estimated")}
+              </p>
               <p className="text-2xl font-bold">
                 {money(netVolume * Number(company.price_per_m3), company.currency, lang)}
               </p>
@@ -771,10 +849,12 @@ function EstimatePage() {
                               onBlur={(e) => {
                                 const value = e.target.value.trim();
                                 if (!value) {
-                                  e.target.value = lang === "no" ? item.name_no || item.name : item.name;
+                                  e.target.value =
+                                    lang === "no" ? item.name_no || item.name : item.name;
                                   return;
                                 }
-                                const current = lang === "no" ? item.name_no || item.name : item.name;
+                                const current =
+                                  lang === "no" ? item.name_no || item.name : item.name;
                                 if (value === current) return;
                                 patchItem.mutate({
                                   item,
@@ -803,19 +883,27 @@ function EstimatePage() {
                                   aria-label="-"
                                   disabled={item.quantity <= 1}
                                   onClick={() =>
-                                    patchItem.mutate({ item, patch: { quantity: item.quantity - 1 } })
+                                    patchItem.mutate({
+                                      item,
+                                      patch: { quantity: item.quantity - 1 },
+                                    })
                                   }
                                 >
                                   <Minus className="size-3.5" />
                                 </Button>
-                                <span className="w-6 text-center text-sm font-semibold">{item.quantity}</span>
+                                <span className="w-6 text-center text-sm font-semibold">
+                                  {item.quantity}
+                                </span>
                                 <Button
                                   size="icon"
                                   variant="ghost"
                                   className="size-8"
                                   aria-label="+"
                                   onClick={() =>
-                                    patchItem.mutate({ item, patch: { quantity: item.quantity + 1 } })
+                                    patchItem.mutate({
+                                      item,
+                                      patch: { quantity: item.quantity + 1 },
+                                    })
                                   }
                                 >
                                   <Plus className="size-3.5" />
@@ -850,7 +938,10 @@ function EstimatePage() {
                                 className="h-8 rounded-md border border-input bg-background px-2 text-sm"
                                 value={item.room_id ?? ""}
                                 onChange={(event) =>
-                                  moveItem.mutate({ itemId: item.id, roomId: event.target.value || null })
+                                  moveItem.mutate({
+                                    itemId: item.id,
+                                    roomId: event.target.value || null,
+                                  })
                                 }
                               >
                                 <option value="">{rt("res.other")}</option>
@@ -871,7 +962,8 @@ function EstimatePage() {
                                   toast(rt("rep.itemDeleted"), {
                                     action: {
                                       label: rt("rep.undo"),
-                                      onClick: () => softDelete.mutate({ itemId: item.id, restore: true }),
+                                      onClick: () =>
+                                        softDelete.mutate({ itemId: item.id, restore: true }),
                                     },
                                   });
                                 }}
@@ -937,7 +1029,9 @@ function EstimatePage() {
                               </Button>
                             </form>
                           ) : (
-                            item.notes && <p className="mt-2 text-sm text-muted-foreground">{item.notes}</p>
+                            item.notes && (
+                              <p className="mt-2 text-sm text-muted-foreground">{item.notes}</p>
+                            )
                           )}
                         </div>
 
@@ -964,8 +1058,13 @@ function EstimatePage() {
                                   patchItem.mutate({ item, patch: { is_included: value } })
                                 }
                               />
-                              <Label htmlFor={`inc-${item.id}`} className="text-xs text-muted-foreground">
-                                {item.is_included === false ? rt("rep.excluded") : rt("rep.included")}
+                              <Label
+                                htmlFor={`inc-${item.id}`}
+                                className="text-xs text-muted-foreground"
+                              >
+                                {item.is_included === false
+                                  ? rt("rep.excluded")
+                                  : rt("rep.included")}
                               </Label>
                             </div>
                           ) : (
@@ -1019,7 +1118,9 @@ function EstimatePage() {
                   id="elevator"
                   disabled={!canEdit}
                   checked={access.has_elevator}
-                  onCheckedChange={(value) => setAccess({ ...access, has_elevator: value === true })}
+                  onCheckedChange={(value) =>
+                    setAccess({ ...access, has_elevator: value === true })
+                  }
                 />
                 <Label htmlFor="elevator">{rt("rep.elevator")}</Label>
               </div>
@@ -1036,7 +1137,12 @@ function EstimatePage() {
                 />
               </div>
               {canEdit && (
-                <Button className="no-print mt-4" size="sm" onClick={() => saveAccess.mutate()} disabled={saveAccess.isPending}>
+                <Button
+                  className="no-print mt-4"
+                  size="sm"
+                  onClick={() => saveAccess.mutate()}
+                  disabled={saveAccess.isPending}
+                >
                   {saveAccess.isPending && <Loader2 className="size-4 animate-spin" />}
                   {rt("rep.saveAccess")}
                 </Button>
@@ -1068,7 +1174,9 @@ function EstimatePage() {
                       disabled={!canEdit}
                       maxLength={160}
                       value={logistics.storage_company}
-                      onChange={(e) => setLogistics({ ...logistics, storage_company: e.target.value })}
+                      onChange={(e) =>
+                        setLogistics({ ...logistics, storage_company: e.target.value })
+                      }
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -1078,7 +1186,9 @@ function EstimatePage() {
                       disabled={!canEdit}
                       maxLength={160}
                       value={logistics.storage_contact}
-                      onChange={(e) => setLogistics({ ...logistics, storage_contact: e.target.value })}
+                      onChange={(e) =>
+                        setLogistics({ ...logistics, storage_contact: e.target.value })
+                      }
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -1088,7 +1198,9 @@ function EstimatePage() {
                       disabled={!canEdit}
                       maxLength={240}
                       value={logistics.storage_address}
-                      onChange={(e) => setLogistics({ ...logistics, storage_address: e.target.value })}
+                      onChange={(e) =>
+                        setLogistics({ ...logistics, storage_address: e.target.value })
+                      }
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -1098,7 +1210,9 @@ function EstimatePage() {
                       disabled={!canEdit}
                       maxLength={40}
                       value={logistics.storage_phone}
-                      onChange={(e) => setLogistics({ ...logistics, storage_phone: e.target.value })}
+                      onChange={(e) =>
+                        setLogistics({ ...logistics, storage_phone: e.target.value })
+                      }
                     />
                   </div>
                 </div>
@@ -1114,7 +1228,9 @@ function EstimatePage() {
                       disabled={!canEdit}
                       maxLength={240}
                       value={logistics.delivery_address}
-                      onChange={(e) => setLogistics({ ...logistics, delivery_address: e.target.value })}
+                      onChange={(e) =>
+                        setLogistics({ ...logistics, delivery_address: e.target.value })
+                      }
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -1124,7 +1240,9 @@ function EstimatePage() {
                       disabled={!canEdit}
                       maxLength={40}
                       value={logistics.delivery_floor}
-                      onChange={(e) => setLogistics({ ...logistics, delivery_floor: e.target.value })}
+                      onChange={(e) =>
+                        setLogistics({ ...logistics, delivery_floor: e.target.value })
+                      }
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -1260,30 +1378,46 @@ function EstimatePage() {
               </div>
 
               {!tenderMode && (
-              <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="hourly">{rt("rep.hourly")}</Label>
-                  <Input id="hourly" type="number" min={0} value={hourly} onChange={(e) => setHourly(e.target.value)} />
+                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="hourly">{rt("rep.hourly")}</Label>
+                    <Input
+                      id="hourly"
+                      type="number"
+                      min={0}
+                      value={hourly}
+                      onChange={(e) => setHourly(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="hours">{rt("rep.hours")}</Label>
+                    <Input
+                      id="hours"
+                      type="number"
+                      min={0}
+                      value={hours}
+                      onChange={(e) => setHours(e.target.value)}
+                    />
+                  </div>
+                  <div className="rounded-xl bg-muted/50 p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      {rt("rep.hourly")}
+                    </p>
+                    <p className="text-xl font-bold">
+                      {money(Number(hourly || 0) * Number(hours || 0), currency, lang)}
+                    </p>
+                    {company && !tenderMode && (
+                      <>
+                        <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">
+                          {rt("rep.fixed")}
+                        </p>
+                        <p className="text-xl font-bold">
+                          {money(netVolume * Number(company.price_per_m3), currency, lang)}
+                        </p>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="hours">{rt("rep.hours")}</Label>
-                  <Input id="hours" type="number" min={0} value={hours} onChange={(e) => setHours(e.target.value)} />
-                </div>
-                <div className="rounded-xl bg-muted/50 p-4">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{rt("rep.hourly")}</p>
-                  <p className="text-xl font-bold">
-                    {money(Number(hourly || 0) * Number(hours || 0), currency, lang)}
-                  </p>
-                  {company && !tenderMode && (
-                    <>
-                      <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">{rt("rep.fixed")}</p>
-                      <p className="text-xl font-bold">
-                        {money(netVolume * Number(company.price_per_m3), currency, lang)}
-                      </p>
-                    </>
-                  )}
-                </div>
-              </div>
               )}
 
               <div className="mt-6">
@@ -1294,7 +1428,9 @@ function EstimatePage() {
                       <Checkbox
                         id={key}
                         checked={Boolean(checked[key])}
-                        onCheckedChange={(value) => setChecked((prev) => ({ ...prev, [key]: value === true }))}
+                        onCheckedChange={(value) =>
+                          setChecked((prev) => ({ ...prev, [key]: value === true }))
+                        }
                       />
                       <Label htmlFor={key} className="text-sm font-normal">
                         {rt(key)}

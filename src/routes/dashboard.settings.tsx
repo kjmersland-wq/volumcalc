@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useI18n } from "@/lib/i18n";
+import { SUPPORTED_LANGS, useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -22,7 +22,10 @@ export const Route = createFileRoute("/dashboard/settings")({
   head: () => ({
     meta: [
       { title: "Company settings — VolumCalc" },
-      { name: "description", content: "Manage company branding, pricing, currency, and language in VolumCalc." },
+      {
+        name: "description",
+        content: "Manage company branding, pricing, currency, and language in VolumCalc.",
+      },
       { property: "og:title", content: "Company settings — VolumCalc" },
       { property: "og:description", content: "Manage your company settings in VolumCalc." },
       { property: "og:type", content: "website" },
@@ -185,8 +188,11 @@ function SettingsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="no">Norsk</SelectItem>
-                <SelectItem value="en">English</SelectItem>
+                {SUPPORTED_LANGS.map((code) => (
+                  <SelectItem key={code} value={code}>
+                    {languageNames[code]}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -202,11 +208,19 @@ function SettingsPage() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="phone">{t("set.phone")}</Label>
-            <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <Input
+              id="phone"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="address">{t("set.address")}</Label>
-            <Input id="address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+            <Input
+              id="address"
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="contact_email">{t("set.contactEmail")}</Label>
@@ -235,3 +249,17 @@ function SettingsPage() {
     </div>
   );
 }
+const languageNames: Record<string, string> = {
+  no: "Norsk",
+  en: "English",
+  sv: "Svenska",
+  da: "Dansk",
+  fi: "Suomi",
+  de: "Deutsch",
+  nl: "Nederlands",
+  fr: "Français",
+  pl: "Polski",
+  es: "Español",
+  it: "Italiano",
+  pt: "Português",
+};
