@@ -1,11 +1,28 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { USER_VERIFIED_SECURITY_LABEL, VOLUME_DATABASE } from "./volume-database";
 
 const dataUrl = z.string().min(20).max(12_000_000).regex(/^data:image\/(jpeg|png|webp);base64,/);
+const roomNames = Object.keys(VOLUME_DATABASE) as Array<keyof typeof VOLUME_DATABASE>;
+const roomSchema = z.enum(roomNames as [string, ...string[]]);
+
+const manualItemSchema = z.object({
+  room: roomSchema,
+  name: z.string().trim().min(1).max(120),
+  name_no: z.string().trim().min(1).max(120),
+  category: z.string().trim().min(1).max(80),
+  quantity: z.number().int().min(1).max(999),
+  length_cm: z.number().nonnegative().max(5000),
+  width_cm: z.number().nonnegative().max(5000),
+  height_cm: z.number().nonnegative().max(5000),
+  volume_m3: z.number().nonnegative().max(1000),
+  security_label: z.literal(USER_VERIFIED_SECURITY_LABEL),
+});
 
 const createSchema = z.object({
-  images: z.array(dataUrl).min(1).max(100), // practical safety cap to keep the request payload processable
+  images: z.array(dataUrl).max(100).default([]), // kept for backward compatibility, no longer used for analysis
+  manual_items: z.array(manualItemSchema).min(1).max(300),
   customer_name: z.string().trim().max(120).optional(),
   customer_phone: z.string().trim().max(40).optional(),
   move_date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -37,7 +54,7 @@ export const createEstimate = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => createSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { analyzeImages } = await import("./analyze.server");
+    const { analyzeManualItems } = await import("./analyze.server");
 
     // A company-specific upload link attributes the estimate to that company so
     // it lands in their dashboard; otherwise it stays unattributed.
@@ -84,12 +101,15 @@ export const createEstimate = createServerFn({ method: "POST" })
       paths.push(path);
     }
 
-    const { data: signed } = await supabaseAdmin.storage
-      .from("estimate-photos")
-      .createSignedUrls(paths, 60 * 60 * 24 * 365);
-    const photoUrls = (signed ?? []).map((s) => s.signedUrl).filter(Boolean) as string[];
+    const photoUrls = paths.length
+      ? (
+          await supabaseAdmin.storage
+            .from("estimate-photos")
+            .createSignedUrls(paths, 60 * 60 * 24 * 365)
+        ).data?.map((s) => s.signedUrl).filter(Boolean) ?? []
+      : [];
 
-    const result = await analyzeImages(data.images);
+    const result = analyzeManualItems(data.manual_items);
 
     if (result.items.length) {
       const roomNames = Array.from(new Set(result.items.map((item) => item.room || "Other")));

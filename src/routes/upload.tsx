@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Camera, ImagePlus, Info, Loader2, X } from "lucide-react";
+import { Camera, Info, Loader2, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +12,12 @@ import { useI18n } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { createEstimate } from "@/lib/estimates.functions";
 import { getCompanyByUploadToken } from "@/lib/admin.functions";
-import { blobToDataUrl, compressImage } from "@/lib/images";
-import { useUnlimitedPhotos } from "@/hooks/useCompany";
+import {
+  USER_VERIFIED_SECURITY_LABEL,
+  VOLUME_DATABASE,
+  type VolumeRoom,
+} from "@/lib/volume-database";
+import { recommendedVolume } from "@/lib/volume";
 
 export const Route = createFileRoute("/upload")({
   staticData: { sitemap: true },
@@ -44,63 +48,137 @@ export const Route = createFileRoute("/upload")({
   component: UploadPage,
 });
 
-type Stage = "idle" | "uploading" | "analysing" | "saving";
+type Stage = "idle" | "saving";
+type QuantityByRoom = Record<VolumeRoom, Record<string, number>>;
+
+const ROOMS = Object.keys(VOLUME_DATABASE) as VolumeRoom[];
+
+function createInitialQuantities(): QuantityByRoom {
+  return ROOMS.reduce(
+    (acc, room) => ({
+      ...acc,
+      [room]: VOLUME_DATABASE[room].reduce(
+        (items, item) => ({ ...items, [item.key]: 0 }),
+        {} as Record<string, number>,
+      ),
+    }),
+    {} as QuantityByRoom,
+  );
+}
 
 function UploadPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const submitEstimate = useServerFn(createEstimate);
-  const inputRef = useRef<HTMLInputElement>(null);
   const { c: companyId, k: companyToken } = Route.useSearch();
   const brandingFn = useServerFn(getCompanyByUploadToken);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
   const { data: branding } = useQuery({
     queryKey: ["upload-branding", companyToken],
     enabled: Boolean(companyToken),
     queryFn: () => brandingFn({ data: { token: companyToken! } }),
   });
-  const unlimited = useUnlimitedPhotos();
-  const maxPhotos = unlimited ? Infinity : 20;
 
-  const [files, setFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
-  const [dragging, setDragging] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState<VolumeRoom>("Living room");
+  const [recording, setRecording] = useState(true);
   const [stage, setStage] = useState<Stage>("idle");
+  const [quantities, setQuantities] = useState<QuantityByRoom>(() => createInitialQuantities());
   const [form, setForm] = useState({ name: "", phone: "", date: "", address: "" });
-
   const busy = stage !== "idle";
 
-  function addFiles(list: FileList | null) {
-    if (!list) return;
-    const imageFiles = Array.from(list).filter((f) => f.type.startsWith("image/"));
-    if (!imageFiles.length) return;
-    const room = maxPhotos - files.length;
-    const incoming = room === Infinity ? imageFiles : imageFiles.slice(0, Math.max(0, room));
-    if (incoming.length < imageFiles.length) toast.error(t("upload.limit"));
-    if (!incoming.length) return;
-    setFiles((prev) => [...prev, ...incoming]);
-    setPreviews((prev) => [...prev, ...incoming.map((f) => URL.createObjectURL(f))]);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false,
+        });
+        if (cancelled) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+        streamRef.current = stream;
+        if (videoRef.current) videoRef.current.srcObject = stream;
+      } catch {
+        toast.error("Klarte ikke å starte kamera.");
+      }
+    }
+
+    void startCamera();
+
+    return () => {
+      cancelled = true;
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+    };
+  }, []);
+
+  function stopVideoCapture() {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setRecording(false);
   }
 
-  function removeFile(index: number) {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
+  function changeQuantity(itemKey: string, delta: number) {
+    setQuantities((prev) => {
+      const current = prev[selectedRoom][itemKey] ?? 0;
+      const next = Math.max(0, current + delta);
+      return {
+        ...prev,
+        [selectedRoom]: {
+          ...prev[selectedRoom],
+          [itemKey]: next,
+        },
+      };
+    });
   }
+
+  const manualItems = useMemo(
+    () =>
+      ROOMS.flatMap((room) =>
+        VOLUME_DATABASE[room]
+          .map((item) => ({
+            room,
+            name: item.name,
+            name_no: item.name_no,
+            category: item.category,
+            quantity: quantities[room][item.key] ?? 0,
+            length_cm: item.length_cm,
+            width_cm: item.width_cm,
+            height_cm: item.height_cm,
+            volume_m3: item.volume_m3,
+            security_label: USER_VERIFIED_SECURITY_LABEL,
+          }))
+          .filter((item) => item.quantity > 0),
+      ),
+    [quantities],
+  );
+
+  const netVolume = useMemo(
+    () => Math.round(manualItems.reduce((sum, item) => sum + item.quantity * item.volume_m3, 0) * 100) / 100,
+    [manualItems],
+  );
+  const grossVolume = recommendedVolume(netVolume);
 
   async function handleSubmit() {
-    if (!files.length) {
-      toast.error(t("upload.needPhoto"));
+    if (!manualItems.length) {
+      toast.error("Legg til minst én gjenstand i sjekklisten.");
       return;
     }
 
     try {
-      setStage("uploading");
-      const compressed = await Promise.all(files.map((f) => compressImage(f)));
-      const images = await Promise.all(compressed.map((b) => blobToDataUrl(b)));
-
-      setStage("analysing");
+      setStage("saving");
       const created = await submitEstimate({
         data: {
-          images,
+          manual_items: manualItems,
           ...(form.name.trim() ? { customer_name: form.name.trim() } : {}),
           ...(form.phone.trim() ? { customer_phone: form.phone.trim() } : {}),
           ...(form.date ? { move_date: form.date } : {}),
@@ -109,29 +187,13 @@ function UploadPage() {
           ...(companyToken ? { company_token: companyToken } : {}),
         },
       });
-
-      setStage("saving");
       navigate({ to: "/estimate/$id", params: { id: created.id }, search: { token: created.share_token } });
     } catch (error) {
       console.error(error);
       setStage("idle");
-      const message = error instanceof Error ? error.message : "";
-      if (message.includes("payment_required")) {
-        toast.error(t("upload.aiCredits"));
-      } else if (message.includes("rate_limited")) {
-        toast.error(t("upload.aiBusy"));
-      } else {
-        toast.error(t("upload.failed"));
-      }
+      toast.error(t("upload.failed"));
     }
   }
-
-  const stageLabel =
-    stage === "uploading"
-      ? t("upload.uploading")
-      : stage === "analysing"
-        ? t("upload.analysing")
-        : t("upload.saving");
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -156,125 +218,140 @@ function UploadPage() {
               </div>
             </div>
           )}
-          <h1 className="text-3xl font-bold sm:text-4xl">{t("upload.title")}</h1>
-          <p className="mt-3 text-muted-foreground">{t("upload.sub")}</p>
 
-          <div className="mt-7 flex gap-4 rounded-xl border border-primary/20 bg-primary-soft/70 p-5">
-            <Info className="mt-0.5 size-5 shrink-0 text-primary" />
-            <div>
-              <h2 className="font-semibold">{t("upload.guideTitle")}</h2>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{t("upload.guide")}</p>
+          <h1 className="text-3xl font-bold sm:text-4xl">Film rommet ditt</h1>
+          <p className="mt-3 text-muted-foreground">
+            Lokal videostrøm og lokal sjekkliste. Sikkerhet: {USER_VERIFIED_SECURITY_LABEL}.
+          </p>
+
+          {recording ? (
+            <div className="mt-6 space-y-4">
+              <div className="rounded-xl border border-border bg-card p-4">
+                <Label htmlFor="room">Velg rom</Label>
+                <select
+                  id="room"
+                  className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  value={selectedRoom}
+                  onChange={(event) => setSelectedRoom(event.target.value as VolumeRoom)}
+                >
+                  {ROOMS.map((room) => (
+                    <option key={room} value={room}>
+                      {room}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="overflow-hidden rounded-2xl border border-border bg-black">
+                <video ref={videoRef} autoPlay playsInline muted className="aspect-video w-full object-cover" />
+              </div>
+
+              <Button
+                size="lg"
+                className="h-14 w-full bg-red-600 text-base font-bold text-white hover:bg-red-700"
+                onClick={stopVideoCapture}
+              >
+                STOPP FILMING & SE SJEKKLISTE
+              </Button>
             </div>
-          </div>
-
-          <div
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragging(true);
-            }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragging(false);
-              addFiles(e.dataTransfer.files);
-            }}
-            onClick={() => inputRef.current?.click()}
-            className={`mt-6 cursor-pointer rounded-xl border-2 border-dashed p-10 text-center transition-colors ${
-              dragging ? "border-primary bg-primary-soft" : "border-border bg-card hover:border-primary/60"
-            }`}
-          >
-            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary-soft text-primary">
-              <ImagePlus className="size-6" />
-            </div>
-            <p className="mt-4 font-medium">{t("upload.drop")}</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {unlimited ? t("upload.unlimited") : t("upload.hint")}
-            </p>
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => {
-                addFiles(e.target.files);
-                e.target.value = "";
-              }}
-            />
-          </div>
-
-          {previews.length > 0 && (
+          ) : (
             <>
-              <p className="mt-6 text-sm text-muted-foreground">
-                {previews.length} {t("upload.photos")}
-              </p>
-              <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
-                {previews.map((src, i) => (
-                  <div key={src} className="group relative overflow-hidden rounded-xl border border-border">
-                    <img src={src} alt="" className="aspect-square w-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeFile(i)}
-                      className="absolute right-1.5 top-1.5 rounded-full bg-background/90 p-1 text-foreground shadow-sm"
-                      aria-label="Remove photo"
+              <div className="mt-7 flex gap-4 rounded-xl border border-primary/20 bg-primary-soft/70 p-5">
+                <Info className="mt-0.5 size-5 shrink-0 text-primary" />
+                <div>
+                  <h2 className="font-semibold">Sjekkliste: {selectedRoom}</h2>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                    Bruk plus/minus. All beregning skjer lokalt (Antall × m³).
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-3">
+                {VOLUME_DATABASE[selectedRoom].map((item) => {
+                  const qty = quantities[selectedRoom][item.key] ?? 0;
+                  return (
+                    <div
+                      key={item.key}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
                     >
-                      <X className="size-3.5" />
-                    </button>
+                      <div>
+                        <p className="font-medium">{item.name_no}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {item.length_cm}×{item.width_cm}×{item.height_cm} cm · {item.volume_m3.toFixed(2)} m³
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => changeQuantity(item.key, -1)}
+                          disabled={qty <= 0}
+                        >
+                          <Minus className="size-4" />
+                        </Button>
+                        <span className="inline-flex min-w-10 justify-center text-lg font-semibold">{qty}</span>
+                        <Button type="button" variant="outline" size="icon" onClick={() => changeQuantity(item.key, 1)}>
+                          <Plus className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 rounded-xl border border-border bg-muted/30 p-4">
+                <p className="text-sm text-muted-foreground">Nettovolum: {netVolume.toFixed(2)} m³</p>
+                <p className="text-sm text-muted-foreground">
+                  Bilbehov (+25% stuefaktor): {grossVolume.toFixed(2)} m³
+                </p>
+              </div>
+
+              <div className="card-soft mt-8 p-6">
+                <h2 className="font-semibold">{t("upload.details")}</h2>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name">{t("upload.name")}</Label>
+                    <Input
+                      id="name"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    />
                   </div>
-                ))}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="phone">{t("upload.phone")}</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="date">{t("upload.date")}</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={form.date}
+                      onChange={(e) => setForm({ ...form, date: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="address">{t("upload.address")}</Label>
+                    <Input
+                      id="address"
+                      value={form.address}
+                      onChange={(e) => setForm({ ...form, address: e.target.value })}
+                    />
+                  </div>
+                </div>
               </div>
+
+              <Button size="lg" className="mt-8 w-full" disabled={busy} onClick={handleSubmit}>
+                {busy ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
+                {busy ? "Lagrer beregning …" : "Lagre og åpne rapport"}
+              </Button>
             </>
-          )}
-
-          <div className="card-soft mt-10 p-6">
-            <h2 className="font-semibold">{t("upload.details")}</h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="name">{t("upload.name")}</Label>
-                <Input
-                  id="name"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="phone">{t("upload.phone")}</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="date">{t("upload.date")}</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={form.date}
-                  onChange={(e) => setForm({ ...form, date: e.target.value })}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="address">{t("upload.address")}</Label>
-                <Input
-                  id="address"
-                  value={form.address}
-                  onChange={(e) => setForm({ ...form, address: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-
-          <Button size="lg" className="mt-8 w-full" disabled={busy} onClick={handleSubmit}>
-            {busy ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
-            {busy ? stageLabel : t("upload.submit")}
-          </Button>
-
-          {busy && (
-            <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-              <div className="h-full w-1/3 animate-pulse rounded-full bg-primary" />
-            </div>
           )}
         </div>
       </main>
@@ -282,3 +359,4 @@ function UploadPage() {
     </div>
   );
 }
+
