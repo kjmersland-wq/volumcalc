@@ -556,18 +556,18 @@ export const dict: Dict = {
   "rep.titlePlaceholder": { no: "F.eks. Flytting Møviklia 4 → Oslo", en: "E.g. Move from Møviklia 4 → Oslo" },
   "rep.titleSaved": { no: "Rapportnavnet er lagret", en: "Report name saved" },
 
-  "price.title": { no: "Grovt prisestimat for flyttingen", en: "Rough moving price estimate" },
-  "price.sub": {
+  "mprice.title": { no: "Grovt prisestimat for flyttingen", en: "Rough moving price estimate" },
+  "mprice.sub": {
     no: "Regn ut et omtrentlig prisspenn ut fra volum, avstand og adkomst. Endelig pris får du fra flyttefirmaet.",
     en: "Get an approximate price range based on volume, distance and access. The final price comes from the mover.",
   },
-  "price.from": { no: "Flytter fra", en: "Moving from" },
-  "price.to": { no: "Flytter til", en: "Moving to" },
-  "price.km": { no: "Avstand (km)", en: "Distance (km)" },
-  "price.floors": { no: "Etasjer uten heis", en: "Floors without lift" },
-  "price.packing": { no: "Pakking av innbo", en: "Packing service" },
-  "price.range": { no: "Estimert prisspenn", en: "Estimated price range" },
-  "price.disclaimer": {
+  "mprice.from": { no: "Flytter fra", en: "Moving from" },
+  "mprice.to": { no: "Flytter til", en: "Moving to" },
+  "mprice.km": { no: "Avstand (km)", en: "Distance (km)" },
+  "mprice.floors": { no: "Etasjer uten heis", en: "Floors without lift" },
+  "mprice.packing": { no: "Pakking av innbo", en: "Packing service" },
+  "mprice.range": { no: "Estimert prisspenn", en: "Estimated price range" },
+  "mprice.disclaimer": {
     no: "Estimatet er veiledende og avhenger av avstand, tidspunkt, adkomst og hva som avtales med flyttefirmaet.",
     en: "The estimate is indicative and depends on distance, timing, access and what you agree with the mover.",
   },
