@@ -2,19 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { extraTranslations } from "./i18n.translations";
 
 export type Lang =
-  | "no"
-  | "en"
-  | "sv"
-  | "da"
-  | "fi"
-  | "de"
-  | "nl"
-  | "fr"
-  | "pl"
-  | "es"
-  | "it"
-  | "pt";
-
+  "no" | "en" | "sv" | "da" | "fi" | "de" | "nl" | "fr" | "pl" | "es" | "it" | "pt";
 
 type Dict = Record<string, { no: string; en: string }>;
 
@@ -42,15 +30,24 @@ export const dict: Dict = {
   },
   "contact.sentTitle": { no: "Melding sendt", en: "Message sent" },
   "contact.another": { no: "Send en ny melding", en: "Send another message" },
-  "contact.error": { no: "Noe gikk galt. Prøv igjen eller send e-post direkte.", en: "Something went wrong. Try again or email us directly." },
-  "contact.required": { no: "Fyll ut navn, e-post, emne og melding.", en: "Please fill in name, email, subject and message." },
+  "contact.error": {
+    no: "Noe gikk galt. Prøv igjen eller send e-post direkte.",
+    en: "Something went wrong. Try again or email us directly.",
+  },
+  "contact.required": {
+    no: "Fyll ut navn, e-post, emne og melding.",
+    en: "Please fill in name, email, subject and message.",
+  },
   "contact.privacy": {
     no: "Vi bruker opplysningene kun til å svare deg.",
     en: "We only use your details to reply to you.",
   },
   "contact.emailUs": { no: "Send e-post", en: "Email us" },
   "contact.response": { no: "Svartid", en: "Response time" },
-  "contact.responseTime": { no: "Vanligvis innen én virkedag", en: "Usually within one business day" },
+  "contact.responseTime": {
+    no: "Vanligvis innen én virkedag",
+    en: "Usually within one business day",
+  },
   "contact.aside": {
     no: "Er du flyttebyrå og vil teste VolumCalc med egne bilder? Nevn det i meldingen, så setter vi opp en gratis prøvekonto.",
     en: "Running a moving company and want to test VolumCalc with your own video + checklist flow? Mention it and we will set up a free trial account.",
@@ -67,12 +64,18 @@ export const dict: Dict = {
   "nav.dashboard": { no: "Dashbord", en: "Dashboard" },
   "nav.tryFree": { no: "Prøv gratis", en: "Try for free" },
 
-  "hero.badge": { no: "AI-drevet volumberegning", en: "Instant volume estimates from room video" },
-  "hero.title1": { no: "Kubikk på", en: "Cubic metres in" },
-  "hero.title2": { no: "sekunder – ikke befaring", en: "seconds — not site visits" },
+  "hero.badge": {
+    no: "Trygg og enkel volumberegning",
+    en: "Instant volume estimates from room video",
+  },
+  "hero.title1": {
+    no: "Så fint! Vi fikser flyttevolumet ditt",
+    en: "Brilliant! Let’s sort your moving volume in a jiffy —",
+  },
+  "hero.title2": { no: "med en rolig videorunde", en: "from a quick room video." },
   "hero.sub": {
-    no: "VolumCalc gjør bilder av rommene dine om til en ryddig, rominndelt volumberegning – klar for flytteplanlegging og pristilbud.",
-    en: "VolumCalc turns a quick room video into a clear, room-by-room volume estimate.",
+    no: "VolumCalc hjelper deg med å gjøre en rolig runde gjennom rommene, og gjør det om til en tydelig, rominndelt volumberegning. Perfekt når du vil planlegge flyttingen i fred og ro.",
+    en: "VolumCalc helps you turn a quick wander through your rooms into a beautifully clear, room-by-room volume estimate. Perfectly sorted for your moving plans.",
   },
   "hero.cta": { no: "Start en gratis beregning", en: "Start a free estimate" },
   "hero.cta2": { no: "For flyttebyråer", en: "For moving companies" },
@@ -80,16 +83,16 @@ export const dict: Dict = {
   "hero.stat2": { no: "gjenstander gjenkjent", en: "standard items available" },
   "hero.stat3": { no: "færre tvister", en: "fewer disputes" },
 
-  "how.title": { no: "Fra bilde til tilbud i tre steg", en: "From video to quote in three steps" },
-  "how.1t": { no: "Kunden laster opp bilder", en: "Customer records video" },
+  "how.title": { no: "Fra video til tilbud i tre steg", en: "From video to quote in three steps" },
+  "how.1t": { no: "Film rommet i ditt tempo", en: "Simply record a quick video" },
   "how.1d": {
-    no: "Del en lenke. Kunden tar bilder fra mobilen – ingen innlogging, ingen app.",
-    en: "Share a link. The customer records a quick video of their room on their phone — no login, no app.",
+    no: "Åpne lenken på mobilen og ta en rolig, behagelig runde gjennom rommet. Du har god tid, og trenger verken app eller innlogging.",
+    en: "Simply record a quick video — Just open the link on your mobile and take a steady, relaxed stroll through the room. Take all the time you need, with no fussy apps or logins required.",
   },
-  "how.2t": { no: "AI analyserer", en: "Stress-free checklist" },
+  "how.2t": { no: "Rolig sjekkliste etterpå", en: "Stress-free checklist" },
   "how.2d": {
-    no: "Hver gjenstand identifiseres med mål, volum i m³ og en tydelig sikkerhetsgrad.",
-    en: "The customer confirms their items from a tailored checklist right after filming — with 100% accuracy and zero stress.",
+    no: "Når du er ferdig med videoen, krysser du av gjenstandene i en tilpasset sjekkliste i fred og ro. Enkelt og trygt, hver gang.",
+    en: "Once you’ve finished filming, simply tick off your items from a tailored checklist in total peace and quiet. Spot on every time.",
   },
   "how.3t": { no: "Du sender tilbud", en: "You send the quote" },
   "how.3d": {
@@ -106,7 +109,7 @@ export const dict: Dict = {
   "feat.2t": { no: "Sikkerhetsgrad", en: "User-verified list" },
   "feat.2d": {
     no: "Se hvilke gjenstander som bør dobbeltsjekkes før du sender tilbudet.",
-    en: "Customers verify their own inventory on the spot, giving you a 100% reliable basis for your transport quote without disputes.",
+    en: "100% reliable checklists. Your customers verify their own items down to a tee, giving you a completely accurate, dispute-free basis for your transport quotes.",
   },
   "feat.3t": { no: "Delbar rapport", en: "Shareable report" },
   "feat.3d": {
@@ -125,32 +128,65 @@ export const dict: Dict = {
     en: "Create an account and share your first upload link today.",
   },
 
-  "upload.title": { no: "Last opp bilder av tingene dine", en: "Record a video of your inventory" },
+  "upload.title": {
+    no: "Så gøy at du er i gang! La oss filme flyttelasset ditt",
+    en: "Lovely — let’s record your inventory together",
+  },
   "upload.sub": {
-    no: "AI-en sorterer bildene og gjenstandene automatisk etter rom.",
-    en: "You record the room, and easily select the items in peace and quiet right after.",
+    no: "Her tar vi det helt uten stress. Du filmer rommet i eget tempo, og så klikker du enkelt av gjenstandene dine i fred og ro etterpå.",
+    en: "No rush at all — just film each room at your own pace, then tick through your items calmly afterwards.",
   },
-  "upload.guideTitle": { no: "Slik får du best resultat", en: "How it works" },
+  "upload.guideTitle": { no: "Slik gjør vi det sammen", en: "How it works" },
   "upload.guide": {
-    no: "Ta 1–3 bilder per rom. Ett oversiktsbilde av hele rommet + 1–2 nærbilder av de største møblene gir best resultat. Du trenger ikke fotografere hver minste gjenstand.",
-    en: "How it works: Select the room you are in, and record a steady video of the space for about 15 seconds. You do the item checklist in peace and quiet afterwards!",
+    no: "Slik gjør vi det sammen: Velg rommet du står i nå, og ta en rolig og behagelig runde med kameraet. Du har kjempegod tid og filmer helt i ditt eget tempo. Du trenger ikke å tenke på opptelling underveis – det fikser vi sammen på sjekklisten etterpå!",
+    en: "Choose the room you’re in and take a steady 15-second sweep on your phone. Afterwards, you can go through the checklist in peace and quiet.",
   },
-  "upload.drop": { no: "Dra bilder hit eller trykk for å velge", en: "Click here to select a room and start video recording directly" },
-  "upload.hint": { no: "JPG eller PNG · maks 20 bilder", en: "Room video + checklist flow" },
+  "upload.drop": {
+    no: "Trykk her for å velge rom før du starter den koselige videorunden på mobilen din",
+    en: "Choose your room here before starting your calm video walkthrough",
+  },
+  "upload.roomSelectorLabel": {
+    no: "Trykk her for å velge rom før du starter den koselige videorunden på mobilen din",
+    en: "Choose your room here before starting your calm video walkthrough",
+  },
+  "upload.selectRoom": { no: "Velg rom", en: "Select room" },
+  "upload.hint": {
+    no: "Romvideo + sjekkliste i rolig tempo",
+    en: "Room video + checklist, at your own pace",
+  },
+  "upload.stopRecording": {
+    no: "Stopp filming og se sjekklisten",
+    en: "Stop filming and view checklist",
+  },
   "upload.photos": { no: "bilder valgt", en: "items selected" },
   "upload.details": { no: "Kontaktinformasjon (valgfritt)", en: "Contact details (optional)" },
   "upload.name": { no: "Navn", en: "Name" },
   "upload.phone": { no: "Telefon", en: "Phone" },
   "upload.date": { no: "Flyttedato", en: "Move date" },
   "upload.address": { no: "Adresse", en: "Address" },
-  "upload.submit": { no: "Beregn volum", en: "Start registration" },
-  "upload.needPhoto": { no: "Legg til minst ett bilde først.", en: "Select at least one item first." },
-  "upload.uploading": { no: "Laster opp bilder …", en: "Starting room recording …" },
-  "upload.analysing": { no: "AI analyserer møblene dine …", en: "Preparing your checklist …" },
+  "upload.securityLabel": { no: "Sikkerhet", en: "Security" },
+  "upload.submit": {
+    no: "La oss starte registreringen",
+    en: "Let’s get your registration started",
+  },
+  "upload.netVolumeLabel": { no: "Nettovolum", en: "Net volume" },
+  "upload.grossVolumeLabel": {
+    no: "Bilbehov (+25 % stuefaktor)",
+    en: "Vehicle requirement (+25% stowage factor)",
+  },
+  "upload.needPhoto": {
+    no: "Velg minst én gjenstand i sjekklisten først, så er vi i gang.",
+    en: "Please tick at least one item in the checklist first, and we’ll get cracking.",
+  },
+  "upload.uploading": { no: "Starter videorunden …", en: "Starting your room recording …" },
+  "upload.analysing": { no: "Gjør klar sjekklisten …", en: "Preparing your checklist …" },
   "upload.saving": { no: "Lagrer beregningen …", en: "Saving your estimate …" },
-  "upload.failed": { no: "Noe gikk galt. Prøv igjen.", en: "Something went wrong. Please try again." },
+  "upload.failed": {
+    no: "Noe gikk galt. Prøv igjen.",
+    en: "Something went wrong. Please try again.",
+  },
   "upload.aiCredits": {
-    no: "AI-kvoten er brukt opp. Fyll på AI-kreditter for å beregne volum.",
+    no: "Video- og sjekklisteflyten er midlertidig utilgjengelig. Prøv gjerne igjen om litt.",
     en: "The video + checklist flow is temporarily unavailable. Please try again shortly.",
   },
   "upload.aiBusy": {
@@ -182,7 +218,10 @@ export const dict: Dict = {
     en: "This estimate is based on room video and a user-verified checklist, and is indicative until the moving company approves it.",
   },
   "share.title": { no: "Del beregningen", en: "Share this estimate" },
-  "share.sub": { no: "Send rapporten trygt via kanalen du foretrekker.", en: "Send the report using your preferred channel." },
+  "share.sub": {
+    no: "Send rapporten trygt via kanalen du foretrekker.",
+    en: "Send the report using your preferred channel.",
+  },
   "share.whatsapp": { no: "Del på WhatsApp", en: "Share on WhatsApp" },
   "share.facebook": { no: "Del på Facebook", en: "Share on Facebook" },
   "share.linkedin": { no: "Del på LinkedIn", en: "Share on LinkedIn" },
@@ -198,7 +237,10 @@ export const dict: Dict = {
   "auth.company": { no: "Firmanavn", en: "Company name" },
   "auth.google": { no: "Fortsett med Google", en: "Continue with Google" },
   "auth.toSignup": { no: "Har du ikke konto? Opprett en", en: "No account? Create one" },
-  "auth.toSignin": { no: "Har du allerede konto? Logg inn", en: "Already have an account? Sign in" },
+  "auth.toSignin": {
+    no: "Har du allerede konto? Logg inn",
+    en: "Already have an account? Sign in",
+  },
   "auth.check": {
     no: "Sjekk e-posten din for å bekrefte kontoen.",
     en: "Check your email to confirm your account.",
@@ -235,7 +277,10 @@ export const dict: Dict = {
   "set.save": { no: "Lagre innstillinger", en: "Save settings" },
   "set.saved": { no: "Innstillinger lagret", en: "Settings saved" },
 
-  "price.title": { no: "Enkle priser, uansett hvordan du flytter", en: "Simple pricing, however you move" },
+  "price.title": {
+    no: "Enkle priser, uansett hvordan du flytter",
+    en: "Simple pricing, however you move",
+  },
   "price.sub": {
     no: "Velg en enkelt beregning for din egen flytting, eller en plan for flyttebyrået.",
     en: "Choose a one-off estimate for your own move, or a plan for your moving company.",
@@ -247,12 +292,24 @@ export const dict: Dict = {
   "price.popular": { no: "Mest populær", en: "Most popular" },
   "payment.buy": { no: "Kjøp sikkert", en: "Buy securely" },
   "payment.subscribe": { no: "Abonner", en: "Subscribe" },
-  "payment.secure": { no: "Sikker betaling uten å forlate VolumCalc.", en: "Secure payment without leaving VolumCalc." },
-  "payment.test": { no: "Testmodus: Ingen ekte betalinger belastes.", en: "Test mode: No real payments are charged." },
-  "payment.notLive": { no: "Betaling er ikke aktivert for produksjon ennå.", en: "Payments are not active in production yet." },
+  "payment.secure": {
+    no: "Sikker betaling uten å forlate VolumCalc.",
+    en: "Secure payment without leaving VolumCalc.",
+  },
+  "payment.test": {
+    no: "Testmodus: Ingen ekte betalinger belastes.",
+    en: "Test mode: No real payments are charged.",
+  },
+  "payment.notLive": {
+    no: "Betaling er ikke aktivert for produksjon ennå.",
+    en: "Payments are not active in production yet.",
+  },
   "payment.complete": { no: "Betalingen er fullført", en: "Payment complete" },
   "payment.pending": { no: "Betalingsstatus mangler", en: "Payment status unavailable" },
-  "payment.completeSub": { no: "Takk! Du kan nå fortsette til din neste volumberegning.", en: "Thank you. You can now continue to your next volume estimate." },
+  "payment.completeSub": {
+    no: "Takk! Du kan nå fortsette til din neste volumberegning.",
+    en: "Thank you. You can now continue to your next volume estimate.",
+  },
   "payment.continue": { no: "Start beregning", en: "Start estimate" },
 
   "rep.status.draft": { no: "Kladd", en: "Draft" },
@@ -260,7 +317,10 @@ export const dict: Dict = {
   "rep.status.processed": { no: "Behandlet", en: "Processed" },
   "rep.estimateId": { no: "Beregnings-ID", en: "Estimate ID" },
   "rep.netVolume": { no: "Beregnet nettovolum", en: "Calculated net volume" },
-  "rep.recommended": { no: "Anbefalt bil/plassbehov (inkl. stuefaktor +25 %)", en: "Recommended vehicle/space (incl. stowage factor +25%)" },
+  "rep.recommended": {
+    no: "Anbefalt bil/plassbehov (inkl. stuefaktor +25 %)",
+    en: "Recommended vehicle/space (incl. stowage factor +25%)",
+  },
   "rep.counts": { no: "Totalt antall gjenstander & rom", en: "Total items & rooms" },
   "rep.itemsWord": { no: "gjenstander", en: "items" },
   "rep.roomsWord": { no: "rom", en: "rooms" },
@@ -268,7 +328,10 @@ export const dict: Dict = {
   "rep.pdf": { no: "Last ned PDF-rapport", en: "Download PDF report" },
   "rep.requestQuote": { no: "Be om uforpliktende tilbud", en: "Request a no-obligation quote" },
   "rep.truck.van": { no: "Varebil kl. B", en: "Small van (class B)" },
-  "rep.truck.small": { no: "Varebil kl. B / Liten flyttebil", en: "Large van / small moving truck" },
+  "rep.truck.small": {
+    no: "Varebil kl. B / Liten flyttebil",
+    en: "Large van / small moving truck",
+  },
   "rep.truck.medium": { no: "Flyttebil 3,5–7,5 tonn", en: "Moving truck 3.5–7.5 t" },
   "rep.truck.large": { no: "Stor flyttebil / semi", en: "Large moving truck / trailer" },
   "rep.storage": { no: "Tilsvarer et lagerrom på ca.", en: "Roughly a storage unit of about" },
@@ -286,11 +349,20 @@ export const dict: Dict = {
 
   "rep.accessTitle": { no: "Adkomst & forhold", en: "Access & conditions" },
   "rep.floor": { no: "Etasje", en: "Floor" },
-  "rep.elevator": { no: "Har heis (får plass til standardmøbler)", en: "Has a lift (fits standard furniture)" },
+  "rep.elevator": {
+    no: "Har heis (får plass til standardmøbler)",
+    en: "Has a lift (fits standard furniture)",
+  },
   "rep.carry": { no: "Bæreavstand", en: "Carrying distance" },
-  "rep.carryHelp": { no: "Meter fra inngangsdør til parkering for flyttebil", en: "Metres from the front door to truck parking" },
+  "rep.carryHelp": {
+    no: "Meter fra inngangsdør til parkering for flyttebil",
+    en: "Metres from the front door to truck parking",
+  },
   "rep.generalNotes": { no: "Særlige merknader for oppdraget", en: "Special notes for the job" },
-  "rep.generalNotesPh": { no: "F.eks. bomvei, smal trappeoppgang, piano må bæres", en: "E.g. toll road, narrow stairwell, piano must be carried" },
+  "rep.generalNotesPh": {
+    no: "F.eks. bomvei, smal trappeoppgang, piano må bæres",
+    en: "E.g. toll road, narrow stairwell, piano must be carried",
+  },
   "rep.saveAccess": { no: "Lagre adkomstinfo", en: "Save access details" },
   "rep.saved": { no: "Lagret", en: "Saved" },
 
@@ -302,24 +374,42 @@ export const dict: Dict = {
   "rep.fixed": { no: "Fastpris (volum × m³-pris)", en: "Fixed price (volume × rate per m³)" },
   "rep.internalNotes": { no: "Interne notater", en: "Internal notes" },
   "rep.checklist": { no: "Sjekkliste for oppdraget", en: "Operational checklist" },
-  "rep.check1": { no: "Adkomst og bæreavstand bekreftet", en: "Access and carrying distance confirmed" },
+  "rep.check1": {
+    no: "Adkomst og bæreavstand bekreftet",
+    en: "Access and carrying distance confirmed",
+  },
   "rep.check2": { no: "Demontering avklart", en: "Disassembly clarified" },
   "rep.check3": { no: "Skjøre gjenstander merket", en: "Fragile items flagged" },
   "rep.check4": { no: "Bilstørrelse booket", en: "Vehicle size booked" },
   "rep.export": { no: "Eksporter", en: "Export" },
 
   "quote.title": { no: "Be om uforpliktende tilbud", en: "Request a no-obligation quote" },
-  "quote.sub": { no: "Vi sender forespørselen til flyttebyrået sammen med rapporten.", en: "We send your request to the moving company together with this report." },
+  "quote.sub": {
+    no: "Vi sender forespørselen til flyttebyrået sammen med rapporten.",
+    en: "We send your request to the moving company together with this report.",
+  },
   "quote.name": { no: "Navn", en: "Name" },
   "quote.phone": { no: "Telefon", en: "Phone" },
   "quote.email": { no: "E-post", en: "Email" },
   "quote.message": { no: "Melding", en: "Message" },
   "quote.send": { no: "Send forespørsel", en: "Send request" },
-  "quote.sent": { no: "Takk! Forespørselen er sendt.", en: "Thank you. Your request has been sent." },
-  "quote.required": { no: "Fyll inn navn og telefon eller e-post.", en: "Enter your name and a phone number or email." },
+  "quote.sent": {
+    no: "Takk! Forespørselen er sendt.",
+    en: "Thank you. Your request has been sent.",
+  },
+  "quote.required": {
+    no: "Fyll inn navn og telefon eller e-post.",
+    en: "Enter your name and a phone number or email.",
+  },
 
-  "upload.limit": { no: "Du kan laste opp maksimalt 20 bilder per beregning.", en: "Your checklist is ready to fill in room by room." },
-  "upload.unlimited": { no: "Kontoen din har ubegrenset antall bilder.", en: "Your account supports unlimited registrations." },
+  "upload.limit": {
+    no: "Sjekklisten er klar, rom for rom, når du er klar.",
+    en: "Your checklist is ready to fill in room by room.",
+  },
+  "upload.unlimited": {
+    no: "Kontoen din støtter ubegrenset antall registreringer.",
+    en: "Your account supports unlimited registrations.",
+  },
 
   "admin.nav": { no: "Admin", en: "Admin" },
   "admin.title": { no: "Transportfirma-kontoer", en: "Moving company accounts" },
@@ -346,17 +436,26 @@ export const dict: Dict = {
   "admin.link": { no: "Hemmelig delelenke", en: "Secret share link" },
   "admin.copy": { no: "Kopier lenke", en: "Copy link" },
   "admin.rotate": { no: "Ny lenke", en: "New link" },
-  "admin.rotated": { no: "Ny lenke laget. Den gamle virker ikke lenger.", en: "New link created. The old one no longer works." },
+  "admin.rotated": {
+    no: "Ny lenke laget. Den gamle virker ikke lenger.",
+    en: "New link created. The old one no longer works.",
+  },
   "admin.estimates": { no: "beregninger", en: "estimates" },
   "admin.onlyAdmin": { no: "Kun for administratorer.", en: "Administrators only." },
   "admin.setPassword": { no: "Sett nytt passord", en: "Set new password" },
   "admin.passwordSet": { no: "Passordet er oppdatert.", en: "The password was updated." },
   "admin.demoLink": { no: "Åpne demo-side", en: "Open demo page" },
 
-  "upload.forCompany": { no: "Du sender bildene til", en: "You are sending this registration to" },
+  "upload.forCompany": {
+    no: "Du sender registreringen til",
+    en: "You are sending this registration to",
+  },
 
   "demo.badge": { no: "Demo", en: "Demo" },
-  "demo.title": { no: "Slik ser dashbordet ut for ditt firma", en: "This is how the dashboard looks for your company" },
+  "demo.title": {
+    no: "Slik ser dashbordet ut for ditt firma",
+    en: "This is how the dashboard looks for your company",
+  },
   "demo.sub": {
     no: "Et eksempel med et fiktivt firma. Egen logo og firmadetaljer i toppen, egen hemmelig delelenke, og kun firmaets egne beregninger i listen.",
     en: "An example using a fictitious company. Your own logo and company details in the header, your own secret share link, and only your own estimates in the list.",
@@ -366,7 +465,6 @@ export const dict: Dict = {
     en: "Every account is separate: a company can never see estimates that belong to another company.",
   },
   "demo.cta": { no: "Vil du ha en slik konto?", en: "Want an account like this?" },
-
 
   "rep.reportLang": { no: "Rapportspråk", en: "Report language" },
   "rep.reportLangHelp": {
@@ -407,7 +505,10 @@ export const dict: Dict = {
   "mat.wardrobe": { no: "Garderobekasser", en: "Wardrobe boxes" },
   "mat.mattress": { no: "Madrassposer", en: "Mattress bags" },
   "mat.blanket": { no: "Møbeltepper", en: "Furniture blankets" },
-  "rep.packingNotes": { no: "Spesielle gjenstander (kunst, piano, TV)", en: "Special items (art, piano, TV)" },
+  "rep.packingNotes": {
+    no: "Spesielle gjenstander (kunst, piano, TV)",
+    en: "Special items (art, piano, TV)",
+  },
   "rep.saveExtras": { no: "Lagre logistikk", en: "Save logistics" },
 
   "set.org": { no: "Organisasjonsnummer", en: "Company registration number" },
@@ -428,7 +529,10 @@ export const dict: Dict = {
   "footer.terms": { no: "Vilkår for bruk", en: "Terms of service" },
   "footer.cookies": { no: "Informasjonskapsler", en: "Cookie policy" },
   "footer.dpa": { no: "Databehandleravtale", en: "Data processing agreement" },
-  "footer.purchase": { no: "Kjøpsvilkår og angrerett", en: "Purchase terms and right of withdrawal" },
+  "footer.purchase": {
+    no: "Kjøpsvilkår og angrerett",
+    en: "Purchase terms and right of withdrawal",
+  },
   "footer.about": { no: "Om oss", en: "About us" },
   "footer.builtBy": {
     no: "Utviklet og drevet av KM TECH LABS i Kristiansand, Norge · Org.nr. 934 044 029",
@@ -440,7 +544,6 @@ export const dict: Dict = {
   "dash.markHandled": { no: "Merk som behandlet", en: "Mark as handled" },
   "dash.handled": { no: "Behandlet", en: "Handled" },
 };
-
 
 type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (k: keyof typeof dict | string) => string };
 
@@ -505,7 +608,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (host.endsWith(".no")) setLangState("no");
   }, []);
 
-
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
     window.localStorage.setItem("volumcalc-lang", l);
@@ -513,7 +615,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback((k: string) => translate(k, lang), [lang]);
 
-  return <LanguageContext.Provider value={{ lang, setLang, t }}>{children}</LanguageContext.Provider>;
+  return (
+    <LanguageContext.Provider value={{ lang, setLang, t }}>{children}</LanguageContext.Provider>
+  );
 }
 
 export function translate(key: string, lang: Lang): string {
@@ -525,7 +629,6 @@ export function translate(key: string, lang: Lang): string {
   }
   return entry.en;
 }
-
 
 export function useI18n() {
   return useContext(LanguageContext);

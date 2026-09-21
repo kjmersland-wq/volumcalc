@@ -77,9 +77,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   staticData: { sitemap: false },
   validateSearch: (search: Record<string, unknown>): { lang?: "no" | "en" } =>
-    search["lang"] === "no" || search["lang"] === "en"
-      ? { lang: search["lang"] }
-      : {},
+    search["lang"] === "no" || search["lang"] === "en" ? { lang: search["lang"] } : {},
   head: ({ match }) => {
     const norwegian = match.search.lang === "no";
     const socialImage = norwegian
@@ -87,40 +85,53 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       : "https://volumcalc.com/og-volumcalc-en.jpg";
     return {
       meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "VolumCalc — Instant volume estimates from room video" },
-      {
-        name: "description",
-        content: "Room-by-room cubic metre estimates from room video for private moves and moving companies.",
-      },
-      { name: "author", content: "VolumCalc" },
-      { name: "google-site-verification", content: "lw36vGJxiTk2wfz2FodnA06RXUeBUdk7a3EwNI-wSE8" },
-      { property: "og:title", content: "VolumCalc — Instant volume estimates from room video" },
-      {
-        property: "og:description",
-        content: "Room-by-room cubic metre estimates from room video for private moves and moving companies.",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:image", content: socialImage },
-      { property: "og:image:width", content: "1200" },
-      { property: "og:image:height", content: "630" },
-      { property: "og:image:alt", content: norwegian ? "VolumCalc – romvis volumberegning fra video" : "VolumCalc — room-by-room volume estimates from room video" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: socialImage },
-    ],
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { title: "VolumCalc — Brilliant moving volume estimates from a quick room video" },
+        {
+          name: "description",
+          content:
+            "Room-by-room cubic metre estimates from a quick room video and stress-free checklist flow.",
+        },
+        { name: "author", content: "VolumCalc" },
+        {
+          name: "google-site-verification",
+          content: "lw36vGJxiTk2wfz2FodnA06RXUeBUdk7a3EwNI-wSE8",
+        },
+        {
+          property: "og:title",
+          content: "VolumCalc — Brilliant moving volume estimates from a quick room video",
+        },
+        {
+          property: "og:description",
+          content:
+            "Room-by-room cubic metre estimates from a quick room video and stress-free checklist flow.",
+        },
+        { property: "og:type", content: "website" },
+        { property: "og:image", content: socialImage },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        {
+          property: "og:image:alt",
+          content: norwegian
+            ? "VolumCalc – romvis volumberegning fra video"
+            : "VolumCalc — room-by-room volume estimates from room video",
+        },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: socialImage },
+      ],
       links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap",
-      },
-      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+        {
+          rel: "stylesheet",
+          href: appCss,
+        },
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap",
+        },
+        { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       ],
     };
   },

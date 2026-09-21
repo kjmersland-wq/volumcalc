@@ -8,7 +8,18 @@ import { useI18n } from "@/lib/i18n";
 type Faq = { q: string; a: string };
 type Group = { heading: string; items: Faq[] };
 
-const content: Record<"no" | "en", { title: string; intro: string; groups: Group[]; ctaTitle: string; ctaText: string; cta: string; contact: string }> = {
+const content: Record<
+  "no" | "en",
+  {
+    title: string;
+    intro: string;
+    groups: Group[];
+    ctaTitle: string;
+    ctaText: string;
+    cta: string;
+    contact: string;
+  }
+> = {
   no: {
     title: "Hjelp og ofte stilte spørsmål",
     intro:
@@ -130,26 +141,26 @@ const content: Record<"no" | "en", { title: string; intro: string; groups: Group
   en: {
     title: "Help and frequently asked questions",
     intro:
-      "Everything you need to get going with VolumCalc — from recording room video and confirming the checklist to a finished report, packing, storage and sharing.",
+      "Everything you need to get started with VolumCalc — from a quick room video and a calm checklist to a polished report, packing, storage and sharing.",
     ctaTitle: "Didn't find your answer?",
     ctaText: "Send us a few words and we usually reply within one business day.",
     cta: "Start a free estimate",
     contact: "Contact us",
     groups: [
       {
-        heading: "Recording room video",
+        heading: "Recording your room video",
         items: [
           {
             q: "How long should each room video be?",
-            a: "Record a steady video of each room for about 15 seconds so the main furniture is visible. You do not need close-ups of every small object because you confirm items in the checklist afterwards.",
+            a: "A gentle 15-second sweep per room is usually spot on, so the main furniture is clearly visible. No need for close-ups of every little thing, as you’ll confirm items in the checklist afterwards.",
           },
           {
             q: "What gives the best result?",
-            a: "Good light, tidy surfaces and a smooth pan from the doorway so the whole room fits. Keep the phone stable and move slowly.",
+            a: "Good lighting, tidy surfaces, and a smooth pan from the doorway so the full room is in view. Keep your phone steady and take your time.",
           },
           {
             q: "Do I need to record inside cupboards and drawers?",
-            a: "No. Cupboard contents are normally counted as boxes. Confirm the quantity in the checklist after filming instead.",
+            a: "No, not at all. Cupboard contents are normally counted as boxes, so you can simply confirm quantities in the checklist after filming.",
           },
         ],
       },
@@ -158,7 +169,7 @@ const content: Record<"no" | "en", { title: string; intro: string; groups: Group
         items: [
           {
             q: "How are items assigned to rooms?",
-            a: "You pick the room before recording and confirm items in that room-specific checklist after filming.",
+            a: "You choose the room before filming, then confirm items in a checklist tailored to that exact room.",
           },
           {
             q: "Can I rename rooms and move items?",
@@ -166,7 +177,7 @@ const content: Record<"no" | "en", { title: string; intro: string; groups: Group
           },
           {
             q: "What if something is missing or wrong?",
-            a: "Adjust quantities directly in the checklist. The list is user-verified and totals update instantly.",
+            a: "No worries — just adjust quantities directly in the checklist. Totals update instantly, so you can tidy everything up in moments.",
           },
         ],
       },
@@ -239,7 +250,7 @@ const content: Record<"no" | "en", { title: string; intro: string; groups: Group
           },
           {
             q: "What happens to my room video?",
-            a: "The estimate is generated from your room video and checklist flow. Contact us at kjell@volumcalc.com if you need data deletion assistance.",
+            a: "Your estimate is created from your room video and checklist flow. Your media stays private, is not used to train AI models, and is deleted no later than 12 months after the last activity. If you’d like deletion sooner, just drop us a line at kjell@volumcalc.com and we’ll gladly help.",
           },
         ],
       },

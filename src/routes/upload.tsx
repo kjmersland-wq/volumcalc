@@ -35,13 +35,13 @@ export const Route = createFileRoute("/upload")({
       {
         name: "description",
         content:
-          "Film each room and complete a local checklist to generate an itemised cubic metre estimate.",
+          "Film each room at your own pace, then complete a calm, friendly checklist for a clear cubic metre estimate.",
       },
       { property: "og:title", content: "Room video checklist — VolumCalc" },
       {
         property: "og:description",
         content:
-          "Record rooms and verify inventory locally before generating your move volume report.",
+          "Record your rooms, confirm your checklist, and get a tidy moving volume report without the stress.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -76,7 +76,7 @@ function createInitialQuantities(): QuantityByRoom {
 }
 
 function UploadPage() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const navigate = useNavigate();
   const submitEstimate = useServerFn(createEstimate);
   const { c: companyId, k: companyToken } = Route.useSearch();
@@ -106,7 +106,7 @@ function UploadPage() {
         if (!navigator.mediaDevices?.getUserMedia) {
           setRecording(false);
           setCameraReady(true);
-          toast.error("Camera is not supported in this browser.");
+          toast.error("Looks like your browser doesn’t support camera recording just yet.");
           return;
         }
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -122,7 +122,7 @@ function UploadPage() {
         setRecording(true);
         setCameraReady(true);
       } catch {
-        toast.error("Could not start the camera.");
+        toast.error("We couldn’t start your camera just now — please try once more.");
         setRecording(false);
         setCameraReady(true);
       }
@@ -246,7 +246,7 @@ function UploadPage() {
 
           <h1 className="text-3xl font-bold sm:text-4xl">{t("upload.title")}</h1>
           <p className="mt-3 text-muted-foreground">
-            {t("upload.sub")} Security: {USER_VERIFIED_SECURITY_LABEL}.
+            {t("upload.sub")} {t("upload.securityLabel")}: {USER_VERIFIED_SECURITY_LABEL}.
           </p>
 
           {!cameraReady ? (
@@ -256,12 +256,12 @@ function UploadPage() {
               aria-live="polite"
             >
               <Loader2 className="size-5 animate-spin text-primary" />
-              <span className="text-sm text-muted-foreground">Starting camera …</span>
+              <span className="text-sm text-muted-foreground">Getting your camera ready …</span>
             </div>
           ) : recording ? (
             <div className="mt-6 space-y-4">
               <div className="rounded-xl border border-border bg-card p-4">
-                <Label htmlFor="room">{t("upload.drop")}</Label>
+                <Label htmlFor="room">{t("upload.roomSelectorLabel")}</Label>
                 <select
                   id="room"
                   className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -291,13 +291,13 @@ function UploadPage() {
                 className="h-14 w-full bg-red-600 text-base font-bold text-white hover:bg-red-700"
                 onClick={stopVideoCapture}
               >
-                STOP FILMING & VIEW CHECKLIST
+                {t("upload.stopRecording")}
               </Button>
             </div>
           ) : (
             <>
               <div className="mt-6 rounded-xl border border-border bg-card p-4">
-                <Label htmlFor="room-checklist">Select room</Label>
+                <Label htmlFor="room-checklist">{t("upload.selectRoom")}</Label>
                 <select
                   id="room-checklist"
                   className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -331,7 +331,7 @@ function UploadPage() {
                       className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
                     >
                       <div>
-                        <p className="font-medium">{item.name_no}</p>
+                        <p className="font-medium">{lang === "no" ? item.name_no : item.name}</p>
                         <p className="text-sm text-muted-foreground">
                           {item.length_cm}×{item.width_cm}×{item.height_cm} cm ·{" "}
                           {item.volume_m3.toFixed(2)} m³
@@ -344,7 +344,7 @@ function UploadPage() {
                           size="icon"
                           onClick={() => changeQuantity(item.key, -1)}
                           disabled={qty <= 0}
-                          aria-label={`Decrease quantity ${item.name_no}`}
+                          aria-label={`Decrease quantity ${lang === "no" ? item.name_no : item.name}`}
                         >
                           <Minus className="size-4" />
                         </Button>
@@ -356,7 +356,7 @@ function UploadPage() {
                           variant="outline"
                           size="icon"
                           onClick={() => changeQuantity(item.key, 1)}
-                          aria-label={`Increase quantity ${item.name_no}`}
+                          aria-label={`Increase quantity ${lang === "no" ? item.name_no : item.name}`}
                         >
                           <Plus className="size-4" />
                         </Button>
@@ -368,10 +368,10 @@ function UploadPage() {
 
               <div className="mt-6 rounded-xl border border-border bg-muted/30 p-4">
                 <p className="text-sm text-muted-foreground">
-                  Net volume: {netVolume.toFixed(2)} m³
+                  {t("upload.netVolumeLabel")}: {netVolume.toFixed(2)} m³
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Vehicle requirement (+25% stowage factor): {grossVolume.toFixed(2)} m³
+                  {t("upload.grossVolumeLabel")}: {grossVolume.toFixed(2)} m³
                 </p>
               </div>
 
@@ -417,7 +417,7 @@ function UploadPage() {
 
               <Button size="lg" className="mt-8 w-full" disabled={busy} onClick={handleSubmit}>
                 {busy ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
-                {busy ? "Saving estimate …" : t("upload.submit")}
+                {busy ? "Saving your estimate …" : t("upload.submit")}
               </Button>
             </>
           )}
