@@ -73,6 +73,18 @@ function DashboardHome() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["quote-requests"] }),
   });
 
+  const deleteEstimate = useMutation({
+    mutationFn: async (estimateId: string) => {
+      const { error } = await supabase.from("estimates").delete().eq("id", estimateId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["estimates"] });
+      queryClient.invalidateQueries({ queryKey: ["quote-requests"] });
+    },
+    onError: () => toast.error(t("dash.deleteFailed")),
+  });
+
 
   if (isLoading) {
     return (
