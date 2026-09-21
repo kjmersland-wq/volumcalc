@@ -139,7 +139,6 @@ function UploadPage() {
 
   useEffect(() => {
     if (!recording || !freePlan) return;
-    setSecondsLeft(FREE_RECORDING_SECONDS);
     const timer = window.setInterval(() => {
       setSecondsLeft((current) => {
         if (current <= 1) {
