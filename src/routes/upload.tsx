@@ -94,7 +94,7 @@ function UploadPage() {
 
   const [selectedRoom, setSelectedRoom] = useState<VolumeRoom>("Living room");
   const [recording, setRecording] = useState(false);
-  const [cameraReady, setCameraReady] = useState(false);
+  const [startingCamera, setStartingCamera] = useState(false);
   const [stage, setStage] = useState<Stage>("idle");
   const [quantities, setQuantities] = useState<QuantityByRoom>(() => createInitialQuantities());
   const [form, setForm] = useState({ name: "", phone: "", date: "", address: "" });
