@@ -60,6 +60,13 @@ export const Route = createFileRoute("/upload")({
 
 const FREE_RECORDING_SECONDS = 20;
 
+const DEMO_REPORT_ROOMS = [
+  { room: "Stue / Living room", items: "3-seter sofa, sofabord, TV-benk, reol", m3: 6.4 },
+  { room: "Kjøkken / Kitchen", items: "Spisebord, 4 stoler, kjøleskap, kasser", m3: 4.1 },
+  { room: "Soverom 1 / Bedroom 1", items: "Dobbeltseng, kommode, garderobe", m3: 5.2 },
+  { room: "Gang / Hallway", items: "Skohylle, speil, 6 flyttekasser", m3: 1.8 },
+];
+
 type Stage = "idle" | "saving";
 type QuantityByRoom = Record<string, Record<string, number>>;
 
@@ -139,7 +146,6 @@ function UploadPage() {
 
   useEffect(() => {
     if (!recording || !freePlan) return;
-    setSecondsLeft(FREE_RECORDING_SECONDS);
     const timer = window.setInterval(() => {
       setSecondsLeft((current) => {
         if (current <= 1) {
@@ -153,7 +159,7 @@ function UploadPage() {
     }, 1000);
     return () => window.clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recording, freePlan, selectedRoom]);
+  }, [recording, freePlan]);
 
   useEffect(() => {
     try {
@@ -242,6 +248,11 @@ function UploadPage() {
 
   async function startVideoCapture() {
     if (recording || startingCamera) return;
+    if (freePlan && secondsLeft <= 0) {
+      setShowUpsell(true);
+      toast.error(t("upload.freeUsedUp"));
+      return;
+    }
     try {
       setStartingCamera(true);
       if (!navigator.mediaDevices?.getUserMedia) {
@@ -384,6 +395,34 @@ function UploadPage() {
             <div className="mt-6 rounded-2xl border-2 border-primary bg-primary/5 p-6">
               <h2 className="text-xl font-bold">{t("upload.freeOverTitle")}</h2>
               <p className="mt-2 text-sm text-muted-foreground">{t("upload.freeOverBody")}</p>
+
+              <div className="mt-5 rounded-xl border border-border bg-card p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold">{t("upload.demoReportTitle")}</p>
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t("upload.demoBadge")}
+                  </span>
+                </div>
+                <ul className="mt-3 space-y-1.5 text-sm">
+                  {DEMO_REPORT_ROOMS.map((row) => (
+                    <li key={row.room} className="flex justify-between border-b border-border/60 pb-1.5">
+                      <span>
+                        {row.room}{" "}
+                        <span className="text-muted-foreground">· {row.items}</span>
+                      </span>
+                      <span className="font-semibold tabular-nums">{row.m3.toFixed(1)} m³</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-3 flex justify-between text-sm font-bold">
+                  <span>{t("upload.demoTotal")}</span>
+                  <span className="tabular-nums">
+                    {DEMO_REPORT_ROOMS.reduce((sum, row) => sum + row.m3, 0).toFixed(1)} m³
+                  </span>
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">{t("upload.demoNote")}</p>
+              </div>
+
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <Button asChild size="lg">
                   <Link to="/pricing">{t("upload.freeOverCta")}</Link>
