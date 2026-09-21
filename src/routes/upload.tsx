@@ -101,39 +101,7 @@ function UploadPage() {
   const busy = stage !== "idle";
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function startCamera() {
-      try {
-        if (!navigator.mediaDevices?.getUserMedia) {
-          setRecording(false);
-          setCameraReady(true);
-          toast.error("Looks like your browser doesn’t support camera recording just yet.");
-          return;
-        }
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
-          audio: false,
-        });
-        if (cancelled) {
-          stream.getTracks().forEach((track) => track.stop());
-          return;
-        }
-        streamRef.current = stream;
-        if (videoRef.current) videoRef.current.srcObject = stream;
-        setRecording(true);
-        setCameraReady(true);
-      } catch {
-        toast.error("We couldn’t start your camera just now — please try once more.");
-        setRecording(false);
-        setCameraReady(true);
-      }
-    }
-
-    void startCamera();
-
     return () => {
-      cancelled = true;
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
@@ -141,11 +109,38 @@ function UploadPage() {
     };
   }, []);
 
+  async function startVideoCapture() {
+    if (recording || startingCamera) return;
+    try {
+      setStartingCamera(true);
+      if (!navigator.mediaDevices?.getUserMedia) {
+        toast.error("Looks like your browser doesn’t support camera recording just yet.");
+        return;
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      setRecording(true);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        void videoRef.current.play().catch(() => undefined);
+      }
+    } catch {
+      toast.error("We couldn’t start your camera just now — please try once more.");
+      setRecording(false);
+    } finally {
+      setStartingCamera(false);
+    }
+  }
+
   function stopVideoCapture() {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
+    if (videoRef.current) videoRef.current.srcObject = null;
     setRecording(false);
   }
 
