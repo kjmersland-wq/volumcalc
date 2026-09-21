@@ -661,6 +661,11 @@ const PATH_LANGS: Partial<Record<string, Lang>> = {
   "/pt": "pt",
 };
 
+const LOCALE_OVERRIDES: Partial<Record<Lang, Record<string, string>>> = {
+  ...extraTranslations,
+  pt: ptLandingTranslations,
+};
+
 function isLang(value: unknown): value is Lang {
   return typeof value === "string" && (SUPPORTED_LANGS as string[]).includes(value);
 }
@@ -688,6 +693,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     [pathname, search],
   );
   const [lang, setLangState] = useState<Lang>(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlLang = params.get("lang");
+      const syncedUrlLang = isLang(urlLang) ? urlLang : getPathLang(window.location.pathname);
+      if (syncedUrlLang) return syncedUrlLang;
+    }
     if (routeLang) return routeLang;
     if (typeof window === "undefined") return "en";
     const stored = window.localStorage.getItem("volumcalc-lang");
@@ -717,11 +728,9 @@ export function translate(key: string, lang: Lang): string {
   const entry = dict[key];
   if (!entry) return key;
   if (lang === "no" || lang === "en") return entry[lang];
-  if (lang === "pt") {
-    return ptLandingTranslations[key] ?? (entry as { pt?: string }).pt ?? entry.en;
-  }
-  if (lang === "sv" || lang === "da" || lang === "pl") {
-    return extraTranslations[lang]?.[key] ?? entry.en;
+  const override = LOCALE_OVERRIDES[lang];
+  if (override) {
+    return override[key] ?? (entry as Partial<Record<Lang, string>>)[lang] ?? entry.en;
   }
   return entry.en;
 }
