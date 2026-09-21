@@ -122,7 +122,8 @@ export function LanguageToggle({ className }: { className?: string }) {
       >
         <img
           src={currentLang.flagUrl}
-          alt={currentLang.label}
+          alt=""
+          aria-hidden="true"
           className="h-4 w-4 rounded-full object-cover border border-gray-100"
         />
         <span className="text-xs font-bold tracking-wider text-gray-700">{currentLang.label}</span>
@@ -161,7 +162,8 @@ export function LanguageToggle({ className }: { className?: string }) {
             >
               <img
                 src={item.flagUrl}
-                alt={item.label}
+                alt=""
+                aria-hidden="true"
                 className="h-4 w-4 rounded-full object-cover border border-gray-100"
               />
               <span className="w-5 text-xs font-bold tracking-wider">{item.label}</span>

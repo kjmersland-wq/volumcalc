@@ -66,8 +66,8 @@ function AuthPage() {
         });
         if (error) throw error;
       }
-    } catch {
-      toast.error(t("auth.errorGeneric"));
+    } catch (error) {
+      toast.error(error instanceof Error && error.message ? error.message : t("auth.errorGeneric"));
     } finally {
       setBusy(false);
     }
