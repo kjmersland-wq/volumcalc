@@ -465,14 +465,12 @@ function EstimatePage() {
   const netVolume =
     Math.round(included.reduce((sum, i) => sum + Number(i.volume_m3), 0) * 100) / 100;
   const gross = recommendedVolume(netVolume);
-  const metaEstimate = data?.estimate;
-  const metaTitle =
-    metaEstimate &&
-    ((((metaEstimate as Record<string, unknown>)["report_title"] as string | null) ||
-      metaEstimate.customer_name ||
-      rt("res.title")) as string);
+  const reportTitle =
+    ((estimate as Record<string, unknown> | undefined)?.["report_title"] as string | null) ||
+    estimate?.customer_name ||
+    rt("res.title");
   useLocalizedMeta({
-    title: `${metaTitle ?? rt("res.title")} — VolumCalc`,
+    title: `${reportTitle} — VolumCalc`,
     description: rt("res.disclaimer"),
   });
 
@@ -512,10 +510,6 @@ function EstimatePage() {
   const canEdit = Boolean(session) && !unclaimed;
   const businessView = canEdit && view === "business";
   const shareToken = (estimate.share_token as string | undefined) ?? token;
-  const reportTitle =
-    ((estimate as Record<string, unknown>)["report_title"] as string | null) ||
-    estimate.customer_name ||
-    rt("res.title");
 
   const statusKey =
     estimate.status === "approved"

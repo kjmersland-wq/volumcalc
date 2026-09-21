@@ -44,6 +44,8 @@ export function useLocalizedMeta({
       }
       node.dataset.localizedMeta = "true";
       node.textContent = JSON.stringify(jsonLd);
+    } else {
+      document.getElementById(jsonLdId)?.remove();
     }
 
     return () => {
