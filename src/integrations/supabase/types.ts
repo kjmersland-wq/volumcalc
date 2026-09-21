@@ -243,6 +243,9 @@ export type Database = {
           id: string
           internal_notes: string | null
           move_date: string | null
+          move_distance_km: number | null
+          move_from: string | null
+          move_to: string | null
           notes: string | null
           packing_level: string | null
           packing_materials: Json
@@ -250,6 +253,7 @@ export type Database = {
           packing_requested: boolean
           photo_urls: string[]
           report_language: string
+          report_title: string | null
           share_token: string
           status: string
           storage_address: string | null
@@ -280,6 +284,9 @@ export type Database = {
           id?: string
           internal_notes?: string | null
           move_date?: string | null
+          move_distance_km?: number | null
+          move_from?: string | null
+          move_to?: string | null
           notes?: string | null
           packing_level?: string | null
           packing_materials?: Json
@@ -287,6 +294,7 @@ export type Database = {
           packing_requested?: boolean
           photo_urls?: string[]
           report_language?: string
+          report_title?: string | null
           share_token?: string
           status?: string
           storage_address?: string | null
@@ -317,6 +325,9 @@ export type Database = {
           id?: string
           internal_notes?: string | null
           move_date?: string | null
+          move_distance_km?: number | null
+          move_from?: string | null
+          move_to?: string | null
           notes?: string | null
           packing_level?: string | null
           packing_materials?: Json
@@ -324,6 +335,7 @@ export type Database = {
           packing_requested?: boolean
           photo_urls?: string[]
           report_language?: string
+          report_title?: string | null
           share_token?: string
           status?: string
           storage_address?: string | null
