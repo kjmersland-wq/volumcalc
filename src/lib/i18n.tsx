@@ -718,7 +718,7 @@ export function translate(key: string, lang: Lang): string {
   if (!entry) return key;
   if (lang === "no" || lang === "en") return entry[lang];
   if (lang === "pt") {
-    return ptLandingTranslations[key] ?? entry.en;
+    return ptLandingTranslations[key] ?? (entry as { pt?: string }).pt ?? entry.en;
   }
   if (lang === "sv" || lang === "da" || lang === "pl") {
     return extraTranslations[lang]?.[key] ?? entry.en;
