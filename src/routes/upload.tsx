@@ -18,6 +18,7 @@ import {
   type VolumeRoom,
 } from "@/lib/volume-database";
 import { recommendedVolume } from "@/lib/volume";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/upload")({
   staticData: { sitemap: true },
