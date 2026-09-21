@@ -720,9 +720,11 @@ export function translate(key: string, lang: Lang): string {
   const entry = dict[key];
   if (!entry) return key;
   if (lang === "no" || lang === "en") return entry[lang];
+  const localizedEntry = (entry as Partial<Record<Lang, string>>)[lang];
+  if (localizedEntry) return localizedEntry;
   const override = LOCALE_OVERRIDES[lang];
   if (override) {
-    return override[key] ?? (entry as Partial<Record<Lang, string>>)[lang] ?? entry.en;
+    return override[key] ?? entry.en;
   }
   return entry.en;
 }
