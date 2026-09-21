@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/lib/i18n";
 import { useIsAdmin } from "@/hooks/useCompany";
+import { useLocalizedMeta } from "@/lib/use-localized-meta";
 import {
   adminCreateCompany,
   adminListCompanies,
@@ -21,9 +22,15 @@ export const Route = createFileRoute("/dashboard/admin")({
   head: () => ({
     meta: [
       { title: "Company accounts — VolumCalc admin" },
-      { name: "description", content: "Create and manage moving company accounts, branding and secret share links." },
+      {
+        name: "description",
+        content: "Create and manage moving company accounts, branding and secret share links.",
+      },
       { property: "og:title", content: "Company accounts — VolumCalc admin" },
-      { property: "og:description", content: "Create and manage moving company accounts in VolumCalc." },
+      {
+        property: "og:description",
+        content: "Create and manage moving company accounts in VolumCalc.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "robots", content: "noindex" },
@@ -48,6 +55,10 @@ const emptyForm = {
 
 function AdminPage() {
   const { t } = useI18n();
+  useLocalizedMeta({
+    title: `${t("admin.nav")} — VolumCalc`,
+    description: t("dash.metaDescription"),
+  });
   const isAdmin = useIsAdmin();
   const queryClient = useQueryClient();
   const list = useServerFn(adminListCompanies);
@@ -97,7 +108,9 @@ function AdminPage() {
   });
 
   if (!isAdmin) {
-    return <div className="card-soft p-10 text-center text-muted-foreground">{t("admin.onlyAdmin")}</div>;
+    return (
+      <div className="card-soft p-10 text-center text-muted-foreground">{t("admin.onlyAdmin")}</div>
+    );
   }
 
   const linkFor = (token: string) =>
@@ -122,14 +135,51 @@ function AdminPage() {
             createMutation.mutate();
           }}
         >
-          <Field label={t("admin.company")} value={form.company_name} onChange={(v) => setForm({ ...form, company_name: v })} required />
-          <Field label={t("admin.email")} type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} required />
-          <Field label={t("admin.password")} type="text" value={form.password} onChange={(v) => setForm({ ...form, password: v })} required />
-          <Field label={t("admin.org")} value={form.org_number} onChange={(v) => setForm({ ...form, org_number: v })} />
-          <Field label={t("admin.address")} value={form.address} onChange={(v) => setForm({ ...form, address: v })} />
-          <Field label={t("admin.phone")} value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
-          <Field label={t("admin.website")} value={form.website} onChange={(v) => setForm({ ...form, website: v })} />
-          <Field label={t("admin.logo")} value={form.logo_url} onChange={(v) => setForm({ ...form, logo_url: v })} />
+          <Field
+            label={t("admin.company")}
+            value={form.company_name}
+            onChange={(v) => setForm({ ...form, company_name: v })}
+            required
+          />
+          <Field
+            label={t("admin.email")}
+            type="email"
+            value={form.email}
+            onChange={(v) => setForm({ ...form, email: v })}
+            required
+          />
+          <Field
+            label={t("admin.password")}
+            type="text"
+            value={form.password}
+            onChange={(v) => setForm({ ...form, password: v })}
+            required
+          />
+          <Field
+            label={t("admin.org")}
+            value={form.org_number}
+            onChange={(v) => setForm({ ...form, org_number: v })}
+          />
+          <Field
+            label={t("admin.address")}
+            value={form.address}
+            onChange={(v) => setForm({ ...form, address: v })}
+          />
+          <Field
+            label={t("admin.phone")}
+            value={form.phone}
+            onChange={(v) => setForm({ ...form, phone: v })}
+          />
+          <Field
+            label={t("admin.website")}
+            value={form.website}
+            onChange={(v) => setForm({ ...form, website: v })}
+          />
+          <Field
+            label={t("admin.logo")}
+            value={form.logo_url}
+            onChange={(v) => setForm({ ...form, logo_url: v })}
+          />
           <div className="space-y-1.5">
             <Label htmlFor="color">{t("admin.color")}</Label>
             <Input
@@ -140,7 +190,12 @@ function AdminPage() {
               onChange={(e) => setForm({ ...form, brand_color: e.target.value })}
             />
           </div>
-          <Field label={t("admin.price")} type="number" value={form.price_per_m3} onChange={(v) => setForm({ ...form, price_per_m3: v })} />
+          <Field
+            label={t("admin.price")}
+            type="number"
+            value={form.price_per_m3}
+            onChange={(v) => setForm({ ...form, price_per_m3: v })}
+          />
           <label className="flex items-center gap-2 text-sm sm:col-span-2">
             <input
               type="checkbox"
@@ -170,7 +225,11 @@ function AdminPage() {
             {(data ?? []).map((company) => (
               <li key={company.id} className="card-soft flex flex-wrap items-center gap-4 p-5">
                 {company.logo_url ? (
-                  <img src={company.logo_url} alt="" className="h-10 w-auto max-w-28 object-contain" />
+                  <img
+                    src={company.logo_url}
+                    alt=""
+                    className="h-10 w-auto max-w-28 object-contain"
+                  />
                 ) : (
                   <span
                     className="flex size-10 items-center justify-center rounded-xl text-sm font-bold text-white"
@@ -204,7 +263,11 @@ function AdminPage() {
                     <Copy className="size-4" />
                     {t("admin.link")}
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => rotateMutation.mutate(company.id)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => rotateMutation.mutate(company.id)}
+                  >
                     <RefreshCw className="size-4" />
                     {t("admin.rotate")}
                   </Button>
@@ -254,7 +317,13 @@ function Field({
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
-      <Input id={id} type={type} value={value} required={required} onChange={(e) => onChange(e.target.value)} />
+      <Input
+        id={id}
+        type={type}
+        value={value}
+        required={required}
+        onChange={(e) => onChange(e.target.value)}
+      />
     </div>
   );
 }

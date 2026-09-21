@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { useI18n, type Lang } from "@/lib/i18n";
+import { useLocalizedMeta } from "@/lib/use-localized-meta";
 
 type Faq = { q: string; a: string };
 type Group = { heading: string; items: Faq[] };
@@ -1438,18 +1439,6 @@ const content: Record<
   },
 };
 
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: content.en.groups.flatMap((group) =>
-    group.items.map((item) => ({
-      "@type": "Question",
-      name: item.q,
-      acceptedAnswer: { "@type": "Answer", text: item.a },
-    })),
-  ),
-};
-
 export const Route = createFileRoute("/hjelp")({
   staticData: { sitemap: true },
   head: () => ({
@@ -1465,7 +1454,6 @@ export const Route = createFileRoute("/hjelp")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    scripts: [{ type: "application/ld+json", children: JSON.stringify(faqSchema) }],
   }),
   component: HelpPage,
 });
@@ -1473,6 +1461,23 @@ export const Route = createFileRoute("/hjelp")({
 function HelpPage() {
   const { lang } = useI18n();
   const c = content[lang] ?? content.en;
+  useLocalizedMeta({
+    title: `${c.title} — VolumCalc`,
+    description: c.intro,
+    jsonLdId: "faq-schema",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      inLanguage: lang,
+      mainEntity: c.groups.flatMap((group) =>
+        group.items.map((item) => ({
+          "@type": "Question",
+          name: item.q,
+          acceptedAnswer: { "@type": "Answer", text: item.a },
+        })),
+      ),
+    },
+  });
 
   return (
     <div className="flex min-h-screen flex-col">

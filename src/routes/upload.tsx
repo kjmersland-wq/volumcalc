@@ -21,6 +21,7 @@ import {
 } from "@/lib/volume-database";
 import { recommendedVolume } from "@/lib/volume";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocalizedMeta } from "@/lib/use-localized-meta";
 
 export const Route = createFileRoute("/upload")({
   staticData: { sitemap: true },
@@ -72,6 +73,10 @@ function createInitialQuantities(): QuantityByRoom {
 
 function UploadPage() {
   const { t, lang } = useI18n();
+  useLocalizedMeta({
+    title: `${t("upload.hint")} — VolumCalc`,
+    description: t("upload.sub"),
+  });
   const navigate = useNavigate();
   const submitEstimate = useServerFn(createEstimate);
   const { c: companyId, k: companyToken } = Route.useSearch();
@@ -196,7 +201,7 @@ function UploadPage() {
           ...(form.phone.trim() ? { customer_phone: form.phone.trim() } : {}),
           ...(form.date ? { move_date: form.date } : {}),
           ...(form.address.trim() ? { address: form.address.trim() } : {}),
-          ...(companyId ?? session?.user.id
+          ...((companyId ?? session?.user.id)
             ? { company_id: (companyId ?? session?.user.id) as string }
             : {}),
           ...(companyToken ? { company_token: companyToken } : {}),

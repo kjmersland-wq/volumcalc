@@ -16,6 +16,7 @@ import {
 import { SUPPORTED_LANGS, useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useLocalizedMeta } from "@/lib/use-localized-meta";
 
 export const Route = createFileRoute("/dashboard/settings")({
   staticData: { sitemap: false },
@@ -52,6 +53,10 @@ type Form = {
 
 function SettingsPage() {
   const { t } = useI18n();
+  useLocalizedMeta({
+    title: `${t("set.title")} — VolumCalc`,
+    description: t("set.brandingHelp"),
+  });
   const { session } = useAuth();
   const [form, setForm] = useState<Form | null>(null);
   const [saving, setSaving] = useState(false);

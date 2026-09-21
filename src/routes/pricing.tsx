@@ -14,6 +14,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { useI18n } from "@/lib/i18n";
 import { getPricingCopy } from "@/lib/pricing-copy";
+import { useLocalizedMeta } from "@/lib/use-localized-meta";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/pricing")({
@@ -41,6 +42,10 @@ export const Route = createFileRoute("/pricing")({
 
 function Pricing() {
   const { t, lang } = useI18n();
+  useLocalizedMeta({
+    title: `${t("price.title")} — VolumCalc`,
+    description: t("price.sub"),
+  });
   const [checkout, setCheckout] = useState<{ priceId: string; name: string } | null>(null);
   const pricingCopy = getPricingCopy(lang);
 

@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
 import { VolumCalcLogo } from "@/components/VolumCalcLogo";
+import { useLocalizedMeta } from "@/lib/use-localized-meta";
 
 export const Route = createFileRoute("/auth")({
   staticData: { sitemap: false },
@@ -34,6 +35,10 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const { t } = useI18n();
+  useLocalizedMeta({
+    title: `${t("auth.title")} — VolumCalc`,
+    description: t("auth.metaDescription"),
+  });
   const navigate = useNavigate();
   const { session } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">("signin");

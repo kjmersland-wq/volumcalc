@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useI18n } from "@/lib/i18n";
+import { useLocalizedMeta } from "@/lib/use-localized-meta";
 
 export const Route = createFileRoute("/demo")({
   staticData: { sitemap: true },
@@ -64,6 +65,10 @@ const ROWS = [
 
 function DemoPage() {
   const { t, lang } = useI18n();
+  useLocalizedMeta({
+    title: `${t("set.title")} demo — VolumCalc`,
+    description: t("set.brandingHelp"),
+  });
   const orgNumberLabel =
     {
       no: "Org.nr.",

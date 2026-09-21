@@ -44,6 +44,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
 import { claimEstimate, getSharedEstimate } from "@/lib/estimates.functions";
 import { m3, money, shortDate } from "@/lib/format";
+import { useLocalizedMeta } from "@/lib/use-localized-meta";
 import { recommendVehicle, recommendedVolume, storageUnitM2 } from "@/lib/volume";
 import { getStoredItemLabel, getStoredRoomLabel } from "@/lib/volume-database";
 
@@ -464,6 +465,16 @@ function EstimatePage() {
   const netVolume =
     Math.round(included.reduce((sum, i) => sum + Number(i.volume_m3), 0) * 100) / 100;
   const gross = recommendedVolume(netVolume);
+  const metaEstimate = data?.estimate;
+  const metaTitle =
+    metaEstimate &&
+    ((((metaEstimate as Record<string, unknown>)["report_title"] as string | null) ||
+      metaEstimate.customer_name ||
+      rt("res.title")) as string);
+  useLocalizedMeta({
+    title: `${metaTitle ?? rt("res.title")} — VolumCalc`,
+    description: rt("res.disclaimer"),
+  });
 
   if (isLoading || authLoading) {
     return (
