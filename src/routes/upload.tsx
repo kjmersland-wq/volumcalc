@@ -80,6 +80,7 @@ function UploadPage() {
   const navigate = useNavigate();
   const submitEstimate = useServerFn(createEstimate);
   const { c: companyId, k: companyToken } = Route.useSearch();
+  const { session } = useAuth();
   const brandingFn = useServerFn(getCompanyByUploadToken);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
