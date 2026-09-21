@@ -817,6 +817,7 @@ function EstimatePage() {
           <ShareButtons
             title={`${rt("res.title")} — VolumCalc`}
             text={`${rt("res.title")}: ${m3(netVolume)} · ${included.length} ${rt("res.items")}`}
+            langOverride={reportLang}
           />
 
           {/* Rooms & items */}
