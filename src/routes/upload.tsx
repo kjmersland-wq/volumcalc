@@ -152,7 +152,7 @@ function UploadPage() {
     }, 1000);
     return () => window.clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recording, freePlan, selectedRoom]);
+  }, [recording, freePlan]);
 
   useEffect(() => {
     try {
