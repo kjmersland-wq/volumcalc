@@ -18,7 +18,8 @@ import {
 } from "@/lib/volume-database";
 import { recommendedVolume } from "@/lib/volume";
 import { useAuth } from "@/hooks/useAuth";
-import { useCompany } from "@/hooks/useCompany";
+import { useCompany, useUnlimitedPhotos } from "@/hooks/useCompany";
+import { Link } from "@tanstack/react-router";
 import {
   defaultRoomNames,
   localizedTemplateName,
