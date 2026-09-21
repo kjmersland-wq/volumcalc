@@ -109,14 +109,19 @@ function UploadPage() {
   });
 
   const linkedRoomNames = (branding as { room_names?: string[] } | null | undefined)?.room_names;
-  const roomNames = useMemo(
+  const baseRoomNames = useMemo(
     () => sanitizeRoomNames(linkedRoomNames ?? ownCompany?.room_names, defaultRoomNames(lang)),
     [linkedRoomNames, ownCompany?.room_names, lang],
   );
 
+  const [customRooms, setCustomRooms] = useState<string[] | null>(null);
+  const roomNames = customRooms ?? baseRoomNames;
+
   const [selectedRoom, setSelectedRoom] = useState<string>(() => firstRoomName(defaultRoomNames("en")));
   const [recording, setRecording] = useState(false);
   const [startingCamera, setStartingCamera] = useState(false);
+  const [editingRooms, setEditingRooms] = useState(false);
+  const [newRoom, setNewRoom] = useState("");
   const [stage, setStage] = useState<Stage>("idle");
   const [quantities, setQuantities] = useState<QuantityByRoom>(() =>
     createInitialQuantities(defaultRoomNames("en")),
@@ -125,9 +130,73 @@ function UploadPage() {
   const busy = stage !== "idle";
 
   useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("volumcalc.rooms");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length) setCustomRooms(sanitizeRoomNames(parsed, parsed));
+      }
+    } catch {
+      /* ignore unreadable storage */
+    }
+  }, []);
+
+  useEffect(() => {
     setSelectedRoom((current) => (roomNames.includes(current) ? current : firstRoomName(roomNames)));
     setQuantities((current) => syncRoomQuantities(current, roomNames));
   }, [roomNames]);
+
+  function persistRooms(next: string[]) {
+    setCustomRooms(next);
+    try {
+      window.localStorage.setItem("volumcalc.rooms", JSON.stringify(next));
+    } catch {
+      /* ignore unwritable storage */
+    }
+  }
+
+  function addRoom() {
+    const name = newRoom.trim();
+    if (!name) return;
+    if (roomNames.some((room) => room.toLowerCase() === name.toLowerCase())) {
+      toast.error(t("upload.roomExists"));
+      return;
+    }
+    persistRooms([...roomNames, name]);
+    setNewRoom("");
+    setSelectedRoom(name);
+    toast.success(t("upload.roomAdded"));
+  }
+
+  function renameRoom(index: number, value: string) {
+    const next = roomNames.map((room, i) => (i === index ? value : room));
+    persistRooms(next);
+    setSelectedRoom((current) => (current === roomNames[index] ? value || current : current));
+  }
+
+  function removeRoom(index: number) {
+    if (roomNames.length <= 1) {
+      toast.error(t("upload.roomLast"));
+      return;
+    }
+    persistRooms(roomNames.filter((_, i) => i !== index));
+    toast.success(t("upload.roomRemoved"));
+  }
+
+  function resetRooms() {
+    setCustomRooms(null);
+    try {
+      window.localStorage.removeItem("volumcalc.rooms");
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function goToNextRoom() {
+    const index = roomNames.indexOf(selectedRoom);
+    setSelectedRoom(roomNames[(index + 1) % roomNames.length] ?? selectedRoom);
+  }
+
 
   useEffect(() => {
     return () => {
