@@ -35,8 +35,10 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ShareButtons } from "@/components/ShareButtons";
 import { QuoteRequestDialog } from "@/components/QuoteRequestDialog";
-import { useI18n, translate, type Lang } from "@/lib/i18n";
-import { reportPl, type ReportLang } from "@/lib/report-pl";
+import { useI18n, translate, SUPPORTED_LANGS, LANG_LABELS, type Lang } from "@/lib/i18n";
+import { reportLangs } from "@/lib/report-langs";
+import { MovePriceEstimator } from "@/components/MovePriceEstimator";
+import { MoverOutreach } from "@/components/MoverOutreach";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
@@ -142,13 +144,16 @@ function EstimatePage() {
   const [hourly, setHourly] = useState("1200");
   const [hours, setHours] = useState("5");
   const [checked, setChecked] = useState<Record<string, boolean>>({});
-  const [reportLang, setReportLang] = useState<ReportLang>(lang === "no" || lang === "pl" ? lang : "en");
+  const [reportLang, setReportLang] = useState<Lang>(lang);
+  const [titleDraft, setTitleDraft] = useState<string | null>(null);
   const [tenderMode, setTenderMode] = useState(false);
   const [logistics, setLogistics] = useState<Logistics | null>(null);
 
   // Report labels follow the chosen report language; user-entered text is untouched.
   const rt = (key: string) =>
-    reportLang === "pl" ? (reportPl[key] ?? translate(key, "en")) : translate(key, reportLang as Lang);
+    reportLang === "no" || reportLang === "en"
+      ? translate(key, reportLang)
+      : (reportLangs[reportLang]?.[key] ?? translate(key, "en"));
 
   const { data, isLoading } = useQuery({
     queryKey: ["estimate", id, session?.user.id ?? "guest"],
@@ -245,7 +250,7 @@ function EstimatePage() {
     );
     setTenderMode(Boolean(e['tender_mode']));
     const saved = e['report_language'];
-    if (saved === "no" || saved === "en" || saved === "pl") setReportLang(saved);
+    if (typeof saved === "string" && (SUPPORTED_LANGS as string[]).includes(saved)) setReportLang(saved as Lang);
   }, [estimate]);
 
   useEffect(() => {
@@ -403,7 +408,7 @@ function EstimatePage() {
   });
 
   const saveReportSettings = useMutation({
-    mutationFn: async (patch: { report_language?: string; tender_mode?: boolean }) => {
+    mutationFn: async (patch: { report_language?: string; tender_mode?: boolean; report_title?: string | null }) => {
       const { error } = await supabase.from("estimates").update(patch).eq("id", id);
       if (error) throw error;
     },
@@ -452,6 +457,10 @@ function EstimatePage() {
   const canEdit = Boolean(session) && !unclaimed;
   const businessView = canEdit && view === "business";
   const shareToken = (estimate.share_token as string | undefined) ?? token;
+  const reportTitle =
+    ((estimate as Record<string, unknown>)['report_title'] as string | null) ||
+    estimate.customer_name ||
+    rt("res.title");
 
   const statusKey =
     estimate.status === "approved" ? "rep.status.processed" : items.length ? "rep.status.ready" : "rep.status.draft";
@@ -556,9 +565,45 @@ function EstimatePage() {
                   {rt(statusKey)}
                 </Badge>
               </div>
-              <h1 className="mt-1 text-3xl font-bold tracking-tight">
-                {estimate.customer_name || rt("res.title")}
-              </h1>
+              {titleDraft !== null ? (
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <Input
+                    autoFocus
+                    value={titleDraft}
+                    placeholder={rt("rep.titlePlaceholder")}
+                    onChange={(event) => setTitleDraft(event.target.value)}
+                    className="h-11 max-w-md text-lg font-semibold"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      saveReportSettings.mutate({ report_title: titleDraft.trim() || null });
+                      toast.success(rt("rep.titleSaved"));
+                      setTitleDraft(null);
+                    }}
+                  >
+                    <Check className="size-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setTitleDraft(null)}>
+                    {rt("rep.cancel")}
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-1 flex items-center gap-2">
+                  <h1 className="text-3xl font-bold tracking-tight">{reportTitle}</h1>
+                  {canEdit && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="no-print"
+                      aria-label={rt("rep.titleEdit")}
+                      onClick={() => setTitleDraft(reportTitle)}
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                  )}
+                </div>
+              )}
               <p className="mt-1 text-sm text-muted-foreground">
                 {shortDate(estimate.created_at, lang)}
                 {estimate.address ? ` · ${estimate.address}` : ""}
@@ -606,7 +651,7 @@ function EstimatePage() {
                 <Select
                   value={reportLang}
                   onValueChange={(value) => {
-                    setReportLang(value as ReportLang);
+                    setReportLang(value as Lang);
                     saveReportSettings.mutate({ report_language: value });
                   }}
                 >
@@ -614,9 +659,11 @@ function EstimatePage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="no">Norsk</SelectItem>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="pl">Polski</SelectItem>
+                    {SUPPORTED_LANGS.map((code) => (
+                      <SelectItem key={code} value={code}>
+                        {LANG_LABELS[code]}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">{rt("rep.reportLangHelp")}</p>
