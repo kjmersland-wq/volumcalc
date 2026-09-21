@@ -380,6 +380,21 @@ function UploadPage() {
             {t("upload.sub")} {t("upload.securityLabel")}: {USER_VERIFIED_SECURITY_LABEL}.
           </p>
 
+          {showUpsell && (
+            <div className="mt-6 rounded-2xl border-2 border-primary bg-primary/5 p-6">
+              <h2 className="text-xl font-bold">{t("upload.freeOverTitle")}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{t("upload.freeOverBody")}</p>
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                <Button asChild size="lg">
+                  <Link to="/pricing">{t("upload.freeOverCta")}</Link>
+                </Button>
+                <Button variant="ghost" size="lg" onClick={() => setShowUpsell(false)}>
+                  {t("upload.freeOverDismiss")}
+                </Button>
+              </div>
+            </div>
+          )}
+
           {recording ? (
             <div className="mt-6 space-y-4">
               <div className="rounded-xl border border-border bg-card p-4">
