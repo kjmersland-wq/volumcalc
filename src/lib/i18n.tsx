@@ -8,7 +8,8 @@ import {
   type ReactNode,
 } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { extraTranslations, ptLandingTranslations } from "./i18n.translations";
+import { extraTranslations } from "./i18n.translations";
+import { landingRouteTranslations } from "./i18n.landing-translations";
 
 export type Lang =
   "no" | "en" | "sv" | "da" | "fi" | "de" | "nl" | "fr" | "pl" | "es" | "it" | "pt";
@@ -663,7 +664,7 @@ const PATH_LANGS: Partial<Record<string, Lang>> = {
 
 const LOCALE_OVERRIDES: Partial<Record<Lang, Record<string, string>>> = {
   ...extraTranslations,
-  pt: ptLandingTranslations,
+  ...landingRouteTranslations,
 };
 
 function isLang(value: unknown): value is Lang {
