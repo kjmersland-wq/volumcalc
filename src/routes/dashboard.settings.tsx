@@ -80,7 +80,7 @@ function SettingsPage() {
         brand_color: data.brand_color ?? "#2563eb",
         price_per_m3: String(data.price_per_m3 ?? 850),
         currency: data.currency ?? "NOK",
-        default_language: data.default_language ?? "no",
+        default_language: data.default_language === "dk" ? "da" : (data.default_language ?? "no"),
         org_number: data.org_number ?? "",
         address: data.address ?? "",
         phone: data.phone ?? "",
@@ -193,6 +193,7 @@ function SettingsPage() {
                     {languageNames[code]}
                   </SelectItem>
                 ))}
+                {form.default_language === "dk" && <SelectItem value="dk">Dansk</SelectItem>}
               </SelectContent>
             </Select>
           </div>

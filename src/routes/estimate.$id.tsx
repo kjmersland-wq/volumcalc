@@ -148,7 +148,7 @@ function EstimatePage() {
   const [hourly, setHourly] = useState("1200");
   const [hours, setHours] = useState("5");
   const [checked, setChecked] = useState<Record<string, boolean>>({});
-  const initialReportLang: Lang = lang === "da" ? "da" : lang;
+  const initialReportLang: Lang = String(lang) === "dk" ? "da" : lang;
   const [reportLang, setReportLang] = useState<Lang>(initialReportLang);
   const [tenderMode, setTenderMode] = useState(false);
   const [logistics, setLogistics] = useState<Logistics | null>(null);
@@ -271,6 +271,7 @@ function EstimatePage() {
       saved === "en" ||
       saved === "sv" ||
       saved === "da" ||
+      saved === "dk" ||
       saved === "fi" ||
       saved === "de" ||
       saved === "nl" ||
@@ -280,7 +281,7 @@ function EstimatePage() {
       saved === "it" ||
       saved === "pt"
     ) {
-      setReportLang(saved);
+      setReportLang(saved === "dk" ? "da" : saved);
     }
   }, [estimate]);
 
