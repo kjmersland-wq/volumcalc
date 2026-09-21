@@ -370,12 +370,29 @@ function UploadPage() {
                     </option>
                   ))}
                 </select>
+                <div className="mt-3 flex gap-2">
+                  <Input
+                    value={newRoom}
+                    placeholder={t("upload.addRoomPh")}
+                    onChange={(event) => setNewRoom(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        addRoom();
+                      }
+                    }}
+                  />
+                  <Button type="button" variant="outline" onClick={addRoom}>
+                    <Plus className="size-4" />
+                    <span className="hidden sm:inline">{t("upload.addRoom")}</span>
+                  </Button>
+                </div>
                 <p className="mt-2 text-xs text-muted-foreground">
                   {t("upload.roomTemplate")}: {localizedTemplateName(selectedTemplateRoom, lang)}
                 </p>
               </div>
 
-              <div className="overflow-hidden rounded-2xl border border-border bg-black">
+              <div className="relative overflow-hidden rounded-2xl border border-border bg-black">
                 <video
                   ref={videoRef}
                   autoPlay
@@ -383,6 +400,10 @@ function UploadPage() {
                   muted
                   className="aspect-video w-full object-cover"
                 />
+                <span className="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
+                  <span className="size-2 animate-pulse rounded-full bg-red-500" />
+                  {t("upload.filmingRoom")}: {selectedRoom}
+                </span>
               </div>
 
               <Button
@@ -392,11 +413,30 @@ function UploadPage() {
               >
                 {t("upload.stopRecording")}
               </Button>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button type="button" variant="outline" onClick={goToNextRoom}>
+                  {t("upload.nextRoom")}
+                </Button>
+                <Button type="button" variant="ghost" onClick={stopVideoCapture}>
+                  {t("upload.cancelRecording")}
+                </Button>
+              </div>
             </div>
           ) : (
             <>
               <div className="mt-6 rounded-xl border border-border bg-card p-4">
-                <Label htmlFor="room-checklist">{t("upload.selectRoom")}</Label>
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="room-checklist">{t("upload.selectRoom")}</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEditingRooms((v) => !v)}
+                  >
+                    <Pencil className="size-4" />
+                    {editingRooms ? t("upload.doneEditing") : t("upload.editRooms")}
+                  </Button>
+                </div>
                 <select
                   id="room-checklist"
                   className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -409,10 +449,56 @@ function UploadPage() {
                     </option>
                   ))}
                 </select>
+
+                {editingRooms && (
+                  <div className="mt-4 space-y-2">
+                    {roomNames.map((room, index) => (
+                      <div key={`${room}-${index}`} className="flex items-center gap-2">
+                        <Input
+                          value={room}
+                          aria-label={t("upload.renameRoom")}
+                          onChange={(event) => renameRoom(index, event.target.value)}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          aria-label={t("upload.removeRoom")}
+                          onClick={() => removeRoom(index)}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" variant="ghost" size="sm" onClick={resetRooms}>
+                      {t("upload.resetRooms")}
+                    </Button>
+                  </div>
+                )}
+
+                <div className="mt-3 flex gap-2">
+                  <Input
+                    value={newRoom}
+                    placeholder={t("upload.addRoomPh")}
+                    onChange={(event) => setNewRoom(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        addRoom();
+                      }
+                    }}
+                  />
+                  <Button type="button" variant="outline" onClick={addRoom}>
+                    <Plus className="size-4" />
+                    <span className="hidden sm:inline">{t("upload.addRoom")}</span>
+                  </Button>
+                </div>
+
                 <p className="mt-2 text-xs text-muted-foreground">
                   {t("upload.roomHint")}
                 </p>
               </div>
+
 
               <Button
                 size="lg"
