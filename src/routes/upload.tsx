@@ -302,6 +302,23 @@ function UploadPage() {
                 </select>
               </div>
 
+              <Button
+                size="lg"
+                className="mt-4 h-14 w-full text-base font-bold"
+                disabled={startingCamera}
+                onClick={startVideoCapture}
+              >
+                {startingCamera ? (
+                  <Loader2 className="size-5 animate-spin" />
+                ) : (
+                  <Camera className="size-5" />
+                )}
+                {startingCamera ? t("upload.startingCamera") : t("upload.startRecording")}
+              </Button>
+              <p className="mt-2 text-center text-sm text-muted-foreground">
+                {t("upload.skipToChecklist")}
+              </p>
+
               <div className="mt-7 flex gap-4 rounded-xl border border-primary/20 bg-primary-soft/70 p-5">
                 <Info className="mt-0.5 size-5 shrink-0 text-primary" />
                 <div>
