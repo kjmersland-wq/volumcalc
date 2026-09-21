@@ -16,9 +16,15 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Company login — VolumCalc" },
-      { name: "description", content: "Sign in to manage incoming video/checklist estimates and quotes." },
+      {
+        name: "description",
+        content: "Sign in to manage incoming video/checklist estimates and quotes.",
+      },
       { property: "og:title", content: "Company login — VolumCalc" },
-      { property: "og:description", content: "Sign in to manage incoming video/checklist estimates and quotes." },
+      {
+        property: "og:description",
+        content: "Sign in to manage incoming video/checklist estimates and quotes.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

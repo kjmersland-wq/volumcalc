@@ -131,7 +131,7 @@ function UploadPage() {
         streamRef.current = null;
       }
     };
-  }, []);
+  }, [t]);
 
   function stopVideoCapture() {
     if (streamRef.current) {

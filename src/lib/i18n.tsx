@@ -640,7 +640,11 @@ export function translate(key: string, lang: Lang): string {
   const entry = dict[key];
   if (!entry) return key;
   if (lang === "no" || lang === "en") return entry[lang];
-  return localizedTranslations[lang]?.[key] ?? extraTranslations[(lang as "sv" | "da" | "pl")]?.[key] ?? entry.en;
+  return (
+    localizedTranslations[lang]?.[key] ??
+    extraTranslations[lang as "sv" | "da" | "pl"]?.[key] ??
+    entry.en
+  );
 }
 
 export function useI18n() {
