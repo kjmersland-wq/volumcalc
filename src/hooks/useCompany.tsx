@@ -13,6 +13,7 @@ export type CompanyProfile = {
   phone: string | null;
   website: string | null;
   contact_email: string | null;
+  room_names: string[];
   upload_token: string;
   is_demo: boolean;
 };

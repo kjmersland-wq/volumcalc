@@ -29,6 +29,7 @@ export type Database = {
           org_number: string | null
           phone: string | null
           price_per_m3: number
+          room_names: string[]
           updated_at: string
           upload_token: string
           website: string | null
@@ -47,6 +48,7 @@ export type Database = {
           org_number?: string | null
           phone?: string | null
           price_per_m3?: number
+          room_names?: string[]
           updated_at?: string
           upload_token?: string
           website?: string | null
@@ -65,6 +67,7 @@ export type Database = {
           org_number?: string | null
           phone?: string | null
           price_per_m3?: number
+          room_names?: string[]
           updated_at?: string
           upload_token?: string
           website?: string | null

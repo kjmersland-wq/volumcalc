@@ -1,4 +1,4 @@
-import { USER_VERIFIED_SECURITY_LABEL, type VolumeRoom } from "./volume-database";
+import { USER_VERIFIED_SECURITY_LABEL } from "./volume-database";
 
 const USER_VERIFIED_CONFIDENCE = 1;
 
@@ -25,7 +25,7 @@ export type ManualItemInput = {
   width_cm: number;
   height_cm: number;
   volume_m3: number;
-  room: VolumeRoom;
+  room: string;
   security_label: string;
 };
 

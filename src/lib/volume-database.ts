@@ -1,4 +1,13 @@
-export type VolumeRoom = "Office" | "Living room" | "Hallway" | "Garage" | "Bedroom";
+export type VolumeRoom =
+  | "Office"
+  | "Living room"
+  | "Hallway"
+  | "Garage"
+  | "Bedroom"
+  | "Kitchen"
+  | "Bathroom"
+  | "Dining room"
+  | "Other";
 
 export type VolumeDatabaseItem = {
   key: string;
@@ -88,6 +97,48 @@ export const VOLUME_DATABASE: Record<VolumeRoom, VolumeDatabaseItem[]> = {
       volume_m3: 0.29,
     },
   ],
+  Kitchen: [
+    {
+      key: "kitchen-table",
+      name: "Kitchen table",
+      name_no: "Kjøkkenbord",
+      category: "kitchen",
+      length_cm: 120,
+      width_cm: 80,
+      height_cm: 75,
+      volume_m3: 0.72,
+    },
+    {
+      key: "kitchen-chair",
+      name: "Kitchen chair",
+      name_no: "Kjøkkenstol",
+      category: "kitchen",
+      length_cm: 45,
+      width_cm: 50,
+      height_cm: 90,
+      volume_m3: 0.2,
+    },
+    {
+      key: "microwave",
+      name: "Microwave",
+      name_no: "Mikrobølgeovn",
+      category: "kitchen",
+      length_cm: 55,
+      width_cm: 45,
+      height_cm: 35,
+      volume_m3: 0.09,
+    },
+    {
+      key: "kitchen-box",
+      name: "Kitchen box",
+      name_no: "Kjøkkeneske",
+      category: "kitchen",
+      length_cm: 55,
+      width_cm: 40,
+      height_cm: 50,
+      volume_m3: 0.11,
+    },
+  ],
   Hallway: [
     {
       key: "white-dresser",
@@ -172,6 +223,102 @@ export const VOLUME_DATABASE: Record<VolumeRoom, VolumeDatabaseItem[]> = {
       width_cm: 80,
       height_cm: 50,
       volume_m3: 0.68,
+    },
+  ],
+  Bathroom: [
+    {
+      key: "bathroom-cabinet",
+      name: "Bathroom cabinet",
+      name_no: "Baderomsskap",
+      category: "bathroom",
+      length_cm: 60,
+      width_cm: 35,
+      height_cm: 80,
+      volume_m3: 0.17,
+    },
+    {
+      key: "laundry-basket",
+      name: "Laundry basket",
+      name_no: "Skittentøyskurv",
+      category: "bathroom",
+      length_cm: 45,
+      width_cm: 45,
+      height_cm: 65,
+      volume_m3: 0.13,
+    },
+    {
+      key: "bathroom-box",
+      name: "Bathroom box",
+      name_no: "Baderomseske",
+      category: "bathroom",
+      length_cm: 45,
+      width_cm: 35,
+      height_cm: 35,
+      volume_m3: 0.06,
+    },
+  ],
+  "Dining room": [
+    {
+      key: "dining-table",
+      name: "Dining table",
+      name_no: "Spisebord",
+      category: "dining_room",
+      length_cm: 200,
+      width_cm: 95,
+      height_cm: 75,
+      volume_m3: 1.43,
+    },
+    {
+      key: "dining-chair",
+      name: "Dining chair",
+      name_no: "Spisestol",
+      category: "dining_room",
+      length_cm: 50,
+      width_cm: 55,
+      height_cm: 95,
+      volume_m3: 0.26,
+    },
+    {
+      key: "sideboard",
+      name: "Sideboard",
+      name_no: "Skjenk",
+      category: "dining_room",
+      length_cm: 160,
+      width_cm: 45,
+      height_cm: 85,
+      volume_m3: 0.61,
+    },
+  ],
+  Other: [
+    {
+      key: "moving-box-other",
+      name: "Moving box",
+      name_no: "Flytteeske",
+      category: "other",
+      length_cm: 55,
+      width_cm: 40,
+      height_cm: 50,
+      volume_m3: 0.11,
+    },
+    {
+      key: "medium-shelf",
+      name: "Medium shelf",
+      name_no: "Middels hylle",
+      category: "other",
+      length_cm: 80,
+      width_cm: 35,
+      height_cm: 180,
+      volume_m3: 0.5,
+    },
+    {
+      key: "miscellaneous-bag",
+      name: "Bag / soft goods",
+      name_no: "Bag / myke ting",
+      category: "other",
+      length_cm: 70,
+      width_cm: 40,
+      height_cm: 35,
+      volume_m3: 0.1,
     },
   ],
 };
