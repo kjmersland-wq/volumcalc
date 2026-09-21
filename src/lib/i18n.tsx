@@ -648,8 +648,19 @@ export const dict: Dict = {
 
   "upload.freeLeft": { no: "Gratis demo – sekunder igjen", en: "Free demo — seconds left" },
   "upload.freeNote": {
-    no: "I gratisversjonen kan du filme i 20 sekunder per rom. Full pakke gir ubegrenset filming av alle rom.",
-    en: "The free version films for 20 seconds per room. The full package gives unlimited filming of every room.",
+    no: "Gratisdemoen gir deg 20 sekunder filming totalt. Full pakke gir ubegrenset filming av alle rom.",
+    en: "The free demo gives you 20 seconds of filming in total. The full package gives unlimited filming of every room.",
+  },
+  "upload.freeUsedUp": {
+    no: "Gratisdemoen på 20 sekunder er brukt opp. Kjøp full pakke for å filme videre.",
+    en: "Your 20-second free demo is used up. Get the full package to keep filming.",
+  },
+  "upload.demoReportTitle": { no: "Slik ser rapporten ut", en: "This is what your report looks like" },
+  "upload.demoBadge": { no: "Eksempel", en: "Example" },
+  "upload.demoTotal": { no: "Totalt volum (inkl. 25 % stuingsfaktor)", en: "Total volume (incl. 25% stowage factor)" },
+  "upload.demoNote": {
+    no: "Eksempelrapport basert på en typisk 3-roms bolig. Med full pakke lager VolumCalc denne rapporten automatisk fra dine egne opptak – med PDF, delelenke og tilbudsforespørsel til flyttefirma.",
+    en: "Example report based on a typical three-room home. With the full package VolumCalc builds this report automatically from your own footage — with PDF, share link and quote requests to movers.",
   },
   "upload.freeOverTitle": { no: "Gratisdemoen er ferdig", en: "Your free demo has ended" },
   "upload.freeOverBody": {
