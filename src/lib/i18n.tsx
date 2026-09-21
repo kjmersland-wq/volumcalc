@@ -167,7 +167,7 @@ export const dict: Dict = {
     en: "Stop filming and view checklist",
   },
   "upload.startRecording": {
-    no: "Start filming",
+    no: "Start å filme",
     en: "Start filming",
   },
   "upload.cameraUnsupported": {
