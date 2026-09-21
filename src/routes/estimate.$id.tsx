@@ -672,14 +672,6 @@ function EstimatePage() {
             </div>
           </div>
 
-          {company && !tenderMode && (
-            <div className="card-soft mt-4 flex items-center justify-between p-5">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{rt("res.estimated")}</p>
-              <p className="text-2xl font-bold">
-                {money(netVolume * Number(company.price_per_m3), company.currency, lang)}
-              </p>
-            </div>
-          )}
 
           <ShareButtons
             title={`${rt("res.title")} — VolumCalc`}
