@@ -80,8 +80,25 @@ function DemoPage() {
       pt: "N.º reg.",
     }[lang] ?? "Reg. no.";
 
+  const intlLocale =
+    {
+      no: "nb-NO",
+      en: "en-GB",
+      sv: "sv-SE",
+      da: "da-DK",
+      dk: "da-DK",
+      fi: "fi-FI",
+      de: "de-DE",
+      nl: "nl-NL",
+      fr: "fr-FR",
+      pl: "pl-PL",
+      es: "es-ES",
+      it: "it-IT",
+      pt: "pt-PT",
+    }[lang] ?? "en-GB";
+
   const formatDemoDate = (day: number) =>
-    new Intl.DateTimeFormat(lang, {
+    new Intl.DateTimeFormat(intlLocale, {
       day: "2-digit",
       month: "short",
       year: "numeric",

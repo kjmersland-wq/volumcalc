@@ -254,6 +254,7 @@ const languageNames: Record<string, string> = {
   en: "English",
   sv: "Svenska",
   da: "Dansk",
+  dk: "Dansk",
   fi: "Suomi",
   de: "Deutsch",
   nl: "Nederlands",
