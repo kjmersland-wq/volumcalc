@@ -248,16 +248,7 @@ function UploadPage() {
             {t("upload.sub")} {t("upload.securityLabel")}: {USER_VERIFIED_SECURITY_LABEL}.
           </p>
 
-          {!cameraReady ? (
-            <div
-              className="mt-6 flex items-center justify-center gap-3 rounded-xl border border-border bg-card p-8"
-              role="status"
-              aria-live="polite"
-            >
-              <Loader2 className="size-5 animate-spin text-primary" />
-              <span className="text-sm text-muted-foreground">Getting your camera ready …</span>
-            </div>
-          ) : recording ? (
+          {recording ? (
             <div className="mt-6 space-y-4">
               <div className="rounded-xl border border-border bg-card p-4">
                 <Label htmlFor="room">{t("upload.roomSelectorLabel")}</Label>
