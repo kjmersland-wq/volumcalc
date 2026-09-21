@@ -138,7 +138,7 @@ export const dict: Dict = {
   },
   "upload.guideTitle": { no: "Slik gjør vi det sammen", en: "How it works" },
   "upload.guide": {
-    no: "Slik gjør vi det sammen: Velg rommet du står i nå, og ta en rolig og behagelig runde med kameraet. Du har kjempegod tid og filmer helt i ditt eget tempo. Du trenger ikke å tenke på opptelling underveis – det fikser vi sammen på sjekklisten etterpå!",
+    no: "Velg rommet du står i nå, og ta en rolig runde med kameraet. Romlisten kan du endre på Min side før du starter, slik at navnene passer hjemmet ditt.",
     en: "Choose the room you’re in and take a steady 15-second sweep on your phone. Afterwards, you can go through the checklist in peace and quiet.",
   },
   "upload.drop": {
@@ -146,10 +146,18 @@ export const dict: Dict = {
     en: "Choose your room here before starting your calm video walkthrough",
   },
   "upload.roomSelectorLabel": {
-    no: "Trykk her for å velge rom før du starter den koselige videorunden på mobilen din",
+    no: "Velg rommet du filmer nå",
     en: "Choose your room here before starting your calm video walkthrough",
   },
   "upload.selectRoom": { no: "Velg rom", en: "Select room" },
+  "upload.roomHint": {
+    no: "Du kan endre romnavnene på Min side før du filmer.",
+    en: "You can edit your room names in My page before recording.",
+  },
+  "upload.roomTemplate": {
+    no: "Sjekkliste",
+    en: "Checklist",
+  },
   "upload.hint": {
     no: "Romvideo + sjekkliste i rolig tempo",
     en: "Room video + checklist, at your own pace",
@@ -161,6 +169,14 @@ export const dict: Dict = {
   "upload.startRecording": {
     no: "Start filming",
     en: "Start filming",
+  },
+  "upload.cameraUnsupported": {
+    no: "Nettleseren støtter ikke kamerabruk ennå.",
+    en: "Looks like your browser doesn’t support camera recording just yet.",
+  },
+  "upload.cameraFailed": {
+    no: "Vi fikk ikke startet kameraet nå. Prøv én gang til.",
+    en: "We couldn’t start your camera just now — please try once more.",
   },
   "upload.startingCamera": {
     no: "Gjør kameraet klart …",
@@ -300,6 +316,11 @@ export const dict: Dict = {
   "set.lang": { no: "Standardspråk", en: "Default language" },
   "set.save": { no: "Lagre innstillinger", en: "Save settings" },
   "set.saved": { no: "Innstillinger lagret", en: "Settings saved" },
+  "set.rooms": { no: "Mine rom", en: "My rooms" },
+  "set.roomsHelp": {
+    no: "Skriv ett rom per linje. Disse vises i kameravalget før filming.",
+    en: "Write one room per line. These appear in the camera selector before recording.",
+  },
 
   "price.title": {
     no: "Enkle priser, uansett hvordan du flytter",

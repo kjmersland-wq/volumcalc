@@ -99,7 +99,10 @@ function UploadPage() {
   const { data: branding } = useQuery({
     queryKey: ["upload-branding", companyToken],
     enabled: Boolean(companyToken),
-    queryFn: () => brandingFn({ data: { token: companyToken! } }),
+    queryFn: () => {
+      if (!companyToken) throw new Error("Missing upload token");
+      return brandingFn({ data: { token: companyToken } });
+    },
   });
 
   const roomNames = useMemo(
@@ -286,7 +289,7 @@ function UploadPage() {
                   id="room"
                   className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                   value={selectedRoom}
-                  onChange={(event) => setSelectedRoom(event.target.value as VolumeRoom)}
+                  onChange={(event) => setSelectedRoom(event.target.value)}
                 >
                   {roomNames.map((room) => (
                     <option key={room} value={room}>
@@ -325,7 +328,7 @@ function UploadPage() {
                   id="room-checklist"
                   className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                   value={selectedRoom}
-                  onChange={(event) => setSelectedRoom(event.target.value as VolumeRoom)}
+                  onChange={(event) => setSelectedRoom(event.target.value)}
                 >
                   {roomNames.map((room) => (
                     <option key={room} value={room}>
