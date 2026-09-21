@@ -360,6 +360,51 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          account_type: string
+          address: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          notification_email: string | null
+          phone: string | null
+          postal_code: string | null
+          preferred_report_language: string
+          updated_at: string
+        }
+        Insert: {
+          account_type?: string
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          notification_email?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          preferred_report_language?: string
+          updated_at?: string
+        }
+        Update: {
+          account_type?: string
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          notification_email?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          preferred_report_language?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quote_requests: {
         Row: {
           company_id: string | null
