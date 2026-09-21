@@ -51,13 +51,13 @@ export function MovePriceEstimator({ volumeM3, currency, rt, defaults, onChange 
     <section className="mt-6 rounded-xl border border-border bg-card p-6">
       <div className="flex items-center gap-2">
         <Calculator className="size-5 text-primary" />
-        <h2 className="text-lg font-semibold">{rt("price.title")}</h2>
+        <h2 className="text-lg font-semibold">{rt("mprice.title")}</h2>
       </div>
-      <p className="mt-1 text-sm text-muted-foreground">{rt("price.sub")}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{rt("mprice.sub")}</p>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-3">
         <div className="space-y-1.5">
-          <Label htmlFor="mv-from">{rt("price.from")}</Label>
+          <Label htmlFor="mv-from">{rt("mprice.from")}</Label>
           <Input
             id="mv-from"
             value={from}
@@ -67,7 +67,7 @@ export function MovePriceEstimator({ volumeM3, currency, rt, defaults, onChange 
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="mv-to">{rt("price.to")}</Label>
+          <Label htmlFor="mv-to">{rt("mprice.to")}</Label>
           <Input
             id="mv-to"
             value={to}
@@ -77,7 +77,7 @@ export function MovePriceEstimator({ volumeM3, currency, rt, defaults, onChange 
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="mv-km">{rt("price.km")}</Label>
+          <Label htmlFor="mv-km">{rt("mprice.km")}</Label>
           <Input
             id="mv-km"
             inputMode="numeric"
@@ -88,21 +88,21 @@ export function MovePriceEstimator({ volumeM3, currency, rt, defaults, onChange 
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="mv-floors">{rt("price.floors")}</Label>
+          <Label htmlFor="mv-floors">{rt("mprice.floors")}</Label>
           <Input id="mv-floors" inputMode="numeric" value={floors} onChange={(e) => setFloors(e.target.value)} />
         </div>
         <div className="flex items-center gap-2 pt-6">
           <Switch id="mv-pack" checked={packing} onCheckedChange={setPacking} />
-          <Label htmlFor="mv-pack">{rt("price.packing")}</Label>
+          <Label htmlFor="mv-pack">{rt("mprice.packing")}</Label>
         </div>
       </div>
 
       <div className="mt-5 rounded-lg bg-primary/5 p-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{rt("price.range")}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{rt("mprice.range")}</p>
         <p className="mt-1 text-3xl font-bold text-primary">
           {fmt(low)} – {fmt(high)}
         </p>
-        <p className="mt-2 text-xs text-muted-foreground">{rt("price.disclaimer")}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{rt("mprice.disclaimer")}</p>
       </div>
     </section>
   );

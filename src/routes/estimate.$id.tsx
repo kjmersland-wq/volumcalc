@@ -408,7 +408,7 @@ function EstimatePage() {
   });
 
   const saveReportSettings = useMutation({
-    mutationFn: async (patch: { report_language?: string; tender_mode?: boolean; report_title?: string | null }) => {
+    mutationFn: async (patch: TablesUpdate<"estimates">) => {
       const { error } = await supabase.from("estimates").update(patch).eq("id", id);
       if (error) throw error;
     },
@@ -719,6 +719,32 @@ function EstimatePage() {
             </div>
           </div>
 
+          {!businessView && !tenderMode && (
+            <MovePriceEstimator
+              volumeM3={gross}
+              currency={currency}
+              rt={rt}
+              defaults={{
+                from: ((estimate as Record<string, unknown>)['move_from'] as string) ?? "",
+                to: ((estimate as Record<string, unknown>)['move_to'] as string) ?? "",
+                distanceKm: Number((estimate as Record<string, unknown>)['move_distance_km'] ?? 0),
+              }}
+              {...(canEdit
+                ? {
+                    onChange: (value: { from: string; to: string; distanceKm: number }) =>
+                      saveReportSettings.mutate({
+                        move_from: value.from || null,
+                        move_to: value.to || null,
+                        move_distance_km: value.distanceKm || null,
+                      }),
+                  }
+                : {})}
+            />
+          )}
+
+          {!businessView && shareToken && (
+            <MoverOutreach estimateId={String(estimate.id)} token={shareToken} rt={rt} />
+          )}
 
           <ShareButtons
             title={`${rt("res.title")} — VolumCalc`}
