@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { extraTranslations } from "./i18n.translations";
 
 export type Lang =
@@ -629,49 +630,56 @@ export const SUPPORTED_LANGS: Lang[] = [
   "pt",
 ];
 
+const PATH_LANGS: Partial<Record<string, Lang>> = {
+  "/no": "no",
+  "/se": "sv",
+  "/dk": "da",
+  "/fi": "fi",
+  "/de": "de",
+  "/nl": "nl",
+  "/fr": "fr",
+  "/pl": "pl",
+  "/es": "es",
+  "/it": "it",
+  "/pt": "pt",
+};
+
 function isLang(value: unknown): value is Lang {
   return typeof value === "string" && (SUPPORTED_LANGS as string[]).includes(value);
 }
 
+function normalizePathname(pathname: string) {
+  if (!pathname || pathname === "/") return "/";
+  return pathname.replace(/\/$/, "");
+}
+
+function getPathLang(pathname: string) {
+  return PATH_LANGS[normalizePathname(pathname)];
+}
+
+function getSearchLang(search: unknown) {
+  if (!search || typeof search !== "object") return undefined;
+  const value = (search as Record<string, unknown>).lang;
+  return isLang(value) ? value : undefined;
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("en");
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const search = useRouterState({ select: (state) => state.location.search });
+  const routeLang = useMemo(() => getSearchLang(search) ?? getPathLang(pathname), [pathname, search]);
+  const [lang, setLangState] = useState<Lang>(() => {
+    if (routeLang) return routeLang;
+    if (typeof window === "undefined") return "en";
+    const stored = window.localStorage.getItem("volumcalc-lang");
+    if (isLang(stored)) return stored;
+    return window.location.hostname.endsWith(".no") ? "no" : "en";
+  });
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const urlLang = params.get("lang");
-    if (isLang(urlLang)) {
-      setLangState(urlLang);
-      window.localStorage.setItem("volumcalc-lang", urlLang);
-      return;
-    }
-    const pathLang: Record<string, Lang> = {
-      "/no": "no",
-      "/se": "sv",
-      "/dk": "da",
-      "/fi": "fi",
-      "/de": "de",
-      "/nl": "nl",
-      "/fr": "fr",
-      "/pl": "pl",
-      "/es": "es",
-      "/it": "it",
-      "/pt": "pt",
-    };
-    const fromPath = pathLang[window.location.pathname.replace(/\/$/, "")];
-    if (fromPath) {
-      setLangState(fromPath);
-      window.localStorage.setItem("volumcalc-lang", fromPath);
-      return;
-    }
-    const stored = window.localStorage.getItem("volumcalc-lang");
-    if (isLang(stored)) {
-      setLangState(stored);
-      return;
-    }
-    // No saved choice: .com and other hosts start in English, .no starts in Norwegian
-    const host = window.location.hostname;
-    if (host.endsWith(".no")) setLangState("no");
-  }, []);
+    if (!routeLang) return;
+    setLangState(routeLang);
+    window.localStorage.setItem("volumcalc-lang", routeLang);
+  }, [routeLang]);
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
@@ -689,7 +697,7 @@ export function translate(key: string, lang: Lang): string {
   const entry = dict[key];
   if (!entry) return key;
   if (lang === "no" || lang === "en") return entry[lang];
-  if (lang === "sv" || lang === "da" || lang === "pl") {
+  if (lang === "sv" || lang === "da" || lang === "pl" || lang === "pt") {
     return extraTranslations[lang]?.[key] ?? entry.en;
   }
   return entry.en;
