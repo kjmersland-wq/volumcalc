@@ -8,7 +8,18 @@ import { useI18n } from "@/lib/i18n";
 type Faq = { q: string; a: string };
 type Group = { heading: string; items: Faq[] };
 
-const content: Record<"no" | "en", { title: string; intro: string; groups: Group[]; ctaTitle: string; ctaText: string; cta: string; contact: string }> = {
+const content: Record<
+  "no" | "en",
+  {
+    title: string;
+    intro: string;
+    groups: Group[];
+    ctaTitle: string;
+    ctaText: string;
+    cta: string;
+    contact: string;
+  }
+> = {
   no: {
     title: "Hjelp og ofte stilte spørsmål",
     intro:
@@ -130,26 +141,26 @@ const content: Record<"no" | "en", { title: string; intro: string; groups: Group
   en: {
     title: "Help and frequently asked questions",
     intro:
-      "Everything you need to get going with VolumCalc — from taking photos to a finished report, packing, storage and sharing.",
+      "Everything you need to get started with VolumCalc — from a quick room video and a calm checklist to a polished report, packing, storage and sharing.",
     ctaTitle: "Didn't find your answer?",
     ctaText: "Send us a few words and we usually reply within one business day.",
     cta: "Start a free estimate",
     contact: "Contact us",
     groups: [
       {
-        heading: "Taking photos",
+        heading: "Recording your room video",
         items: [
           {
-            q: "How many photos should I take?",
-            a: "Take 1–3 photos per room: one overview of the whole room plus 1–2 closer shots of the largest furniture. You don't need to photograph every small object. Maximum 20 photos per estimate.",
+            q: "How long should each room video be?",
+            a: "A gentle 15-second sweep per room is usually spot on, so the main furniture is clearly visible. No need for close-ups of every little thing, as you’ll confirm items in the checklist afterwards.",
           },
           {
             q: "What gives the best result?",
-            a: "Good light, tidy surfaces and shots taken from the doorway so the whole room fits. Use landscape orientation if you can.",
+            a: "Good lighting, tidy surfaces, and a smooth pan from the doorway so the full room is in view. Keep your phone steady and take your time.",
           },
           {
-            q: "Do I need to photograph inside cupboards and drawers?",
-            a: "No. Cupboard contents are normally counted as boxes. Add the number of boxes as a note in the report instead.",
+            q: "Do I need to record inside cupboards and drawers?",
+            a: "No, not at all. Cupboard contents are normally counted as boxes, so you can simply confirm quantities in the checklist after filming.",
           },
         ],
       },
@@ -157,16 +168,16 @@ const content: Record<"no" | "en", { title: string; intro: string; groups: Group
         heading: "Rooms and editing",
         items: [
           {
-            q: "How are photos sorted into rooms?",
-            a: "The AI groups items automatically into rooms such as living room, kitchen, bedroom, bathroom, hallway, office, garage and other.",
+            q: "How are items assigned to rooms?",
+            a: "You choose the room before filming, then confirm items in a checklist tailored to that exact room.",
           },
           {
             q: "Can I rename rooms and move items?",
             a: "Yes. In the report you can rename rooms, move an item to another room, change quantity and dimensions, add notes and flag items as fragile, heavy, needing disassembly or not moving at all.",
           },
           {
-            q: "What if the AI gets something wrong?",
-            a: "Every item shows a confidence score. Review the low-confidence ones and adjust the dimensions — the total updates instantly.",
+            q: "What if something is missing or wrong?",
+            a: "No worries — just adjust quantities directly in the checklist. Totals update instantly, so you can tidy everything up in moments.",
           },
         ],
       },
@@ -238,8 +249,8 @@ const content: Record<"no" | "en", { title: string; intro: string; groups: Group
             a: "Private individuals can try it free and buy a single estimate or a pack of three. Moving companies have their own subscription. See the pricing page for current prices.",
           },
           {
-            q: "What happens to my photos?",
-            a: "Photos are kept in private storage and are not public. They are not used to train AI models and are deleted no later than 12 months after the last activity. You can request deletion any time at kjell@volumcalc.com.",
+            q: "What happens to my room video?",
+            a: "Your estimate is created from your room video and checklist flow. Your media stays private, is not used to train AI models, and is deleted no later than 12 months after the last activity. If you’d like deletion sooner, just drop us a line at kjell@volumcalc.com and we’ll gladly help.",
           },
         ],
       },

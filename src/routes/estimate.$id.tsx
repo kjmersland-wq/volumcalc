@@ -53,7 +53,7 @@ export const Route = createFileRoute("/estimate/$id")({
   head: () => ({
     meta: [
       { title: "Estimate report — VolumCalc" },
-      { name: "description", content: "Itemised cubic metre estimate and inventory review generated from photos." },
+      { name: "description", content: "Itemised cubic metre estimate and inventory review generated from room video and checklist." },
       { property: "og:title", content: "Estimate report — VolumCalc" },
       { property: "og:description", content: "Itemised cubic metre estimate and inventory review." },
       { name: "robots", content: "noindex" },
