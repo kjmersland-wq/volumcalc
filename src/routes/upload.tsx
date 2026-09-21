@@ -60,6 +60,13 @@ export const Route = createFileRoute("/upload")({
 
 const FREE_RECORDING_SECONDS = 20;
 
+const DEMO_REPORT_ROOMS = [
+  { room: "Stue / Living room", items: "3-seter sofa, sofabord, TV-benk, reol", m3: 6.4 },
+  { room: "Kjøkken / Kitchen", items: "Spisebord, 4 stoler, kjøleskap, kasser", m3: 4.1 },
+  { room: "Soverom 1 / Bedroom 1", items: "Dobbeltseng, kommode, garderobe", m3: 5.2 },
+  { room: "Gang / Hallway", items: "Skohylle, speil, 6 flyttekasser", m3: 1.8 },
+];
+
 type Stage = "idle" | "saving";
 type QuantityByRoom = Record<string, Record<string, number>>;
 
