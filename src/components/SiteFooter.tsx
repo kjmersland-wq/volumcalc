@@ -93,9 +93,17 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-border pt-6 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} VolumCalc · volumcalc.com</p>
-          <p className="mt-1">{t("footer.builtBy")}</p>
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6 text-sm text-muted-foreground">
+          <div>
+            <p>© {new Date().getFullYear()} VolumCalc · volumcalc.com</p>
+            <p className="mt-1">{t("footer.builtBy")}</p>
+          </div>
+          <Link
+            to="/auth"
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent"
+          >
+            {t("nav.login")}
+          </Link>
         </div>
       </div>
     </footer>
