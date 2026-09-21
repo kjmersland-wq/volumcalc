@@ -30,7 +30,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCompany, useIsAdmin, useUnlimitedPhotos } from "@/hooks/useCompany";
 import { supabase } from "@/integrations/supabase/client";
 import { m3, shortDate } from "@/lib/format";
-import { REPORT_LANGS } from "@/lib/report-langs";
+import { LANG_LABELS, SUPPORTED_LANGS } from "@/lib/i18n";
 
 export const Route = createFileRoute("/dashboard/account")({
   staticData: { sitemap: false },
@@ -350,9 +350,9 @@ function AccountPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {REPORT_LANGS.map((l) => (
-                      <SelectItem key={l.code} value={l.code}>
-                        {l.label}
+                    {SUPPORTED_LANGS.map((code) => (
+                      <SelectItem key={code} value={code}>
+                        {LANG_LABELS[code]}
                       </SelectItem>
                     ))}
                   </SelectContent>
