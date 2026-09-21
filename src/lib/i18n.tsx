@@ -695,7 +695,7 @@ function getUrlOrPathLang(): Lang | undefined {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(getInitialLang);
+  const [lang, setLangState] = useState<Lang>(() => getInitialLang());
 
   useEffect(() => {
     const syncedUrlLang = getUrlOrPathLang();
