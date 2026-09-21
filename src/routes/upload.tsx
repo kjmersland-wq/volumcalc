@@ -58,6 +58,8 @@ export const Route = createFileRoute("/upload")({
   component: UploadPage,
 });
 
+const FREE_RECORDING_SECONDS = 20;
+
 type Stage = "idle" | "saving";
 type QuantityByRoom = Record<string, Record<string, number>>;
 
