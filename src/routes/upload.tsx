@@ -130,6 +130,29 @@ function UploadPage() {
   const [form, setForm] = useState({ name: "", phone: "", date: "", address: "" });
   const busy = stage !== "idle";
 
+  const unlimitedAccount = useUnlimitedPhotos();
+  const freePlan = !unlimitedAccount && !companyToken && !companyId;
+  const [secondsLeft, setSecondsLeft] = useState(FREE_RECORDING_SECONDS);
+  const [showUpsell, setShowUpsell] = useState(false);
+
+  useEffect(() => {
+    if (!recording || !freePlan) return;
+    setSecondsLeft(FREE_RECORDING_SECONDS);
+    const timer = window.setInterval(() => {
+      setSecondsLeft((current) => {
+        if (current <= 1) {
+          window.clearInterval(timer);
+          stopVideoCapture();
+          setShowUpsell(true);
+          return 0;
+        }
+        return current - 1;
+      });
+    }, 1000);
+    return () => window.clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recording, freePlan, selectedRoom]);
+
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem("volumcalc.rooms");
