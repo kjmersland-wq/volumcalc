@@ -109,6 +109,13 @@ function UploadPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (recording && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      void videoRef.current.play().catch(() => undefined);
+    }
+  }, [recording]);
+
   async function startVideoCapture() {
     if (recording || startingCamera) return;
     try {
