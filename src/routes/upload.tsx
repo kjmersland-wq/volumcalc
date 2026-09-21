@@ -19,6 +19,13 @@ import {
 } from "@/lib/volume-database";
 import { recommendedVolume } from "@/lib/volume";
 import { useAuth } from "@/hooks/useAuth";
+import { useCompany } from "@/hooks/useCompany";
+import {
+  defaultRoomNames,
+  localizedTemplateName,
+  roomTemplateForName,
+  sanitizeRoomNames,
+} from "@/lib/rooms";
 
 export const Route = createFileRoute("/upload")({
   staticData: { sitemap: true },
@@ -52,22 +59,13 @@ export const Route = createFileRoute("/upload")({
 });
 
 type Stage = "idle" | "saving";
-type QuantityByRoom = Record<VolumeRoom, Record<string, number>>;
+type QuantityByRoom = Record<string, Record<string, number>>;
 
-const ROOMS = Object.keys(VOLUME_DATABASE) as VolumeRoom[];
-const ROOM_LABELS: Record<VolumeRoom, string> = {
-  Office: "Office",
-  "Living room": "Living room",
-  Hallway: "Hallway",
-  Garage: "Garage",
-  Bedroom: "Bedroom",
-};
-
-function createInitialQuantities(): QuantityByRoom {
-  return ROOMS.reduce(
+function createInitialQuantities(roomNames: string[]): QuantityByRoom {
+  return roomNames.reduce(
     (acc, room) => ({
       ...acc,
-      [room]: VOLUME_DATABASE[room].reduce(
+      [room]: VOLUME_DATABASE[roomTemplateForName(room)].reduce(
         (items, item) => ({ ...items, [item.key]: 0 }),
         {} as Record<string, number>,
       ),
@@ -76,12 +74,24 @@ function createInitialQuantities(): QuantityByRoom {
   );
 }
 
+function syncRoomQuantities(prev: QuantityByRoom, roomNames: string[]): QuantityByRoom {
+  return roomNames.reduce((next, room) => {
+    const existing = prev[room] ?? {};
+    next[room] = VOLUME_DATABASE[roomTemplateForName(room)].reduce(
+      (items, item) => ({ ...items, [item.key]: existing[item.key] ?? 0 }),
+      {} as Record<string, number>,
+    );
+    return next;
+  }, {} as QuantityByRoom);
+}
+
 function UploadPage() {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const submitEstimate = useServerFn(createEstimate);
   const { c: companyId, k: companyToken } = Route.useSearch();
   const { session } = useAuth();
+  const { data: ownCompany } = useCompany();
   const brandingFn = useServerFn(getCompanyByUploadToken);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -92,13 +102,25 @@ function UploadPage() {
     queryFn: () => brandingFn({ data: { token: companyToken! } }),
   });
 
-  const [selectedRoom, setSelectedRoom] = useState<VolumeRoom>("Living room");
+  const roomNames = useMemo(
+    () => sanitizeRoomNames(branding?.room_names ?? ownCompany?.room_names, defaultRoomNames(lang)),
+    [branding?.room_names, ownCompany?.room_names, lang],
+  );
+
+  const [selectedRoom, setSelectedRoom] = useState<string>(() => defaultRoomNames("en")[0]);
   const [recording, setRecording] = useState(false);
   const [startingCamera, setStartingCamera] = useState(false);
   const [stage, setStage] = useState<Stage>("idle");
-  const [quantities, setQuantities] = useState<QuantityByRoom>(() => createInitialQuantities());
+  const [quantities, setQuantities] = useState<QuantityByRoom>(() =>
+    createInitialQuantities(defaultRoomNames("en")),
+  );
   const [form, setForm] = useState({ name: "", phone: "", date: "", address: "" });
   const busy = stage !== "idle";
+
+  useEffect(() => {
+    setSelectedRoom((current) => (roomNames.includes(current) ? current : roomNames[0]));
+    setQuantities((current) => syncRoomQuantities(current, roomNames));
+  }, [roomNames]);
 
   useEffect(() => {
     return () => {
@@ -121,7 +143,7 @@ function UploadPage() {
     try {
       setStartingCamera(true);
       if (!navigator.mediaDevices?.getUserMedia) {
-        toast.error("Looks like your browser doesn’t support camera recording just yet.");
+        toast.error(t("upload.cameraUnsupported"));
         return;
       }
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -135,7 +157,7 @@ function UploadPage() {
         void videoRef.current.play().catch(() => undefined);
       }
     } catch {
-      toast.error("We couldn’t start your camera just now — please try once more.");
+      toast.error(t("upload.cameraFailed"));
       setRecording(false);
     } finally {
       setStartingCamera(false);
@@ -167,14 +189,14 @@ function UploadPage() {
 
   const manualItems = useMemo(
     () =>
-      ROOMS.flatMap((room) =>
-        VOLUME_DATABASE[room]
+      roomNames.flatMap((room) =>
+        VOLUME_DATABASE[roomTemplateForName(room)]
           .map((item) => ({
             room,
             name: item.name,
             name_no: item.name_no,
             category: item.category,
-            quantity: quantities[room][item.key] ?? 0,
+            quantity: quantities[room]?.[item.key] ?? 0,
             length_cm: item.length_cm,
             width_cm: item.width_cm,
             height_cm: item.height_cm,
@@ -183,7 +205,7 @@ function UploadPage() {
           }))
           .filter((item) => item.quantity > 0),
       ),
-    [quantities],
+    [quantities, roomNames],
   );
 
   const netVolume = useMemo(
@@ -193,6 +215,7 @@ function UploadPage() {
     [manualItems],
   );
   const grossVolume = recommendedVolume(netVolume);
+  const selectedTemplateRoom = roomTemplateForName(selectedRoom);
 
   async function handleSubmit() {
     try {
@@ -265,12 +288,15 @@ function UploadPage() {
                   value={selectedRoom}
                   onChange={(event) => setSelectedRoom(event.target.value as VolumeRoom)}
                 >
-                  {ROOMS.map((room) => (
+                  {roomNames.map((room) => (
                     <option key={room} value={room}>
-                      {ROOM_LABELS[room]}
+                      {room}
                     </option>
                   ))}
                 </select>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {t("upload.roomTemplate")}: {localizedTemplateName(selectedTemplateRoom, lang)}
+                </p>
               </div>
 
               <div className="overflow-hidden rounded-2xl border border-border bg-black">
@@ -301,12 +327,15 @@ function UploadPage() {
                   value={selectedRoom}
                   onChange={(event) => setSelectedRoom(event.target.value as VolumeRoom)}
                 >
-                  {ROOMS.map((room) => (
+                  {roomNames.map((room) => (
                     <option key={room} value={room}>
-                      {ROOM_LABELS[room]}
+                      {room}
                     </option>
                   ))}
                 </select>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {t("upload.roomHint")}
+                </p>
               </div>
 
               <Button
@@ -337,8 +366,8 @@ function UploadPage() {
               </div>
 
               <div className="mt-6 space-y-3">
-                {VOLUME_DATABASE[selectedRoom].map((item) => {
-                  const qty = quantities[selectedRoom][item.key] ?? 0;
+                {VOLUME_DATABASE[selectedTemplateRoom].map((item) => {
+                  const qty = quantities[selectedRoom]?.[item.key] ?? 0;
                   return (
                     <div
                       key={item.key}
@@ -431,7 +460,7 @@ function UploadPage() {
 
               <Button size="lg" className="mt-8 w-full" disabled={busy} onClick={handleSubmit}>
                 {busy ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
-                {busy ? "Saving your estimate …" : t("upload.submit")}
+                {busy ? t("upload.saving") : t("upload.submit")}
               </Button>
             </>
           )}
