@@ -43,20 +43,21 @@ function Pricing() {
   const [checkout, setCheckout] = useState<{ priceId: string; name: string } | null>(null);
 
   const pricingCopy = {
-    businessDesc: {
-      no: ["300 beregninger per måned"],
-      en: ["300 estimates per month"],
-      sv: ["300 beräkningar per månad"],
-      da: ["300 beregninger pr. måned"],
-      fi: ["300 arviota kuukaudessa"],
-      de: ["300 Schätzungen pro Monat"],
-      nl: ["300 schattingen per maand"],
-      fr: ["300 estimations par mois"],
-      pl: ["300 wycen miesięcznie"],
-      es: ["300 estimaciones al mes"],
-      it: ["300 stime al mese"],
-      pt: ["300 estimativas por mês"],
-    }[lang] ?? ["300 estimates per month"],
+    businessDesc:
+      {
+        no: "300 beregninger per måned",
+        en: "300 estimates per month",
+        sv: "300 beräkningar per månad",
+        da: "300 beregninger pr. måned",
+        fi: "300 arviota kuukaudessa",
+        de: "300 Schätzungen pro Monat",
+        nl: "300 schattingen per maand",
+        fr: "300 estimations par mois",
+        pl: "300 wycen miesięcznie",
+        es: "300 estimaciones al mes",
+        it: "300 stime al mese",
+        pt: "300 estimativas por mês",
+      }[lang] ?? "300 estimates per month",
     businessFeatures: {
       no: ["Alle basisfunksjoner", "Egen logo og farger", "Pris per m³ og tilbud", "PDF-rapport"],
       en: ["All core features", "Your logo and colours", "Rate per m³ and quotes", "PDF report"],
@@ -314,7 +315,7 @@ function Pricing() {
     {
       name: "Business",
       price: "1 490",
-      desc: pricingCopy.businessDesc[0],
+      desc: pricingCopy.businessDesc,
       features: pricingCopy.businessFeatures,
       featured: true,
       priceId: "volumcalc_business_monthly_nok",
