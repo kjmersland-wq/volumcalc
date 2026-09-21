@@ -430,7 +430,16 @@ function UploadPage() {
                   <span className="size-2 animate-pulse rounded-full bg-red-500" />
                   {t("upload.filmingRoom")}: {selectedRoom}
                 </span>
+                {freePlan && (
+                  <span className="absolute right-3 top-3 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground tabular-nums">
+                    {t("upload.freeLeft")}: {secondsLeft}s
+                  </span>
+                )}
               </div>
+
+              <p className="text-xs text-muted-foreground">
+                {freePlan ? t("upload.freeNote") : t("upload.unlimitedFilming")}
+              </p>
 
               <Button
                 size="lg"
