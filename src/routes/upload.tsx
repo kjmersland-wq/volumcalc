@@ -388,6 +388,34 @@ function UploadPage() {
             <div className="mt-6 rounded-2xl border-2 border-primary bg-primary/5 p-6">
               <h2 className="text-xl font-bold">{t("upload.freeOverTitle")}</h2>
               <p className="mt-2 text-sm text-muted-foreground">{t("upload.freeOverBody")}</p>
+
+              <div className="mt-5 rounded-xl border border-border bg-card p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold">{t("upload.demoReportTitle")}</p>
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t("upload.demoBadge")}
+                  </span>
+                </div>
+                <ul className="mt-3 space-y-1.5 text-sm">
+                  {DEMO_REPORT_ROOMS.map((row) => (
+                    <li key={row.room} className="flex justify-between border-b border-border/60 pb-1.5">
+                      <span>
+                        {row.room}{" "}
+                        <span className="text-muted-foreground">· {row.items}</span>
+                      </span>
+                      <span className="font-semibold tabular-nums">{row.m3.toFixed(1)} m³</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-3 flex justify-between text-sm font-bold">
+                  <span>{t("upload.demoTotal")}</span>
+                  <span className="tabular-nums">
+                    {DEMO_REPORT_ROOMS.reduce((sum, row) => sum + row.m3, 0).toFixed(1)} m³
+                  </span>
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">{t("upload.demoNote")}</p>
+              </div>
+
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <Button asChild size="lg">
                   <Link to="/pricing">{t("upload.freeOverCta")}</Link>
