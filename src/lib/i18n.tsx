@@ -551,6 +551,63 @@ export const dict: Dict = {
   "dash.quotesEmpty": { no: "Ingen forespørsler ennå.", en: "No requests yet." },
   "dash.markHandled": { no: "Merk som behandlet", en: "Mark as handled" },
   "dash.handled": { no: "Behandlet", en: "Handled" },
+
+  "rep.titleEdit": { no: "Endre rapportnavn", en: "Rename report" },
+  "rep.titlePlaceholder": { no: "F.eks. Flytting Møviklia 4 → Oslo", en: "E.g. Move from Møviklia 4 → Oslo" },
+  "rep.titleSaved": { no: "Rapportnavnet er lagret", en: "Report name saved" },
+
+  "price.title": { no: "Grovt prisestimat for flyttingen", en: "Rough moving price estimate" },
+  "price.sub": {
+    no: "Regn ut et omtrentlig prisspenn ut fra volum, avstand og adkomst. Endelig pris får du fra flyttefirmaet.",
+    en: "Get an approximate price range based on volume, distance and access. The final price comes from the mover.",
+  },
+  "price.from": { no: "Flytter fra", en: "Moving from" },
+  "price.to": { no: "Flytter til", en: "Moving to" },
+  "price.km": { no: "Avstand (km)", en: "Distance (km)" },
+  "price.floors": { no: "Etasjer uten heis", en: "Floors without lift" },
+  "price.packing": { no: "Pakking av innbo", en: "Packing service" },
+  "price.range": { no: "Estimert prisspenn", en: "Estimated price range" },
+  "price.disclaimer": {
+    no: "Estimatet er veiledende og avhenger av avstand, tidspunkt, adkomst og hva som avtales med flyttefirmaet.",
+    en: "The estimate is indicative and depends on distance, timing, access and what you agree with the mover.",
+  },
+
+  "mov.title": { no: "Hent pristilbud fra flyttefirma", en: "Get quotes from moving companies" },
+  "mov.sub": {
+    no: "Åpne firmaets eget tilbudsskjema, eller send rapporten på e-post til firmaene du velger.",
+    en: "Open the company's own quote form, or email the report to the companies you choose.",
+  },
+  "mov.country": { no: "Land", en: "Country" },
+  "mov.allCountries": { no: "Alle land", en: "All countries" },
+  "mov.listTitle": { no: "Send rapporten på e-post", en: "Email the report" },
+  "mov.listHelp": {
+    no: "Legg inn e-postadressen firmaet oppgir på nettsiden sin. Du kan også legge til egne adresser.",
+    en: "Add the email address the company lists on its website. You can also add your own addresses.",
+  },
+  "mov.manual": { no: "Eget firma", en: "Own contact" },
+  "mov.addManual": { no: "Legg til adresse manuelt", en: "Add address manually" },
+  "mov.yourName": { no: "Ditt navn", en: "Your name" },
+  "mov.yourEmail": { no: "Din e-post (svaradresse)", en: "Your email (reply-to)" },
+  "mov.message": { no: "Melding (valgfritt)", en: "Message (optional)" },
+  "mov.send": { no: "Send rapport til valgte firma", en: "Send report to selected companies" },
+  "mov.sent": { no: "Rapporten er sendt", en: "Report sent" },
+  "mov.failed": { no: "Utsending feilet", en: "Sending failed" },
+  "mov.missing": { no: "Fyll inn navn, din e-post og minst én mottaker.", en: "Fill in your name, email and at least one recipient." },
+};
+
+export const LANG_LABELS: Record<Lang, string> = {
+  en: "English",
+  no: "Norsk",
+  sv: "Svenska",
+  da: "Dansk",
+  fi: "Suomi",
+  de: "Deutsch",
+  nl: "Nederlands",
+  fr: "Français",
+  pl: "Polski",
+  es: "Español",
+  it: "Italiano",
+  pt: "Português",
 };
 
 type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (k: keyof typeof dict | string) => string };
