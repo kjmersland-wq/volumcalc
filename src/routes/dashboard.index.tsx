@@ -133,12 +133,42 @@ function DashboardHome() {
                     {e.status === "approved" ? t("dash.approved") : t("dash.pending")}
                   </Badge>
                 </span>
-                <Button asChild size="sm" variant="ghost">
-                  <Link to="/estimate/$id" params={{ id: e.id }}>
-                    {t("dash.open")}
-                    <ArrowUpRight className="size-4" />
-                  </Link>
-                </Button>
+                <div className="flex items-center justify-end gap-1">
+                  <Button asChild size="sm" variant="ghost">
+                    <Link to="/estimate/$id" params={{ id: e.id }}>
+                      {t("dash.open")}
+                      <ArrowUpRight className="size-4" />
+                    </Link>
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label={t("dash.delete")}
+                        className="text-muted-foreground hover:text-destructive"
+                        disabled={deleteEstimate.isPending}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>{t("dash.deleteTitle")}</AlertDialogTitle>
+                        <AlertDialogDescription>{t("dash.deleteDesc")}</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{t("dash.cancel")}</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteEstimate.mutate(e.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          {t("dash.delete")}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </li>
             ))}
           </ul>
