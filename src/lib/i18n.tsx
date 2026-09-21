@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { extraTranslations } from "./i18n.translations";
+import { extraTranslations, ptLandingTranslations } from "./i18n.translations";
 
 export type Lang =
   "no" | "en" | "sv" | "da" | "fi" | "de" | "nl" | "fr" | "pl" | "es" | "it" | "pt";
@@ -717,7 +717,10 @@ export function translate(key: string, lang: Lang): string {
   const entry = dict[key];
   if (!entry) return key;
   if (lang === "no" || lang === "en") return entry[lang];
-  if (lang === "sv" || lang === "da" || lang === "pl" || lang === "pt") {
+  if (lang === "pt") {
+    return ptLandingTranslations[key] ?? entry.en;
+  }
+  if (lang === "sv" || lang === "da" || lang === "pl") {
     return extraTranslations[lang]?.[key] ?? entry.en;
   }
   return entry.en;
