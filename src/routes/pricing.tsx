@@ -21,7 +21,7 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:title", content: "Pricing for individuals and movers — VolumCalc" },
       {
         property: "og:description",
-        content: "Simple monthly plans for AI cubic volume estimates.",
+        content: "Simple monthly plans for video-based cubic volume estimates and checklist workflows.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -64,14 +64,14 @@ function Pricing() {
       name: lang === "no" ? "Én beregning" : "Single estimate",
       price: "129",
       desc: lang === "no" ? "For én flytting" : "For one move",
-      features: lang === "no" ? ["Inntil 20 bilder", "Romvis sortering", "PDF-rapport"] : ["Up to 20 photos", "Room grouping", "PDF report"],
+      features: lang === "no" ? ["Inntil 20 bilder", "Romvis sortering", "PDF-rapport"] : ["Room video + checklist", "Room grouping", "PDF report"],
       priceId: "volumcalc_single_estimate_nok",
     },
     {
       name: lang === "no" ? "3 beregninger" : "3 estimates",
       price: "299",
       desc: lang === "no" ? "Spar 88 NOK" : "Save 88 NOK",
-      features: lang === "no" ? ["3 komplette beregninger", "Inntil 20 bilder hver", "PDF-rapporter"] : ["3 complete estimates", "Up to 20 photos each", "PDF reports"],
+      features: lang === "no" ? ["3 komplette beregninger", "Inntil 20 bilder hver", "PDF-rapporter"] : ["3 complete estimates", "Room video + checklist", "PDF reports"],
       priceId: "volumcalc_three_estimates_nok",
     },
   ];

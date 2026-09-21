@@ -12,12 +12,12 @@ export const Route = createFileRoute("/contact")({
       {
         name: "description",
         content:
-          "Get in touch with the VolumCalc team about AI volume estimates, pricing for movers, demos or support. We reply within one business day.",
+          "Get in touch with the VolumCalc team about video-based volume estimates, pricing for movers, demos or support. We reply within one business day.",
       },
       { property: "og:title", content: "Contact VolumCalc" },
       {
         property: "og:description",
-        content: "Questions about AI volume estimates, pricing or a demo? Send us a message.",
+        content: "Questions about video-based volume estimates, pricing or a demo? Send us a message.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

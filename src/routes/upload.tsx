@@ -55,11 +55,11 @@ type QuantityByRoom = Record<VolumeRoom, Record<string, number>>;
 
 const ROOMS = Object.keys(VOLUME_DATABASE) as VolumeRoom[];
 const ROOM_LABELS: Record<VolumeRoom, string> = {
-  Office: "Kontor",
-  "Living room": "Stue",
-  Hallway: "Gang",
-  Garage: "Garasje",
-  Bedroom: "Soverom",
+  Office: "Office",
+  "Living room": "Living room",
+  Hallway: "Hallway",
+  Garage: "Garage",
+  Bedroom: "Bedroom",
 };
 
 function createInitialQuantities(): QuantityByRoom {
@@ -106,7 +106,7 @@ function UploadPage() {
         if (!navigator.mediaDevices?.getUserMedia) {
           setRecording(false);
           setCameraReady(true);
-          toast.error("Kamera støttes ikke i denne nettleseren.");
+          toast.error("Camera is not supported in this browser.");
           return;
         }
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -122,7 +122,7 @@ function UploadPage() {
         setRecording(true);
         setCameraReady(true);
       } catch {
-        toast.error("Klarte ikke å starte kamera.");
+        toast.error("Could not start the camera.");
         setRecording(false);
         setCameraReady(true);
       }
@@ -244,9 +244,9 @@ function UploadPage() {
             </div>
           )}
 
-          <h1 className="text-3xl font-bold sm:text-4xl">Film rommet ditt</h1>
+          <h1 className="text-3xl font-bold sm:text-4xl">{t("upload.title")}</h1>
           <p className="mt-3 text-muted-foreground">
-            Lokal videostrøm og lokal sjekkliste. Sikkerhet: {USER_VERIFIED_SECURITY_LABEL}.
+            {t("upload.sub")} Security: {USER_VERIFIED_SECURITY_LABEL}.
           </p>
 
           {!cameraReady ? (
@@ -256,12 +256,12 @@ function UploadPage() {
               aria-live="polite"
             >
               <Loader2 className="size-5 animate-spin text-primary" />
-              <span className="text-sm text-muted-foreground">Starter kamera …</span>
+              <span className="text-sm text-muted-foreground">Starting camera …</span>
             </div>
           ) : recording ? (
             <div className="mt-6 space-y-4">
               <div className="rounded-xl border border-border bg-card p-4">
-                <Label htmlFor="room">Velg rom</Label>
+                <Label htmlFor="room">{t("upload.drop")}</Label>
                 <select
                   id="room"
                   className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -291,13 +291,13 @@ function UploadPage() {
                 className="h-14 w-full bg-red-600 text-base font-bold text-white hover:bg-red-700"
                 onClick={stopVideoCapture}
               >
-                STOPP FILMING & SE SJEKKLISTE
+                STOP FILMING & VIEW CHECKLIST
               </Button>
             </div>
           ) : (
             <>
               <div className="mt-6 rounded-xl border border-border bg-card p-4">
-                <Label htmlFor="room-checklist">Velg rom</Label>
+                <Label htmlFor="room-checklist">Select room</Label>
                 <select
                   id="room-checklist"
                   className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
@@ -315,9 +315,9 @@ function UploadPage() {
               <div className="mt-7 flex gap-4 rounded-xl border border-primary/20 bg-primary-soft/70 p-5">
                 <Info className="mt-0.5 size-5 shrink-0 text-primary" />
                 <div>
-                  <h2 className="font-semibold">Sjekkliste: {selectedRoom}</h2>
+                  <h2 className="font-semibold">{t("upload.guideTitle")}</h2>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                    Bruk plus/minus. All beregning skjer lokalt (Antall × m³).
+                    {t("upload.guide")}
                   </p>
                 </div>
               </div>
@@ -344,7 +344,7 @@ function UploadPage() {
                           size="icon"
                           onClick={() => changeQuantity(item.key, -1)}
                           disabled={qty <= 0}
-                          aria-label={`Reduser antall ${item.name_no}`}
+                          aria-label={`Decrease quantity ${item.name_no}`}
                         >
                           <Minus className="size-4" />
                         </Button>
@@ -356,7 +356,7 @@ function UploadPage() {
                           variant="outline"
                           size="icon"
                           onClick={() => changeQuantity(item.key, 1)}
-                          aria-label={`Øk antall ${item.name_no}`}
+                          aria-label={`Increase quantity ${item.name_no}`}
                         >
                           <Plus className="size-4" />
                         </Button>
@@ -368,10 +368,10 @@ function UploadPage() {
 
               <div className="mt-6 rounded-xl border border-border bg-muted/30 p-4">
                 <p className="text-sm text-muted-foreground">
-                  Nettovolum: {netVolume.toFixed(2)} m³
+                  Net volume: {netVolume.toFixed(2)} m³
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Bilbehov (+25% stuefaktor): {grossVolume.toFixed(2)} m³
+                  Vehicle requirement (+25% stowage factor): {grossVolume.toFixed(2)} m³
                 </p>
               </div>
 
@@ -417,7 +417,7 @@ function UploadPage() {
 
               <Button size="lg" className="mt-8 w-full" disabled={busy} onClick={handleSubmit}>
                 {busy ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
-                {busy ? "Lagrer beregning …" : "Lagre og åpne rapport"}
+                {busy ? "Saving estimate …" : t("upload.submit")}
               </Button>
             </>
           )}

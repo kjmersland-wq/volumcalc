@@ -130,26 +130,26 @@ const content: Record<"no" | "en", { title: string; intro: string; groups: Group
   en: {
     title: "Help and frequently asked questions",
     intro:
-      "Everything you need to get going with VolumCalc — from taking photos to a finished report, packing, storage and sharing.",
+      "Everything you need to get going with VolumCalc — from recording room video and confirming the checklist to a finished report, packing, storage and sharing.",
     ctaTitle: "Didn't find your answer?",
     ctaText: "Send us a few words and we usually reply within one business day.",
     cta: "Start a free estimate",
     contact: "Contact us",
     groups: [
       {
-        heading: "Taking photos",
+        heading: "Recording room video",
         items: [
           {
-            q: "How many photos should I take?",
-            a: "Take 1–3 photos per room: one overview of the whole room plus 1–2 closer shots of the largest furniture. You don't need to photograph every small object. Maximum 20 photos per estimate.",
+            q: "How long should each room video be?",
+            a: "Record a steady video of each room for about 15 seconds so the main furniture is visible. You do not need close-ups of every small object because you confirm items in the checklist afterwards.",
           },
           {
             q: "What gives the best result?",
-            a: "Good light, tidy surfaces and shots taken from the doorway so the whole room fits. Use landscape orientation if you can.",
+            a: "Good light, tidy surfaces and a smooth pan from the doorway so the whole room fits. Keep the phone stable and move slowly.",
           },
           {
-            q: "Do I need to photograph inside cupboards and drawers?",
-            a: "No. Cupboard contents are normally counted as boxes. Add the number of boxes as a note in the report instead.",
+            q: "Do I need to record inside cupboards and drawers?",
+            a: "No. Cupboard contents are normally counted as boxes. Confirm the quantity in the checklist after filming instead.",
           },
         ],
       },
@@ -157,16 +157,16 @@ const content: Record<"no" | "en", { title: string; intro: string; groups: Group
         heading: "Rooms and editing",
         items: [
           {
-            q: "How are photos sorted into rooms?",
-            a: "The AI groups items automatically into rooms such as living room, kitchen, bedroom, bathroom, hallway, office, garage and other.",
+            q: "How are items assigned to rooms?",
+            a: "You pick the room before recording and confirm items in that room-specific checklist after filming.",
           },
           {
             q: "Can I rename rooms and move items?",
             a: "Yes. In the report you can rename rooms, move an item to another room, change quantity and dimensions, add notes and flag items as fragile, heavy, needing disassembly or not moving at all.",
           },
           {
-            q: "What if the AI gets something wrong?",
-            a: "Every item shows a confidence score. Review the low-confidence ones and adjust the dimensions — the total updates instantly.",
+            q: "What if something is missing or wrong?",
+            a: "Adjust quantities directly in the checklist. The list is user-verified and totals update instantly.",
           },
         ],
       },
@@ -238,8 +238,8 @@ const content: Record<"no" | "en", { title: string; intro: string; groups: Group
             a: "Private individuals can try it free and buy a single estimate or a pack of three. Moving companies have their own subscription. See the pricing page for current prices.",
           },
           {
-            q: "What happens to my photos?",
-            a: "Photos are kept in private storage and are not public. They are not used to train AI models and are deleted no later than 12 months after the last activity. You can request deletion any time at kjell@volumcalc.com.",
+            q: "What happens to my room video?",
+            a: "The estimate is generated from your room video and checklist flow. Contact us at kjell@volumcalc.com if you need data deletion assistance.",
           },
         ],
       },
