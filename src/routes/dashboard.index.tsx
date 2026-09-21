@@ -118,8 +118,12 @@ function DashboardHome() {
                 className="grid grid-cols-2 items-center gap-3 px-5 py-4 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:gap-4"
               >
                 <div className="col-span-2 sm:col-span-1">
-                  <p className="font-medium">{e.customer_name || `#${String(e.id).slice(0, 8).toUpperCase()}`}</p>
-                  <p className="text-xs text-muted-foreground">{e.address || e.customer_phone || ""}</p>
+                  <p className="font-medium">
+                    {e.report_title || e.customer_name || `#${String(e.id).slice(0, 8).toUpperCase()}`}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {[e.report_title ? e.customer_name : null, e.address || e.customer_phone].filter(Boolean).join(" · ")}
+                  </p>
                 </div>
                 <span className="text-sm text-muted-foreground">{shortDate(e.created_at, lang)}</span>
                 <span className="text-sm font-semibold">{m3(e.total_volume_m3)}</span>
