@@ -114,7 +114,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         {
           property: "og:image:alt",
           content: norwegian
-            ? "VolumCalc – romvis volumberegning fra video"
+            ? "VolumCalc – romvis volumberegning fra bilder"
             : "VolumCalc — room-by-room volume estimates from room video",
         },
         { name: "twitter:card", content: "summary_large_image" },

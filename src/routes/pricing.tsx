@@ -79,7 +79,7 @@ function Pricing() {
       desc: lang === "no" ? "For én flytting" : "For one move",
       features:
         lang === "no"
-          ? ["Romvideo + sjekkliste", "Romvis sortering", "PDF-rapport"]
+          ? ["Bilder + sjekkliste", "Romvis sortering", "PDF-rapport"]
           : ["Room video + checklist", "Room grouping", "PDF report"],
       priceId: "volumcalc_single_estimate_nok",
     },
@@ -89,7 +89,7 @@ function Pricing() {
       desc: lang === "no" ? "Spar 88 NOK" : "Save 88 NOK",
       features:
         lang === "no"
-          ? ["3 komplette beregninger", "Romvideo + sjekkliste", "PDF-rapporter"]
+          ? ["3 komplette beregninger", "Bilder + sjekkliste", "PDF-rapporter"]
           : ["3 complete estimates", "Room video + checklist", "PDF reports"],
       priceId: "volumcalc_three_estimates_nok",
     },

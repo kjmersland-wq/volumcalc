@@ -65,16 +65,16 @@ export const dict: Dict = {
   "nav.tryFree": { no: "Prøv gratis", en: "Try for free" },
 
   "hero.badge": {
-    no: "Trygg og enkel volumberegning",
+    no: "Raske volumberegninger fra bilder",
     en: "Instant volume estimates from room video",
   },
   "hero.title1": {
     no: "Så fint! Vi fikser flyttevolumet ditt",
     en: "Brilliant! Let’s sort your moving volume in a jiffy —",
   },
-  "hero.title2": { no: "med en rolig videorunde", en: "from a quick room video." },
+  "hero.title2": { no: "med noen rolige bilder av rommet", en: "from a quick room video." },
   "hero.sub": {
-    no: "VolumCalc hjelper deg med å gjøre en rolig runde gjennom rommene, og gjør det om til en tydelig, rominndelt volumberegning. Perfekt når du vil planlegge flyttingen i fred og ro.",
+    no: "VolumCalc hjelper deg med å ta noen rolige bilder rundt i rommene, og gjør dem om til en tydelig, rominndelt volumberegning. Perfekt når du vil planlegge flyttingen i fred og ro.",
     en: "VolumCalc helps you turn a quick wander through your rooms into a beautifully clear, room-by-room volume estimate. Perfectly sorted for your moving plans.",
   },
   "hero.cta": { no: "Start en gratis beregning", en: "Start a free estimate" },
@@ -83,15 +83,15 @@ export const dict: Dict = {
   "hero.stat2": { no: "gjenstander gjenkjent", en: "standard items available" },
   "hero.stat3": { no: "færre tvister", en: "fewer disputes" },
 
-  "how.title": { no: "Fra video til tilbud i tre steg", en: "From video to quote in three steps" },
-  "how.1t": { no: "Film rommet i ditt tempo", en: "Simply record a quick video" },
+  "how.title": { no: "Fra bilder til tilbud i tre steg", en: "From video to quote in three steps" },
+  "how.1t": { no: "Ta bilder av rommet i ditt tempo", en: "Simply record a quick video" },
   "how.1d": {
-    no: "Åpne lenken på mobilen og ta en rolig, behagelig runde gjennom rommet. Du har god tid, og trenger verken app eller innlogging.",
+    no: "Åpne lenken på mobilen og ta noen rolige bilder av rommet. Du har god tid, og trenger verken app eller innlogging.",
     en: "Simply record a quick video — Just open the link on your mobile and take a steady, relaxed stroll through the room. Take all the time you need, with no fussy apps or logins required.",
   },
   "how.2t": { no: "Rolig sjekkliste etterpå", en: "Stress-free checklist" },
   "how.2d": {
-    no: "Når du er ferdig med videoen, krysser du av gjenstandene i en tilpasset sjekkliste i fred og ro. Enkelt og trygt, hver gang.",
+    no: "Når du er ferdig med bildene, krysser du av gjenstandene i en tilpasset sjekkliste i fred og ro. Enkelt og trygt, hver gang.",
     en: "Once you’ve finished filming, simply tick off your items from a tailored checklist in total peace and quiet. Spot on every time.",
   },
   "how.3t": { no: "Du sender tilbud", en: "You send the quote" },
@@ -103,7 +103,7 @@ export const dict: Dict = {
   "feat.title": { no: "Bygget for flyttebransjen", en: "Built for the moving industry" },
   "feat.1t": { no: "Nøyaktige kubikkmål", en: "Accurate cubic volume" },
   "feat.1d": {
-    no: "Realistiske standardmål per møbeltype, justert etter det AI-en ser på bildet.",
+    no: "Realistiske standardmål per møbeltype, finjustert etter det AI-en ser på bildene dine.",
     en: "Realistic reference dimensions per furniture type in a structured, room-by-room checklist.",
   },
   "feat.2t": { no: "Sikkerhetsgrad", en: "User-verified list" },
@@ -129,16 +129,16 @@ export const dict: Dict = {
   },
 
   "upload.title": {
-    no: "Så gøy at du er i gang! La oss filme flyttelasset ditt",
+    no: "Så gøy at du er i gang! La oss ta bilder av flyttelasset ditt sammen",
     en: "Lovely — let’s record your inventory together",
   },
   "upload.sub": {
-    no: "Her tar vi det helt uten stress. Du filmer rommet i eget tempo, og så klikker du enkelt av gjenstandene dine i fred og ro etterpå.",
+    no: "Her tar vi det helt uten stress. Du tar bilder av hvert rom i eget tempo, og så klikker du enkelt av gjenstandene dine i fred og ro etterpå.",
     en: "No rush at all — just film each room at your own pace, then tick through your items calmly afterwards.",
   },
   "upload.guideTitle": { no: "Slik gjør vi det sammen", en: "How it works" },
   "upload.guide": {
-    no: "Velg rommet du står i nå, og ta en rolig runde med kameraet. Romlisten kan du endre på Min side før du starter, slik at navnene passer hjemmet ditt.",
+    no: "Velg rommet du står i nå, og ta noen rolige bilder med mobilen. Romlisten kan du endre på Min side før du starter, slik at navnene passer hjemmet ditt.",
     en: "Choose the room you’re in and take a steady 15-second sweep on your phone. Afterwards, you can go through the checklist in peace and quiet.",
   },
   "upload.drop": {
@@ -151,7 +151,7 @@ export const dict: Dict = {
   },
   "upload.selectRoom": { no: "Velg rom", en: "Select room" },
   "upload.roomHint": {
-    no: "Legg til, endre navn eller fjern rom her – de vises også mens du filmer.",
+    no: "Legg til, endre navn eller fjern rom her – de vises også når du tar bilder.",
     en: "Add, rename or remove rooms here — they also show while you film.",
   },
   "upload.addRoom": { no: "Legg til rom", en: "Add room" },
