@@ -584,10 +584,10 @@ function EstimatePage() {
                   variant="secondary"
                   className={
                     statusKey === "rep.status.processed"
-                      ? "bg-success/15 text-success"
+                      ? "bg-success/15 text-success print:border-current"
                       : statusKey === "rep.status.ready"
-                        ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground"
+                        ? "bg-primary/10 text-primary print:border-current"
+                        : "bg-muted text-muted-foreground print:border-current"
                   }
                 >
                   {rt(statusKey)}
@@ -1000,7 +1000,7 @@ function EstimatePage() {
                                   }
                                   className={
                                     active
-                                      ? "rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                                      ? "rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary print:border print:border-current"
                                       : "rounded-full border border-dashed border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary"
                                   }
                                 >
@@ -1044,10 +1044,10 @@ function EstimatePage() {
                             variant="secondary"
                             className={
                               item.confidence >= 0.8
-                                ? "bg-success/15 text-success"
+                                ? "bg-success/15 text-success print:border-current"
                                 : item.confidence >= 0.6
-                                  ? "bg-warning/20 text-warning-foreground"
-                                  : "bg-destructive/10 text-destructive"
+                                  ? "bg-warning/20 text-warning-foreground print:border-current"
+                                  : "bg-destructive/10 text-destructive print:border-current"
                             }
                           >
                             {Math.round(item.confidence * 100)}% {rt("res.confidence")}
