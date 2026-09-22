@@ -100,6 +100,16 @@ function mimeHeader(value: string): string {
   return /^[\x00-\x7F]*$/.test(value) ? value : `=?UTF-8?B?${base64(value)}?=`;
 }
 
+// CR/LF are ASCII, so a value carrying them survives mimeHeader() unescaped
+// and would otherwise let a caller smuggle extra header lines (or break out
+// into the envelope/DATA stream) via any field placed in a header or SMTP
+// command — e.g. subject, display name, or an address. Strip them here, at
+// the single point every message passes through, so every caller of
+// sendMailViaSmtp() is covered regardless of how the value was produced.
+function sanitizeHeaderValue(value: string): string {
+  return value.replace(/[\r\n]+/g, " ").trim();
+}
+
 export interface SmtpMessage {
   from: string;
   fromName?: string;
@@ -109,7 +119,16 @@ export interface SmtpMessage {
   text: string;
 }
 
-export async function sendMailViaSmtp(message: SmtpMessage): Promise<void> {
+export async function sendMailViaSmtp(rawMessage: SmtpMessage): Promise<void> {
+  const message: SmtpMessage = {
+    from: sanitizeHeaderValue(rawMessage.from),
+    fromName: rawMessage.fromName !== undefined ? sanitizeHeaderValue(rawMessage.fromName) : undefined,
+    to: sanitizeHeaderValue(rawMessage.to),
+    replyTo: rawMessage.replyTo !== undefined ? sanitizeHeaderValue(rawMessage.replyTo) : undefined,
+    subject: sanitizeHeaderValue(rawMessage.subject),
+    text: rawMessage.text,
+  };
+
   const host = process.env["MIGADU_SMTP_HOST"] || "smtp.migadu.com";
   const port = Number(process.env["MIGADU_SMTP_PORT"] || 465);
   const user = process.env["MIGADU_SMTP_USER"];

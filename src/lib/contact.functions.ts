@@ -5,7 +5,7 @@ const schema = z.object({
   name: z.string().trim().min(2).max(120),
   email: z.string().trim().email().max(180),
   phone: z.string().trim().max(40).optional(),
-  subject: z.string().trim().min(2).max(160),
+  subject: z.string().trim().min(2).max(160).regex(/^[^\r\n]*$/, "Subject cannot contain line breaks"),
   message: z.string().trim().min(10).max(4000),
   locale: z.enum(["no", "en"]).default("no"),
   company: z.string().max(0).optional(), // honeypot

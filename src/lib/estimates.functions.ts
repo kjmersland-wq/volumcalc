@@ -31,7 +31,7 @@ const roomVideoSchema = z.object({
 const createSchema = z.object({
   manual_items: z.array(manualItemSchema).max(300).default([]),
   room_videos: z.array(roomVideoSchema).max(20).default([]),
-  customer_name: z.string().trim().max(120).optional(),
+  customer_name: z.string().trim().max(120).regex(/^[^\r\n]*$/, "Customer name cannot contain line breaks").optional(),
   customer_phone: z.string().trim().max(40).optional(),
   move_date: z
     .string()
