@@ -360,6 +360,63 @@ export type Database = {
           },
         ]
       }
+      payment_events: {
+        Row: {
+          amount_total: number | null
+          created_at: string
+          credits_granted: number
+          currency: string | null
+          customer_email: string | null
+          customer_id: string | null
+          environment: string
+          event_type: string
+          id: string
+          lookup_key: string | null
+          payment_intent_id: string | null
+          session_id: string | null
+          status: string | null
+          stripe_event_id: string
+          subscription_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_total?: number | null
+          created_at?: string
+          credits_granted?: number
+          currency?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          environment: string
+          event_type: string
+          id?: string
+          lookup_key?: string | null
+          payment_intent_id?: string | null
+          session_id?: string | null
+          status?: string | null
+          stripe_event_id: string
+          subscription_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_total?: number | null
+          created_at?: string
+          credits_granted?: number
+          currency?: string | null
+          customer_email?: string | null
+          customer_id?: string | null
+          environment?: string
+          event_type?: string
+          id?: string
+          lookup_key?: string | null
+          payment_intent_id?: string | null
+          session_id?: string | null
+          status?: string | null
+          stripe_event_id?: string
+          subscription_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_type: string
@@ -456,6 +513,33 @@ export type Database = {
           },
         ]
       }
+      user_credits: {
+        Row: {
+          created_at: string
+          credits: number
+          stripe_customer_id: string | null
+          unlimited_until: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          stripe_customer_id?: string | null
+          unlimited_until?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          stripe_customer_id?: string | null
+          unlimited_until?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -482,6 +566,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      grant_estimate_credits: {
+        Args: {
+          _credits: number
+          _customer_id?: string
+          _unlimited_until?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
