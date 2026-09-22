@@ -11,6 +11,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { useI18n } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { createEstimate, uploadRoomVideo, uploadRoomPhoto } from "@/lib/estimates.functions";
+import { analyzeRoomPhotos } from "@/lib/analyze-photos.functions";
 import { getCompanyByUploadToken } from "@/lib/admin.functions";
 import {
   USER_VERIFIED_SECURITY_LABEL,
@@ -164,6 +165,7 @@ function UploadPage() {
   const submitEstimate = useServerFn(createEstimate);
   const uploadVideo = useServerFn(uploadRoomVideo);
   const uploadPhoto = useServerFn(uploadRoomPhoto);
+  const analyzePhotos = useServerFn(analyzeRoomPhotos);
   const { c: companyId, k: companyToken } = Route.useSearch();
   const { session } = useAuth();
   const { data: ownCompany } = useCompany();
@@ -213,6 +215,7 @@ function UploadPage() {
     {},
   );
   const [roomPhotos, setRoomPhotos] = useState<Record<string, { url: string }[]>>({});
+  const [analyzingPhotos, setAnalyzingPhotos] = useState(false);
   const [editingRooms, setEditingRooms] = useState(false);
   const [newRoom, setNewRoom] = useState("");
   const [stage, setStage] = useState<Stage>("idle");
@@ -565,6 +568,37 @@ function UploadPage() {
       ...prev,
       [room]: (prev[room] ?? []).filter((_, i) => i !== index),
     }));
+  }
+
+  /** Suggests quantities from this room's photos and pre-fills only the items
+   * the visitor hasn't already set themselves — never overwrites their input. */
+  async function analyzePhotosForRoom(room: string) {
+    const photos = roomPhotos[room] ?? [];
+    if (photos.length === 0 || analyzingPhotos) return;
+    setAnalyzingPhotos(true);
+    try {
+      const result = await analyzePhotos({
+        data: { room, photo_urls: photos.map((photo) => photo.url) },
+      });
+      let appliedCount = 0;
+      setQuantities((prev) => {
+        const current = prev[room] ?? {};
+        const next = { ...current };
+        for (const suggestion of result.suggestions) {
+          if ((current[suggestion.key] ?? 0) === 0) {
+            next[suggestion.key] = suggestion.quantity;
+            appliedCount++;
+          }
+        }
+        return { ...prev, [room]: next };
+      });
+      toast.success(appliedCount > 0 ? t("upload.analyzeSuggested") : t("upload.analyzeNoneFound"));
+    } catch (error) {
+      console.error("Photo analysis failed", room, error);
+      toast.error(t("upload.analyzeFailed"));
+    } finally {
+      setAnalyzingPhotos(false);
+    }
   }
 
   function changeQuantity(itemKey: string, delta: number) {
@@ -955,6 +989,19 @@ function UploadPage() {
                     </div>
                   ))}
                 </div>
+              )}
+
+              {unlimitedAccount && (roomPhotos[selectedRoom]?.length ?? 0) > 0 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-3 w-full"
+                  disabled={analyzingPhotos}
+                  onClick={() => analyzePhotosForRoom(selectedRoom)}
+                >
+                  {analyzingPhotos ? <Loader2 className="size-4 animate-spin" /> : null}
+                  {analyzingPhotos ? t("upload.analyzing") : t("upload.analyzePhotos")}
+                </Button>
               )}
 
               <div className="mt-7 flex gap-4 rounded-xl border border-primary/20 bg-primary-soft/70 p-5">

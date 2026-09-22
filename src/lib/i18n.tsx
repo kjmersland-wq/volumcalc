@@ -189,6 +189,20 @@ export const dict: Dict = {
     no: "Kunne ikke lagre bildet akkurat nå. Prøv å legge det til på nytt.",
     en: "Couldn't save that photo right now. Try adding it again.",
   },
+  "upload.analyzePhotos": { no: "Analyser bilder (AI-forslag)", en: "Analyze photos (AI suggestion)" },
+  "upload.analyzing": { no: "Analyserer …", en: "Analyzing …" },
+  "upload.analyzeSuggested": {
+    no: "Forslag lagt inn i sjekklisten — juster gjerne før du sender inn.",
+    en: "Suggestions added to the checklist — feel free to adjust before submitting.",
+  },
+  "upload.analyzeNoneFound": {
+    no: "Fant ingen nye gjenstander å foreslå i bildene.",
+    en: "Didn't find any new items to suggest in the photos.",
+  },
+  "upload.analyzeFailed": {
+    no: "Kunne ikke analysere bildene akkurat nå.",
+    en: "Couldn't analyze the photos right now.",
+  },
 
   "upload.roomTemplate": {
     no: "Sjekkliste",
