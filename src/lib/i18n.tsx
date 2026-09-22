@@ -141,14 +141,6 @@ export const dict: Dict = {
     no: "Velg rommet du står i nå, og ta noen rolige bilder med mobilen. Romlisten kan du endre på Min side før du starter, slik at navnene passer hjemmet ditt.",
     en: "Choose the room you’re in and take a steady 15-second sweep on your phone. Afterwards, you can go through the checklist in peace and quiet.",
   },
-  "upload.drop": {
-    no: "Trykk her for å velge rom før du starter den koselige videorunden på mobilen din",
-    en: "Choose your room here before starting your calm video walkthrough",
-  },
-  "upload.roomSelectorLabel": {
-    no: "Velg rommet du filmer nå",
-    en: "Choose your room here before starting your calm video walkthrough",
-  },
   "upload.selectRoom": { no: "Velg rom", en: "Select room" },
   "upload.roomHint": {
     no: "Legg til, endre navn eller fjern rom her – de vises også når du tar bilder.",
@@ -165,20 +157,7 @@ export const dict: Dict = {
   "upload.resetRooms": { no: "Tilbakestill romliste", en: "Reset room list" },
   "upload.renameRoom": { no: "Endre navn", en: "Rename" },
   "upload.removeRoom": { no: "Fjern rom", en: "Remove room" },
-  "upload.cancelRecording": { no: "Avbryt og velg nytt rom", en: "Cancel and pick another room" },
-  "upload.nextRoom": { no: "Neste rom", en: "Next room" },
-  "upload.filmingRoom": { no: "Filmer rom", en: "Filming room" },
   "upload.savedToRoom": { no: "Lagret til", en: "Saved to" },
-  "upload.videoTooLarge": {
-    no: "Opptaket var for stort og ble ikke lagret.",
-    en: "That recording was too large and wasn't saved.",
-  },
-  "upload.videoSaveFailed": {
-    no: "Kunne ikke lagre opptaket akkurat nå. Du kan filme rommet på nytt.",
-    en: "Couldn't save that recording right now. You can film the room again.",
-  },
-  "upload.zoomIn": { no: "Zoom inn", en: "Zoom in" },
-  "upload.zoomOut": { no: "Zoom ut", en: "Zoom out" },
   "upload.takePhoto": { no: "Ta bilde / velg bilder", en: "Take photo / choose photos" },
   "upload.removePhoto": { no: "Fjern bilde", en: "Remove photo" },
   "upload.photoTooLarge": {
@@ -210,39 +189,6 @@ export const dict: Dict = {
     no: "Sjekkliste",
     en: "Checklist",
   },
-  "upload.hint": {
-    no: "Romvideo + sjekkliste i rolig tempo",
-    en: "Room video + checklist, at your own pace",
-  },
-  "upload.stopRecording": {
-    no: "Stopp filming og se sjekklisten",
-    en: "Stop filming and view checklist",
-  },
-  "upload.startRecording": {
-    no: "Start å filme",
-    en: "Start filming",
-  },
-  "upload.cameraUnsupported": {
-    no: "Nettleseren støtter ikke kamerabruk ennå.",
-    en: "Looks like your browser doesn’t support camera recording just yet.",
-  },
-  "upload.cameraFailed": {
-    no: "Vi fikk ikke startet kameraet nå. Prøv én gang til.",
-    en: "We couldn’t start your camera just now — please try once more.",
-  },
-  "upload.startingCamera": {
-    no: "Gjør kameraet klart …",
-    en: "Getting your camera ready …",
-  },
-  "upload.recordingLive": {
-    no: "Filmer nå",
-    en: "Recording now",
-  },
-  "upload.skipToChecklist": {
-    no: "Hopp over filming – gå rett til sjekklisten",
-    en: "Skip filming – go straight to the checklist",
-  },
-  "upload.photos": { no: "bilder valgt", en: "items selected" },
   "upload.details": { no: "Kontaktinformasjon (valgfritt)", en: "Contact details (optional)" },
   "upload.name": { no: "Navn", en: "Name" },
   "upload.phone": { no: "Telefon", en: "Phone" },
@@ -258,12 +204,6 @@ export const dict: Dict = {
     no: "Bilbehov (+25 % stuefaktor)",
     en: "Vehicle requirement (+25% stowage factor)",
   },
-  "upload.needPhoto": {
-    no: "Velg minst én gjenstand i sjekklisten først, så er vi i gang.",
-    en: "Please tick at least one item in the checklist first, and we’ll get cracking.",
-  },
-  "upload.uploading": { no: "Starter videorunden …", en: "Starting your room recording …" },
-  "upload.analysing": { no: "Gjør klar sjekklisten …", en: "Preparing your checklist …" },
   "upload.saving": { no: "Lagrer beregningen …", en: "Saving your estimate …" },
   "upload.failed": {
     no: "Noe gikk galt. Prøv igjen.",
@@ -696,31 +636,6 @@ export const dict: Dict = {
   "mov.sent": { no: "Rapporten er sendt", en: "Report sent" },
   "mov.failed": { no: "Utsending feilet", en: "Sending failed" },
   "mov.missing": { no: "Fyll inn navn, din e-post og minst én mottaker.", en: "Fill in your name, email and at least one recipient." },
-
-  "upload.freeLeft": { no: "Gratis demo – sekunder igjen", en: "Free demo — seconds left" },
-  "upload.freeNote": {
-    no: "Gratisdemoen gir deg 20 sekunder filming totalt. Full pakke gir ubegrenset filming av alle rom.",
-    en: "The free demo gives you 20 seconds of filming in total. The full package gives unlimited filming of every room.",
-  },
-  "upload.freeUsedUp": {
-    no: "Gratisdemoen på 20 sekunder er brukt opp. Kjøp full pakke for å filme videre.",
-    en: "Your 20-second free demo is used up. Get the full package to keep filming.",
-  },
-  "upload.demoReportTitle": { no: "Slik ser rapporten ut", en: "This is what your report looks like" },
-  "upload.demoBadge": { no: "Eksempel", en: "Example" },
-  "upload.demoTotal": { no: "Totalt volum (inkl. 25 % stuingsfaktor)", en: "Total volume (incl. 25% stowage factor)" },
-  "upload.demoNote": {
-    no: "Eksempelrapport basert på en typisk 3-roms bolig. Med full pakke lager VolumCalc denne rapporten automatisk fra dine egne opptak – med PDF, delelenke og tilbudsforespørsel til flyttefirma.",
-    en: "Example report based on a typical three-room home. With the full package VolumCalc builds this report automatically from your own footage — with PDF, share link and quote requests to movers.",
-  },
-  "upload.freeOverTitle": { no: "Gratisdemoen er ferdig", en: "Your free demo has ended" },
-  "upload.freeOverBody": {
-    no: "Du har sett hvordan det virker. Med full pakke filmer du alle rom så lenge du vil, får AI-gjenkjenning av møbler, komplett rapport, PDF og delelenke.",
-    en: "You have seen how it works. With the full package you film every room for as long as you like, with AI furniture recognition, a complete report, PDF and share link.",
-  },
-  "upload.freeOverCta": { no: "Se priser og kjøp full pakke", en: "See pricing and get the full package" },
-  "upload.freeOverDismiss": { no: "Fortsett med gratis sjekkliste", en: "Continue with the free checklist" },
-  "upload.unlimitedFilming": { no: "Ubegrenset filming på din konto", en: "Unlimited filming on your account" },
 };
 
 export const LANG_LABELS: Record<Lang, string> = {

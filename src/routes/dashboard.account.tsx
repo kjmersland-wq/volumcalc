@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
-import { useCompany, useIsAdmin, useUnlimitedPhotos } from "@/hooks/useCompany";
+import { useCompany, useIsAdmin, useIsUnlimitedPlan } from "@/hooks/useCompany";
 import { supabase } from "@/integrations/supabase/client";
 import { m3, shortDate } from "@/lib/format";
 import { LANG_LABELS, SUPPORTED_LANGS } from "@/lib/i18n";
@@ -77,7 +77,7 @@ function AccountPage() {
   const queryClient = useQueryClient();
   const { data: company } = useCompany();
   const isAdmin = useIsAdmin();
-  const unlimited = useUnlimitedPhotos();
+  const unlimited = useIsUnlimitedPlan();
 
   const [form, setForm] = useState<ProfileForm | null>(null);
   const [saving, setSaving] = useState(false);
