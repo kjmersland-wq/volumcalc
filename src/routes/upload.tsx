@@ -417,9 +417,13 @@ function UploadPage() {
 
       setRecording(true);
       drawLoopRef.current = requestAnimationFrame(drawZoomedFrame);
-    } catch {
+    } catch (error) {
+      // isTypeSupported() only validates the codec string in the abstract — it
+      // doesn't guarantee MediaRecorder can actually be constructed against
+      // this specific canvas.captureStream() source, so log what really failed.
+      console.error("Could not start filming", error);
+      stopCameraTracks();
       toast.error(t("upload.cameraFailed"));
-      setRecording(false);
     } finally {
       setStartingCamera(false);
     }
