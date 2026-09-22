@@ -153,6 +153,7 @@ async function fromInvoice(stripe: Stripe, invoice: Stripe.Invoice): Promise<Pur
 }
 
 export const Route = createFileRoute("/api/public/payments/webhook")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {
