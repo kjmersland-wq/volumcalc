@@ -45,15 +45,21 @@ export const extractStructuredJsonFromImage = createServerFn({ method: "POST" })
         jsonSchema: data.json_schema,
       });
 
-      return { ok: true as const, data: result };
+      return {
+        ok: true,
+        result: (result ?? {}) as Record<string, unknown>,
+        error: null as string | null,
+        message: null as string | null,
+      };
     } catch (error) {
       const message = error instanceof Error ? error.message : "AI Gateway request failed";
       // 402/403 credit or policy blocks are terminal - surface, never retry.
       const isCredits = /\((402|403)\)/.test(message) || /credit/i.test(message);
       return {
-        ok: false as const,
-        error: isCredits ? "payment_required" : "gateway_error",
-        message,
+        ok: false,
+        result: {} as Record<string, unknown>,
+        error: (isCredits ? "payment_required" : "gateway_error") as string | null,
+        message: message as string | null,
       };
     }
   });
