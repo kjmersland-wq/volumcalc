@@ -3,6 +3,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { callAIGatewayVisionJson, GEMINI_3_8_FLASH_MODEL } from "./ai-gateway.server";
 
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
 /**
  * Generic vision -> structured JSON endpoint.
  * Sends an image URL plus a caller-supplied JSON schema to the AI Gateway
@@ -47,7 +49,7 @@ export const extractStructuredJsonFromImage = createServerFn({ method: "POST" })
 
       return {
         ok: true,
-        result: (result ?? {}) as Record<string, unknown>,
+        result: (result ?? {}) as JsonValue,
         error: null as string | null,
         message: null as string | null,
       };
@@ -57,7 +59,7 @@ export const extractStructuredJsonFromImage = createServerFn({ method: "POST" })
       const isCredits = /\((402|403)\)/.test(message) || /credit/i.test(message);
       return {
         ok: false,
-        result: {} as Record<string, unknown>,
+        result: {} as JsonValue,
         error: (isCredits ? "payment_required" : "gateway_error") as string | null,
         message: message as string | null,
       };
