@@ -580,6 +580,16 @@ function UploadPage() {
       const result = await analyzePhotos({
         data: { room, photo_urls: photos.map((photo) => photo.url) },
       });
+      if ("error" in result) {
+        // Admin/unlimited-only button — safe and actively useful right now to
+        // show the exact diagnostic message instead of a generic toast.
+        console.error("Photo analysis failed", room, result.error);
+        toast.error(result.error);
+        return;
+      }
+      // TEMPORARY diagnostic logging — remove once the low/zero-match issue is resolved.
+      console.log("[analyze] catalog offered to AI:", result.debug_catalog_keys);
+      console.log("[analyze] raw AI suggestions (pre-filter):", result.debug_raw_items);
       let appliedCount = 0;
       setQuantities((prev) => {
         const current = prev[room] ?? {};

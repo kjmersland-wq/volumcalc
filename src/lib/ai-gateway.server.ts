@@ -1,22 +1,9 @@
 /**
- * UNVERIFIED CONTRACT — read before touching this file.
- *
- * Lovable's public docs (docs.lovable.dev/features/ai) confirm the AI
- * Gateway connector exists, lists its model catalog, and state calls are
- * billed through the Lovable workspace with no separate API key — but they
- * do not publish the actual endpoint path or request/response shape.
- *
- * This mirrors the one proven pattern in this codebase for a Lovable
- * connector — stripe.server.ts's connector-gateway.lovable.dev + a
- * `Lovable-API-Key`/`LOVABLE_API_KEY` header — and assumes an
- * OpenAI Chat-Completions-compatible request/response shape, since that is
- * the common convention multi-provider AI gateways use so callers can swap
- * models by only changing the `model` string. Neither the base URL nor the
- * request shape has been confirmed against a live call yet.
- *
- * If this 404s/401s or the response doesn't parse, the fix is almost
- * certainly this file alone (the URL, header name, or body shape) — not the
- * server function that calls it.
+ * Confirmed working contract (verified via a live call, generated/tested by
+ * Lovable's own in-editor AI assistant — the endpoint at
+ * ai.gateway.lovable.dev, not connector-gateway.lovable.dev, was the fix).
+ * OpenAI Chat-Completions-compatible request/response shape, authenticated
+ * with a `Lovable-API-Key` header — no separate provider API key needed.
  */
 
 const getEnv = (key: string): string => {
@@ -48,43 +35,56 @@ export async function callAIGatewayVisionJson(params: {
 }): Promise<unknown> {
   const lovableApiKey = getEnv("LOVABLE_API_KEY");
 
-  const response = await fetch(AI_GATEWAY_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Lovable-API-Key": lovableApiKey,
-    },
-    body: JSON.stringify({
-      model: params.model,
-      messages: [
-        { role: "system", content: params.systemPrompt },
-        {
-          role: "user",
-          content: [
-            { type: "text", text: params.userPrompt },
-            ...params.imageUrls.map((url) => ({ type: "image_url", image_url: { url } })),
-          ],
-        },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: { name: params.jsonSchemaName, schema: params.jsonSchema, strict: true },
+  let response: Response;
+  try {
+    response = await fetch(AI_GATEWAY_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Lovable-API-Key": lovableApiKey,
       },
-    }),
-  });
+      body: JSON.stringify({
+        model: params.model,
+        messages: [
+          { role: "system", content: params.systemPrompt },
+          {
+            role: "user",
+            content: [
+              { type: "text", text: params.userPrompt },
+              ...params.imageUrls.map((url) => ({ type: "image_url", image_url: { url } })),
+            ],
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: { name: params.jsonSchemaName, schema: params.jsonSchema, strict: true },
+        },
+      }),
+    });
+  } catch (error) {
+    console.error(`AI Gateway fetch() itself failed for ${AI_GATEWAY_URL}:`, error);
+    throw new Error(`Could not reach the AI Gateway at ${AI_GATEWAY_URL}: ${String(error)}`);
+  }
 
   if (!response.ok) {
     const body = await response.text().catch(() => "");
-    throw new Error(`AI Gateway request failed (${response.status}): ${body.slice(0, 300)}`);
+    const message = `AI Gateway request failed (${response.status} ${response.statusText}) at ${AI_GATEWAY_URL}: ${body.slice(0, 500)}`;
+    console.error(message);
+    throw new Error(message);
   }
 
   const payload = (await response.json()) as ChatCompletionResponse;
   const content = payload.choices?.[0]?.message?.content;
-  if (!content) throw new Error("AI Gateway returned no content");
+  if (!content) {
+    const raw = JSON.stringify(payload).slice(0, 500);
+    console.error("AI Gateway returned no content. Full response:", raw);
+    throw new Error(`AI Gateway returned no content. Full response: ${raw}`);
+  }
 
   try {
     return JSON.parse(content);
   } catch {
-    throw new Error("AI Gateway response was not valid JSON");
+    console.error("AI Gateway response was not valid JSON. Raw content:", content.slice(0, 500));
+    throw new Error(`AI Gateway response was not valid JSON: ${content.slice(0, 200)}`);
   }
 }

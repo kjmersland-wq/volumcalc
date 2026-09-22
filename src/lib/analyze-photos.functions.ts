@@ -86,17 +86,43 @@ export const analyzeRoomPhotos = createServerFn({ method: "POST" })
       additionalProperties: false,
     };
 
-    const result = await callAIGatewayVisionJson({
-      model: GEMINI_3_8_FLASH_MODEL,
-      systemPrompt,
-      userPrompt,
-      imageUrls: data.photo_urls,
-      jsonSchemaName: "room_items",
-      jsonSchema,
-    });
+    // Caught here (rather than left to throw across the server-fn RPC
+    // boundary) so the exact diagnostic message — status code, response
+    // body, etc. — reaches the client unmodified instead of risking being
+    // generalized by the framework's error serialization, same reasoning as
+    // createCheckoutSession's error handling in payments.functions.ts.
+    let result: unknown;
+    try {
+      result = await callAIGatewayVisionJson({
+        model: GEMINI_3_8_FLASH_MODEL,
+        systemPrompt,
+        userPrompt,
+        imageUrls: data.photo_urls,
+        jsonSchemaName: "room_items",
+        jsonSchema,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error("analyzeRoomPhotos: AI Gateway call failed", message);
+      return { error: message };
+    }
 
     const parsed = z.object({ items: z.array(suggestedItemSchema) }).safeParse(result);
-    if (!parsed.success) throw new Error("AI response did not match the expected format");
+    if (!parsed.success) {
+      const message = `AI response did not match the expected format: ${JSON.stringify(result).slice(0, 300)}`;
+      console.error("analyzeRoomPhotos:", message);
+      return { error: message };
+    }
+
+    // TEMPORARY diagnostic logging — remove once the low/zero-match issue is resolved.
+    console.error(
+      "analyzeRoomPhotos: raw AI suggestions for room",
+      data.room,
+      "(catalog keys offered:",
+      catalogKeys,
+      ") ->",
+      JSON.stringify(parsed.data.items),
+    );
 
     // Defense in depth: even though the schema's enum already restricts this,
     // never trust model output blindly — drop anything not in this room's
@@ -106,5 +132,8 @@ export const analyzeRoomPhotos = createServerFn({ method: "POST" })
       (item) => catalogKeySet.has(item.key) && item.quantity > 0,
     );
 
-    return { suggestions };
+    // TEMPORARY: raw model output + the catalog keys it was constrained to,
+    // returned to the client so it's visible in the browser console during
+    // this investigation without needing Lovable Cloud's function logs.
+    return { suggestions, debug_raw_items: parsed.data.items, debug_catalog_keys: catalogKeys };
   });
