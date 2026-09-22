@@ -10,7 +10,14 @@ import { callAIGatewayVisionJson, GEMINI_3_8_FLASH_MODEL } from "./ai-gateway.se
  * Auth is required so the workspace's AI credits can't be spent anonymously.
  */
 const inputSchema = z.object({
-  image_url: z.string().trim().url().max(4000),
+  // Either a publicly fetchable https URL or an inline data: image URL.
+  image_url: z
+    .string()
+    .trim()
+    .max(2_000_000)
+    .refine((v) => /^https:\/\//i.test(v) || /^data:image\/(jpeg|png|webp|gif);base64,/i.test(v), {
+      message: "image_url must be an https URL or a base64 data: image URL",
+    }),
   prompt: z.string().trim().min(1).max(4000).optional(),
   system_prompt: z.string().trim().min(1).max(4000).optional(),
   schema_name: z
