@@ -122,9 +122,9 @@ export interface SmtpMessage {
 export async function sendMailViaSmtp(rawMessage: SmtpMessage): Promise<void> {
   const message: SmtpMessage = {
     from: sanitizeHeaderValue(rawMessage.from),
-    fromName: rawMessage.fromName !== undefined ? sanitizeHeaderValue(rawMessage.fromName) : undefined,
+    ...(rawMessage.fromName !== undefined ? { fromName: sanitizeHeaderValue(rawMessage.fromName) } : {}),
     to: sanitizeHeaderValue(rawMessage.to),
-    replyTo: rawMessage.replyTo !== undefined ? sanitizeHeaderValue(rawMessage.replyTo) : undefined,
+    ...(rawMessage.replyTo !== undefined ? { replyTo: sanitizeHeaderValue(rawMessage.replyTo) } : {}),
     subject: sanitizeHeaderValue(rawMessage.subject),
     text: rawMessage.text,
   };
