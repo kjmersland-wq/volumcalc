@@ -16,8 +16,21 @@ const manualItemSchema = z.object({
   security_label: z.literal(USER_VERIFIED_SECURITY_LABEL),
 });
 
+// Kept comfortably under Cloudflare Workers' request body limit even with a
+// handful of rooms filmed (base64 inflates size by ~33% over the raw clip).
+const roomVideoSchema = z.object({
+  room: z.string().trim().min(1).max(50),
+  mime_type: z.string().trim().min(1).max(80).default("video/webm"),
+  data: z
+    .string()
+    .min(1)
+    .max(6_000_000)
+    .regex(/^[A-Za-z0-9+/]+=*$/, "Invalid video data"),
+});
+
 const createSchema = z.object({
   manual_items: z.array(manualItemSchema).max(300).default([]),
+  room_videos: z.array(roomVideoSchema).max(20).default([]),
   customer_name: z.string().trim().max(120).optional(),
   customer_phone: z.string().trim().max(40).optional(),
   move_date: z
@@ -126,9 +139,35 @@ export const createEstimate = createServerFn({ method: "POST" })
       if (itemsError) throw new Error("Could not save the estimate items");
     }
 
+    // Room clips go into the existing 'estimate-photos' bucket, under
+    // <estimateId>/... — the path shape the storage RLS policies already
+    // expect (they match on the first path segment). One long-lived signed
+    // URL per clip is stored so a shared report link can play it back
+    // without requiring the viewer to be authenticated.
+    const photoUrls: string[] = [];
+    for (const video of data.room_videos) {
+      try {
+        const bytes = Uint8Array.from(atob(video.data), (c) => c.charCodeAt(0));
+        const extension = video.mime_type.includes("mp4") ? "mp4" : "webm";
+        const safeRoom = video.room.replace(/[^a-zA-Z0-9-_]+/g, "-").slice(0, 60) || "room";
+        const path = `${estimate.id}/${safeRoom}-${Date.now()}.${extension}`;
+        const { error: uploadError } = await supabaseAdmin.storage
+          .from("estimate-photos")
+          .upload(path, bytes, { contentType: video.mime_type, upsert: true });
+        if (uploadError) throw uploadError;
+
+        const { data: signed } = await supabaseAdmin.storage
+          .from("estimate-photos")
+          .createSignedUrl(path, 60 * 60 * 24 * 365);
+        if (signed?.signedUrl) photoUrls.push(signed.signedUrl);
+      } catch (error) {
+        console.error("Room video upload failed", video.room, error);
+      }
+    }
+
     await supabaseAdmin
       .from("estimates")
-      .update({ photo_urls: [], total_volume_m3: result.total })
+      .update({ photo_urls: photoUrls, total_volume_m3: result.total })
       .eq("id", estimate.id);
 
     return { id: estimate.id as string, share_token: estimate.share_token as string };

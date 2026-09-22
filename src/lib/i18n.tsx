@@ -168,6 +168,11 @@ export const dict: Dict = {
   "upload.cancelRecording": { no: "Avbryt og velg nytt rom", en: "Cancel and pick another room" },
   "upload.nextRoom": { no: "Neste rom", en: "Next room" },
   "upload.filmingRoom": { no: "Filmer rom", en: "Filming room" },
+  "upload.savedToRoom": { no: "Lagret til", en: "Saved to" },
+  "upload.videoTooLarge": {
+    no: "Én opptak var for stort og ble ikke lagret. De andre ble sendt inn som vanlig.",
+    en: "One recording was too large and wasn't saved. The rest were submitted as usual.",
+  },
 
   "upload.roomTemplate": {
     no: "Sjekkliste",

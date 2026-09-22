@@ -98,6 +98,28 @@ function firstRoomName(roomNames: string[]) {
   return roomNames[0] ?? "Living room";
 }
 
+function formatElapsed(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+// Keeps each clip's base64 payload under the server's cap (see estimates.functions.ts).
+const MAX_VIDEO_BASE64_CHARS = 6_000_000;
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      const commaIndex = result.indexOf(",");
+      resolve(commaIndex >= 0 ? result.slice(commaIndex + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("Could not read the recording"));
+    reader.readAsDataURL(blob);
+  });
+}
+
 function UploadPage() {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
@@ -108,6 +130,8 @@ function UploadPage() {
   const brandingFn = useServerFn(getCompanyByUploadToken);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<BlobPart[]>([]);
 
   const { data: branding } = useQuery({
     queryKey: ["upload-branding", companyToken],
@@ -130,6 +154,8 @@ function UploadPage() {
   const [selectedRoom, setSelectedRoom] = useState<string>(() => firstRoomName(defaultRoomNames("en")));
   const [recording, setRecording] = useState(false);
   const [startingCamera, setStartingCamera] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [roomVideos, setRoomVideos] = useState<Record<string, { blob: Blob; seconds: number }>>({});
   const [editingRooms, setEditingRooms] = useState(false);
   const [newRoom, setNewRoom] = useState("");
   const [stage, setStage] = useState<Stage>("idle");
@@ -150,7 +176,7 @@ function UploadPage() {
       setSecondsLeft((current) => {
         if (current <= 1) {
           window.clearInterval(timer);
-          stopVideoCapture();
+          finishRecording();
           setShowUpsell(true);
           return 0;
         }
@@ -160,6 +186,16 @@ function UploadPage() {
     return () => window.clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recording, freePlan]);
+
+  useEffect(() => {
+    if (!recording) return;
+    setElapsedSeconds(0);
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      setElapsedSeconds(Math.floor((Date.now() - startedAt) / 1000));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [recording]);
 
   useEffect(() => {
     try {
@@ -232,6 +268,9 @@ function UploadPage() {
 
   useEffect(() => {
     return () => {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
+      }
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
@@ -264,6 +303,19 @@ function UploadPage() {
         audio: false,
       });
       streamRef.current = stream;
+
+      recordedChunksRef.current = [];
+      const mimeType = typeof MediaRecorder.isTypeSupported === "function" &&
+        MediaRecorder.isTypeSupported("video/webm")
+        ? "video/webm"
+        : undefined;
+      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) recordedChunksRef.current.push(event.data);
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+
       setRecording(true);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -277,13 +329,48 @@ function UploadPage() {
     }
   }
 
-  function stopVideoCapture() {
+  function stopCameraTracks() {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     if (videoRef.current) videoRef.current.srcObject = null;
     setRecording(false);
+  }
+
+  /** Stops the recorder, saves the clip against the room being filmed, and confirms it. */
+  function finishRecording() {
+    const recorder = mediaRecorderRef.current;
+    const room = selectedRoom;
+    const seconds = elapsedSeconds;
+    mediaRecorderRef.current = null;
+    if (!recorder || recorder.state === "inactive") {
+      stopCameraTracks();
+      return;
+    }
+    recorder.onstop = () => {
+      const blob = new Blob(recordedChunksRef.current, { type: recorder.mimeType || "video/webm" });
+      recordedChunksRef.current = [];
+      if (blob.size > 0) {
+        setRoomVideos((prev) => ({ ...prev, [room]: { blob, seconds } }));
+        toast.success(`${t("upload.savedToRoom")} ${room}`);
+      }
+      stopCameraTracks();
+    };
+    recorder.stop();
+  }
+
+  /** Discards the current take (no save) and stops the camera. */
+  function cancelRecording() {
+    const recorder = mediaRecorderRef.current;
+    mediaRecorderRef.current = null;
+    if (recorder && recorder.state !== "inactive") {
+      recorder.ondataavailable = null;
+      recorder.onstop = null;
+      recorder.stop();
+    }
+    recordedChunksRef.current = [];
+    stopCameraTracks();
   }
 
   function changeQuantity(itemKey: string, delta: number) {
@@ -333,9 +420,23 @@ function UploadPage() {
   async function handleSubmit() {
     try {
       setStage("saving");
+
+      const roomVideoEntries = await Promise.all(
+        Object.entries(roomVideos).map(async ([room, video]) => ({
+          room,
+          mime_type: video.blob.type || "video/webm",
+          data: await blobToBase64(video.blob),
+        })),
+      );
+      const room_videos = roomVideoEntries.filter((v) => v.data.length <= MAX_VIDEO_BASE64_CHARS);
+      if (room_videos.length < roomVideoEntries.length) {
+        toast.error(t("upload.videoTooLarge"));
+      }
+
       const created = await submitEstimate({
         data: {
           manual_items: manualItems,
+          room_videos,
           ...(form.name.trim() ? { customer_name: form.name.trim() } : {}),
           ...(form.phone.trim() ? { customer_phone: form.phone.trim() } : {}),
           ...(form.date ? { move_date: form.date } : {}),
@@ -480,8 +581,11 @@ function UploadPage() {
                   muted
                   className="aspect-video w-full object-cover"
                 />
-                <span className="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
-                  <span className="size-2 animate-pulse rounded-full bg-red-500" />
+                <span className="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-black/70 px-3 py-1 text-xs font-bold text-white">
+                  <span className="size-2 animate-pulse rounded-full bg-red-500" aria-hidden="true" />
+                  🔴 {t("upload.recordingLive")} · {formatElapsed(elapsedSeconds)}
+                </span>
+                <span className="absolute left-3 top-12 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
                   {t("upload.filmingRoom")}: {selectedRoom}
                 </span>
                 {freePlan && (
@@ -498,7 +602,7 @@ function UploadPage() {
               <Button
                 size="lg"
                 className="h-14 w-full bg-red-600 text-base font-bold text-white hover:bg-red-700"
-                onClick={stopVideoCapture}
+                onClick={finishRecording}
               >
                 {t("upload.stopRecording")}
               </Button>
@@ -506,7 +610,7 @@ function UploadPage() {
                 <Button type="button" variant="outline" onClick={goToNextRoom}>
                   {t("upload.nextRoom")}
                 </Button>
-                <Button type="button" variant="ghost" onClick={stopVideoCapture}>
+                <Button type="button" variant="ghost" onClick={cancelRecording}>
                   {t("upload.cancelRecording")}
                 </Button>
               </div>
