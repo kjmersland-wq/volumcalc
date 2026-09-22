@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 import { USER_VERIFIED_SECURITY_LABEL } from "./volume-database";
+
+type EstimateItemUpdate = Database["public"]["Tables"]["estimate_items"]["Update"];
 
 const manualItemSchema = z.object({
   room: z.string().trim().min(1).max(50),
@@ -382,7 +385,12 @@ export const updateSharedEstimateItem = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!item || item.estimate_id !== data.id) throw new Error("Item not found");
 
-    const patch: Record<string, unknown> = { ...data.patch };
+    const patch: EstimateItemUpdate = {};
+    if (data.patch.quantity !== undefined) patch.quantity = data.patch.quantity;
+    if (data.patch.length_cm !== undefined) patch.length_cm = data.patch.length_cm;
+    if (data.patch.width_cm !== undefined) patch.width_cm = data.patch.width_cm;
+    if (data.patch.height_cm !== undefined) patch.height_cm = data.patch.height_cm;
+    if (data.patch.tags !== undefined) patch.tags = data.patch.tags;
     if (
       data.patch.length_cm !== undefined ||
       data.patch.width_cm !== undefined ||
