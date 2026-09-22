@@ -203,6 +203,8 @@ export const dict: Dict = {
     no: "Kunne ikke analysere bildene akkurat nå.",
     en: "Couldn't analyze the photos right now.",
   },
+  "upload.roomSpecificItems": { no: "Vanlig for dette rommet", en: "Common for this room" },
+  "upload.crossRoomItems": { no: "Andre vanlige gjenstander", en: "Other common items" },
 
   "upload.roomTemplate": {
     no: "Sjekkliste",

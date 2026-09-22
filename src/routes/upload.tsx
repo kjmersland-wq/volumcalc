@@ -16,6 +16,9 @@ import { getCompanyByUploadToken } from "@/lib/admin.functions";
 import {
   USER_VERIFIED_SECURITY_LABEL,
   VOLUME_DATABASE,
+  CROSS_ROOM_ITEMS,
+  catalogForRoom,
+  type VolumeDatabaseItem,
 } from "@/lib/volume-database";
 import { recommendedVolume } from "@/lib/volume";
 import { useAuth } from "@/hooks/useAuth";
@@ -75,7 +78,7 @@ function createInitialQuantities(roomNames: string[]): QuantityByRoom {
   return roomNames.reduce(
     (acc, room) => ({
       ...acc,
-      [room]: VOLUME_DATABASE[roomTemplateForName(room)].reduce(
+      [room]: catalogForRoom(roomTemplateForName(room)).reduce(
         (items, item) => ({ ...items, [item.key]: 0 }),
         {} as Record<string, number>,
       ),
@@ -87,7 +90,7 @@ function createInitialQuantities(roomNames: string[]): QuantityByRoom {
 function syncRoomQuantities(prev: QuantityByRoom, roomNames: string[]): QuantityByRoom {
   return roomNames.reduce((next, room) => {
     const existing = prev[room] ?? {};
-    next[room] = VOLUME_DATABASE[roomTemplateForName(room)].reduce(
+    next[room] = catalogForRoom(roomTemplateForName(room)).reduce(
       (items, item) => ({ ...items, [item.key]: existing[item.key] ?? 0 }),
       {} as Record<string, number>,
     );
@@ -625,10 +628,49 @@ function UploadPage() {
     });
   }
 
+  function renderChecklistItem(item: VolumeDatabaseItem) {
+    const qty = quantities[selectedRoom]?.[item.key] ?? 0;
+    return (
+      <div
+        key={item.key}
+        className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
+      >
+        <div>
+          <p className="font-medium">{lang === "no" ? item.name_no : item.name}</p>
+          <p className="text-sm text-muted-foreground">
+            {item.length_cm}×{item.width_cm}×{item.height_cm} cm · {item.volume_m3.toFixed(2)} m³
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => changeQuantity(item.key, -1)}
+            disabled={qty <= 0}
+            aria-label={`Decrease quantity ${lang === "no" ? item.name_no : item.name}`}
+          >
+            <Minus className="size-4" />
+          </Button>
+          <span className="inline-flex min-w-10 justify-center text-lg font-semibold">{qty}</span>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => changeQuantity(item.key, 1)}
+            aria-label={`Increase quantity ${lang === "no" ? item.name_no : item.name}`}
+          >
+            <Plus className="size-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const manualItems = useMemo(
     () =>
       roomNames.flatMap((room) =>
-        VOLUME_DATABASE[roomTemplateForName(room)]
+        catalogForRoom(roomTemplateForName(room))
           .map((item) => ({
             room,
             name: item.name,
@@ -1024,48 +1066,22 @@ function UploadPage() {
                 </div>
               </div>
 
-              <div className="mt-6 space-y-3">
-                {VOLUME_DATABASE[selectedTemplateRoom].map((item) => {
-                  const qty = quantities[selectedRoom]?.[item.key] ?? 0;
-                  return (
-                    <div
-                      key={item.key}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
-                    >
-                      <div>
-                        <p className="font-medium">{lang === "no" ? item.name_no : item.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {item.length_cm}×{item.width_cm}×{item.height_cm} cm ·{" "}
-                          {item.volume_m3.toFixed(2)} m³
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => changeQuantity(item.key, -1)}
-                          disabled={qty <= 0}
-                          aria-label={`Decrease quantity ${lang === "no" ? item.name_no : item.name}`}
-                        >
-                          <Minus className="size-4" />
-                        </Button>
-                        <span className="inline-flex min-w-10 justify-center text-lg font-semibold">
-                          {qty}
-                        </span>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => changeQuantity(item.key, 1)}
-                          aria-label={`Increase quantity ${lang === "no" ? item.name_no : item.name}`}
-                        >
-                          <Plus className="size-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="mt-6">
+                <h2 className="text-sm font-semibold text-muted-foreground">
+                  {t("upload.roomSpecificItems")}
+                </h2>
+                <div className="mt-3 space-y-3">
+                  {VOLUME_DATABASE[selectedTemplateRoom].map(renderChecklistItem)}
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <h2 className="text-sm font-semibold text-muted-foreground">
+                  {t("upload.crossRoomItems")}
+                </h2>
+                <div className="mt-3 space-y-3">
+                  {CROSS_ROOM_ITEMS.map(renderChecklistItem)}
+                </div>
               </div>
 
               <div className="mt-6 rounded-xl border border-border bg-muted/30 p-4">

@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { VOLUME_DATABASE } from "./volume-database";
+import { catalogForRoom } from "./volume-database";
 import { roomTemplateForName } from "./rooms";
 import { callAIGatewayVisionJson, GEMINI_3_8_FLASH_MODEL } from "./ai-gateway.server";
 
@@ -54,7 +54,7 @@ export const analyzeRoomPhotos = createServerFn({ method: "POST" })
     await assertUnlimitedOrAdmin(context as any);
 
     const template = roomTemplateForName(data.room);
-    const catalog = VOLUME_DATABASE[template];
+    const catalog = catalogForRoom(template);
     const catalogKeys = catalog.map((item) => item.key);
 
     const systemPrompt =

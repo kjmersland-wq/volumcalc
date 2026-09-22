@@ -322,3 +322,141 @@ export const VOLUME_DATABASE: Record<VolumeRoom, VolumeDatabaseItem[]> = {
     },
   ],
 };
+
+/**
+ * Common items that don't belong to one specific room (electronics,
+ * instruments, sport/hobby gear) — offered alongside every room's own
+ * catalog via catalogForRoom(), not instead of it. Kept as a separate list
+ * (rather than duplicated into each room) so it's a single place to extend.
+ */
+export const CROSS_ROOM_ITEMS: VolumeDatabaseItem[] = [
+  // Electronics
+  {
+    key: "desktop-pc-tower",
+    name: "Desktop PC tower",
+    name_no: "PC-kabinett (tårn)",
+    category: "electronics",
+    length_cm: 45,
+    width_cm: 20,
+    height_cm: 45,
+    volume_m3: 0.04,
+  },
+  {
+    key: "computer-monitor",
+    name: "Computer monitor",
+    name_no: "Dataskjerm",
+    category: "electronics",
+    length_cm: 60,
+    width_cm: 20,
+    height_cm: 40,
+    volume_m3: 0.05,
+  },
+  {
+    key: "home-printer",
+    name: "Home printer",
+    name_no: "Hjemmeskriver",
+    category: "electronics",
+    length_cm: 45,
+    width_cm: 35,
+    height_cm: 20,
+    volume_m3: 0.03,
+  },
+  {
+    key: "floor-speaker",
+    name: "Floor-standing speaker",
+    name_no: "Gulvhøyttaler",
+    category: "electronics",
+    length_cm: 25,
+    width_cm: 30,
+    height_cm: 90,
+    volume_m3: 0.07,
+  },
+  // Musical instruments
+  {
+    key: "musical-instrument-case",
+    name: "Guitar / instrument case",
+    name_no: "Gitar-/instrumentkoffert",
+    category: "instrument",
+    length_cm: 104,
+    width_cm: 35,
+    height_cm: 12,
+    volume_m3: 0.04,
+  },
+  {
+    key: "keyboard-piano",
+    name: "Digital keyboard / piano",
+    name_no: "Keyboard / digitalt piano",
+    category: "instrument",
+    length_cm: 130,
+    width_cm: 35,
+    height_cm: 15,
+    volume_m3: 0.07,
+  },
+  {
+    key: "guitar-amplifier",
+    name: "Guitar amplifier",
+    name_no: "Gitarforsterker",
+    category: "instrument",
+    length_cm: 50,
+    width_cm: 25,
+    height_cm: 45,
+    volume_m3: 0.06,
+  },
+  {
+    key: "drum-kit-boxed",
+    name: "Drum kit (packed)",
+    name_no: "Trommesett (pakket)",
+    category: "instrument",
+    length_cm: 100,
+    width_cm: 100,
+    height_cm: 60,
+    volume_m3: 0.6,
+  },
+  // Sport / hobby
+  {
+    key: "bicycle",
+    name: "Bicycle",
+    name_no: "Sykkel",
+    category: "sport_hobby",
+    length_cm: 170,
+    width_cm: 40,
+    height_cm: 100,
+    volume_m3: 0.68,
+  },
+  {
+    key: "ski-set-bag",
+    name: "Skis + poles (bag)",
+    name_no: "Ski + staver (bag)",
+    category: "sport_hobby",
+    length_cm: 180,
+    width_cm: 25,
+    height_cm: 15,
+    volume_m3: 0.07,
+  },
+  {
+    key: "golf-bag",
+    name: "Golf bag with clubs",
+    name_no: "Golfbag med køller",
+    category: "sport_hobby",
+    length_cm: 130,
+    width_cm: 35,
+    height_cm: 35,
+    volume_m3: 0.16,
+  },
+  {
+    key: "exercise-bike",
+    name: "Exercise bike",
+    name_no: "Ergometersykkel",
+    category: "sport_hobby",
+    length_cm: 100,
+    width_cm: 55,
+    height_cm: 120,
+    volume_m3: 0.66,
+  },
+];
+
+/** This room's own catalog plus the shared cross-room items — the full set
+ * offered to the checklist UI and to AI photo analysis for a given room. */
+export function catalogForRoom(room: VolumeRoom): VolumeDatabaseItem[] {
+  return [...VOLUME_DATABASE[room], ...CROSS_ROOM_ITEMS];
+}
