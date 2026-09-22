@@ -24,9 +24,9 @@ export const Route = createFileRoute("/dashboard/")({
   head: () => ({
     meta: [
       { title: "Estimates dashboard — VolumCalc" },
-      { name: "description", content: "Review and manage room video + checklist moving volume estimates." },
+      { name: "description", content: "Review and manage photo + checklist moving volume estimates." },
       { property: "og:title", content: "Estimates dashboard — VolumCalc" },
-      { property: "og:description", content: "Review and manage room video + checklist moving volume estimates." },
+      { property: "og:description", content: "Review and manage photo + checklist moving volume estimates." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "robots", content: "noindex" },

@@ -15,9 +15,9 @@ export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — VolumCalc" },
-      { name: "description", content: "Review incoming room video/checklist submissions and volume estimates." },
+      { name: "description", content: "Review incoming photo/checklist submissions and volume estimates." },
       { property: "og:title", content: "Dashboard — VolumCalc" },
-      { property: "og:description", content: "Review incoming room video/checklist submissions and volume estimates." },
+      { property: "og:description", content: "Review incoming photo/checklist submissions and volume estimates." },
       { name: "robots", content: "noindex" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

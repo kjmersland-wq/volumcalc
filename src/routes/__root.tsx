@@ -87,11 +87,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { title: "VolumCalc — Brilliant moving volume estimates from a quick room video" },
+        { title: "VolumCalc — Brilliant moving volume estimates from your own photos" },
         {
           name: "description",
           content:
-            "Room-by-room cubic metre estimates from a quick room video and stress-free checklist flow.",
+            "Room-by-room cubic metre estimates from your own photos and a stress-free checklist flow.",
         },
         { name: "author", content: "VolumCalc" },
         {
@@ -100,12 +100,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         },
         {
           property: "og:title",
-          content: "VolumCalc — Brilliant moving volume estimates from a quick room video",
+          content: "VolumCalc — Brilliant moving volume estimates from your own photos",
         },
         {
           property: "og:description",
           content:
-            "Room-by-room cubic metre estimates from a quick room video and stress-free checklist flow.",
+            "Room-by-room cubic metre estimates from your own photos and a stress-free checklist flow.",
         },
         { property: "og:type", content: "website" },
         { property: "og:image", content: socialImage },
@@ -115,7 +115,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           property: "og:image:alt",
           content: norwegian
             ? "VolumCalc – romvis volumberegning fra bilder"
-            : "VolumCalc — room-by-room volume estimates from room video",
+            : "VolumCalc — room-by-room volume estimates from your own photos",
         },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:image", content: socialImage },

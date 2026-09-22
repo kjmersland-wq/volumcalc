@@ -29,7 +29,7 @@ export const Route = createFileRoute("/pricing")({
       {
         property: "og:description",
         content:
-          "Simple monthly plans for video-based cubic volume estimates and checklist workflows.",
+          "Simple monthly plans for photo-based cubic volume estimates and checklist workflows.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -80,7 +80,7 @@ function Pricing() {
       features:
         lang === "no"
           ? ["Bilder + sjekkliste", "Romvis sortering", "PDF-rapport"]
-          : ["Room video + checklist", "Room grouping", "PDF report"],
+          : ["Photos + checklist", "Room grouping", "PDF report"],
       priceId: "volumcalc_single_estimate_nok",
     },
     {
@@ -90,7 +90,7 @@ function Pricing() {
       features:
         lang === "no"
           ? ["3 komplette beregninger", "Bilder + sjekkliste", "PDF-rapporter"]
-          : ["3 complete estimates", "Room video + checklist", "PDF reports"],
+          : ["3 complete estimates", "Photos + checklist", "PDF reports"],
       priceId: "volumcalc_three_estimates_nok",
     },
   ];

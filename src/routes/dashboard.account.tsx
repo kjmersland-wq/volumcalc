@@ -400,7 +400,7 @@ function AccountPage() {
                 <FileText className="size-4" /> Report form access
               </h2>
               <p className="text-sm text-muted-foreground">
-                Share this link to let customers film their rooms and send you a report.
+                Share this link to let customers photograph their rooms and send you a report.
               </p>
             </div>
             <div className="flex gap-2">

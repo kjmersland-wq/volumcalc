@@ -5,7 +5,7 @@ export const Route = createFileRoute("/")({
   staticData: { sitemap: true },
   head: () => ({
     meta: [
-      { title: "VolumCalc — Brilliant moving volume estimates from a quick room video" },
+      { title: "VolumCalc — Brilliant moving volume estimates from your own photos" },
       {
         name: "description",
         content:
@@ -13,12 +13,12 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content: "VolumCalc — Brilliant moving volume estimates from a quick room video",
+        content: "VolumCalc — Brilliant moving volume estimates from your own photos",
       },
       {
         property: "og:description",
         content:
-          "A warm, straightforward room-video and checklist flow for beautifully clear moving volume estimates.",
+          "A warm, straightforward photo-and-checklist flow for beautifully clear moving volume estimates.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

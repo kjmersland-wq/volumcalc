@@ -50,7 +50,7 @@ export const dict: Dict = {
   },
   "contact.aside": {
     no: "Er du flyttebyrå og vil teste VolumCalc med egne bilder? Nevn det i meldingen, så setter vi opp en gratis prøvekonto.",
-    en: "Running a moving company and want to test VolumCalc with your own video + checklist flow? Mention it and we will set up a free trial account.",
+    en: "Running a moving company and want to try VolumCalc with your own photos and checklist flow? Just mention it, and we'll set you up with a free trial account.",
   },
   "contact.homeTitle": { no: "Har du spørsmål?", en: "Got a question?" },
   "contact.homeSub": {
@@ -66,13 +66,13 @@ export const dict: Dict = {
 
   "hero.badge": {
     no: "Raske volumberegninger fra bilder",
-    en: "Instant volume estimates from room video",
+    en: "Instant volume estimates from your own photos",
   },
   "hero.title1": {
     no: "Så fint! Vi fikser flyttevolumet ditt",
     en: "Brilliant! Let’s sort your moving volume in a jiffy —",
   },
-  "hero.title2": { no: "med noen rolige bilder av rommet", en: "from a quick room video." },
+  "hero.title2": { no: "med noen rolige bilder av rommet", en: "from a few relaxed photos of the room." },
   "hero.sub": {
     no: "VolumCalc hjelper deg med å ta noen rolige bilder rundt i rommene, og gjør dem om til en tydelig, rominndelt volumberegning. Perfekt når du vil planlegge flyttingen i fred og ro.",
     en: "VolumCalc helps you turn a quick wander through your rooms into a beautifully clear, room-by-room volume estimate. Perfectly sorted for your moving plans.",
@@ -83,16 +83,16 @@ export const dict: Dict = {
   "hero.stat2": { no: "gjenstander gjenkjent", en: "standard items available" },
   "hero.stat3": { no: "færre tvister", en: "fewer disputes" },
 
-  "how.title": { no: "Fra bilder til tilbud i tre steg", en: "From video to quote in three steps" },
-  "how.1t": { no: "Ta bilder av rommet i ditt tempo", en: "Simply record a quick video" },
+  "how.title": { no: "Fra bilder til tilbud i tre steg", en: "From photos to quote in three simple steps" },
+  "how.1t": { no: "Ta bilder av rommet i ditt tempo", en: "Snap a few photos, at your own pace" },
   "how.1d": {
     no: "Åpne lenken på mobilen og ta noen rolige bilder av rommet. Du har god tid, og trenger verken app eller innlogging.",
-    en: "Simply record a quick video — Just open the link on your mobile and take a steady, relaxed stroll through the room. Take all the time you need, with no fussy apps or logins required.",
+    en: "Open the link on your phone and take a few relaxed photos around the room. Take all the time you need — no app, no login required.",
   },
   "how.2t": { no: "Rolig sjekkliste etterpå", en: "Stress-free checklist" },
   "how.2d": {
     no: "Når du er ferdig med bildene, krysser du av gjenstandene i en tilpasset sjekkliste i fred og ro. Enkelt og trygt, hver gang.",
-    en: "Once you’ve finished filming, simply tick off your items from a tailored checklist in total peace and quiet. Spot on every time.",
+    en: "Once you’ve taken your photos, simply tick off your items from a tailored checklist in total peace and quiet. Spot on every time.",
   },
   "how.3t": { no: "Du sender tilbud", en: "You send the quote" },
   "how.3d": {
@@ -130,21 +130,21 @@ export const dict: Dict = {
 
   "upload.title": {
     no: "Så gøy at du er i gang! La oss ta bilder av flyttelasset ditt sammen",
-    en: "Lovely — let’s record your inventory together",
+    en: "Lovely — let’s photograph your inventory together",
   },
   "upload.sub": {
     no: "Her tar vi det helt uten stress. Du tar bilder av hvert rom i eget tempo, og så klikker du enkelt av gjenstandene dine i fred og ro etterpå.",
-    en: "No rush at all — just film each room at your own pace, then tick through your items calmly afterwards.",
+    en: "No rush at all — just photograph each room at your own pace, then tick through your items calmly afterwards.",
   },
   "upload.guideTitle": { no: "Slik gjør vi det sammen", en: "How it works" },
   "upload.guide": {
     no: "Velg rommet du står i nå, og ta noen rolige bilder med mobilen. Romlisten kan du endre på Min side før du starter, slik at navnene passer hjemmet ditt.",
-    en: "Choose the room you’re in and take a steady 15-second sweep on your phone. Afterwards, you can go through the checklist in peace and quiet.",
+    en: "Choose the room you’re in and take a few relaxed photos on your phone. Afterwards, you can go through the checklist in peace and quiet.",
   },
   "upload.selectRoom": { no: "Velg rom", en: "Select room" },
   "upload.roomHint": {
     no: "Legg til, endre navn eller fjern rom her – de vises også når du tar bilder.",
-    en: "Add, rename or remove rooms here — they also show while you film.",
+    en: "Add, rename or remove rooms here — they also show while you're taking photos.",
   },
   "upload.addRoom": { no: "Legg til rom", en: "Add room" },
   "upload.addRoomPh": { no: "F.eks. Loft, Bod, Kjellerstue", en: "E.g. Attic, Storage, Basement" },
@@ -223,14 +223,6 @@ export const dict: Dict = {
     en: "directly for a quote.",
   },
   "upload.companyQuotaExceededFallbackName": { no: "bedriften", en: "the company" },
-  "upload.aiCredits": {
-    no: "Video- og sjekklisteflyten er midlertidig utilgjengelig. Prøv gjerne igjen om litt.",
-    en: "The video + checklist flow is temporarily unavailable. Please try again shortly.",
-  },
-  "upload.aiBusy": {
-    no: "AI-tjenesten er travel akkurat nå. Prøv igjen om litt.",
-    en: "The service is busy right now. Please try again shortly.",
-  },
 
   "res.title": { no: "Volumberegning", en: "Volume estimate" },
   "res.total": { no: "Totalt volum", en: "Total volume" },
@@ -253,7 +245,7 @@ export const dict: Dict = {
   "res.estimated": { no: "Estimert pris", en: "Estimated price" },
   "res.disclaimer": {
     no: "Estimatet er basert på bildene og er veiledende frem til flyttebyrået har godkjent det.",
-    en: "This estimate is based on room video and a user-verified checklist, and is indicative until the moving company approves it.",
+    en: "This estimate is based on your photos and a user-verified checklist, and is indicative until the moving company approves it.",
   },
   "share.title": { no: "Del beregningen", en: "Share this estimate" },
   "share.sub": {
@@ -311,7 +303,6 @@ export const dict: Dict = {
   "dash.pending": { no: "Til gjennomgang", en: "Pending review" },
   "dash.saveItem": { no: "Lagre", en: "Save" },
   "dash.deleteItem": { no: "Slett", en: "Delete" },
-  "dash.editing": { no: "Rediger AI-resultatet", en: "Edit the checklist result" },
 
   "set.title": { no: "Firmaprofil", en: "Company profile" },
   "set.name": { no: "Firmanavn", en: "Company name" },
@@ -324,8 +315,8 @@ export const dict: Dict = {
   "set.saved": { no: "Innstillinger lagret", en: "Settings saved" },
   "set.rooms": { no: "Mine rom", en: "My rooms" },
   "set.roomsHelp": {
-    no: "Skriv ett rom per linje. Disse vises i kameravalget før filming.",
-    en: "Write one room per line. These appear in the camera selector before recording.",
+    no: "Skriv ett rom per linje. Disse vises i romvalget når bildene tas.",
+    en: "Write one room per line. These appear in the room selector while photos are being taken.",
   },
 
   "price.title": {

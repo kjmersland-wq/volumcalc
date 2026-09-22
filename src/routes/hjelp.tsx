@@ -141,26 +141,26 @@ const content: Record<
   en: {
     title: "Help and frequently asked questions",
     intro:
-      "Everything you need to get started with VolumCalc — from a quick room video and a calm checklist to a polished report, packing, storage and sharing.",
+      "Everything you need to get started with VolumCalc — from a few quick photos and a calm checklist to a polished report, packing, storage and sharing.",
     ctaTitle: "Didn't find your answer?",
     ctaText: "Send us a few words and we usually reply within one business day.",
     cta: "Start a free estimate",
     contact: "Contact us",
     groups: [
       {
-        heading: "Recording your room video",
+        heading: "Photographing your room",
         items: [
           {
-            q: "How long should each room video be?",
-            a: "A gentle 15-second sweep per room is usually spot on, so the main furniture is clearly visible. No need for close-ups of every little thing, as you’ll confirm items in the checklist afterwards.",
+            q: "How many photos should I take per room?",
+            a: "Take 1–3 photos per room: one overview shot of the whole room, plus 1–2 close-ups of the largest furniture. You don't need to photograph every last item. Maximum 20 photos per estimate.",
           },
           {
             q: "What gives the best result?",
-            a: "Good lighting, tidy surfaces, and a smooth pan from the doorway so the full room is in view. Keep your phone steady and take your time.",
+            a: "Good lighting, tidy surfaces, and photos taken from the doorway so the whole room is in view. Shoot in landscape if you can.",
           },
           {
-            q: "Do I need to record inside cupboards and drawers?",
-            a: "No, not at all. Cupboard contents are normally counted as boxes, so you can simply confirm quantities in the checklist after filming.",
+            q: "Do I need to photograph inside cupboards and drawers?",
+            a: "No. Cupboard and drawer contents are normally counted as moving boxes — just note the number of boxes in the report instead.",
           },
         ],
       },
@@ -168,8 +168,8 @@ const content: Record<
         heading: "Rooms and editing",
         items: [
           {
-            q: "How are items assigned to rooms?",
-            a: "You choose the room before filming, then confirm items in a checklist tailored to that exact room.",
+            q: "How are photos sorted into rooms?",
+            a: "The AI automatically groups items into rooms like living room, kitchen, bedroom, bathroom, hallway, office, garage and other.",
           },
           {
             q: "Can I rename rooms and move items?",
@@ -249,8 +249,8 @@ const content: Record<
             a: "Private individuals can try it free and buy a single estimate or a pack of three. Moving companies have their own subscription. See the pricing page for current prices.",
           },
           {
-            q: "What happens to my room video?",
-            a: "Your estimate is created from your room video and checklist flow. Your media stays private, is not used to train AI models, and is deleted no later than 12 months after the last activity. If you’d like deletion sooner, just drop us a line at kjell@volumcalc.com and we’ll gladly help.",
+            q: "What happens to my photos?",
+            a: "Your photos are stored privately and are never public. They're not used to train AI models, and are deleted no later than 12 months after the last activity. You can request deletion at any time at kjell@volumcalc.com.",
           },
         ],
       },
