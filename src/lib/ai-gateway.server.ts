@@ -25,7 +25,7 @@ const getEnv = (key: string): string => {
   return value;
 };
 
-const AI_GATEWAY_URL = "https://connector-gateway.lovable.dev/openai/v1/chat/completions";
+const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 export const GEMINI_3_8_FLASH_MODEL = "google/gemini-3.8-flash";
 
