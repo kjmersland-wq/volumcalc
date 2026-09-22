@@ -333,6 +333,92 @@ export const requestQuote = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+const updateSharedItemSchema = z.object({
+  id: z.string().uuid(),
+  token: z
+    .string()
+    .trim()
+    .min(8)
+    .max(64)
+    .regex(/^[a-f0-9]+$/i),
+  itemId: z.string().uuid(),
+  patch: z
+    .object({
+      quantity: z.number().int().min(1).max(999).optional(),
+      length_cm: z.number().positive().max(5000).optional(),
+      width_cm: z.number().positive().max(5000).optional(),
+      height_cm: z.number().positive().max(5000).optional(),
+      tags: z.array(z.string().trim().min(1).max(40)).max(10).optional(),
+    })
+    .refine((p) => Object.keys(p).length > 0, "Empty patch"),
+});
+
+/**
+ * Lets whoever holds an estimate's share link (customer or owning company)
+ * adjust one item's quantity, measurements or tags directly on the shared
+ * report — same requestQuote pattern: validate {id, token} server-side
+ * before writing anything, via the service-role client (never RLS, since
+ * anon has no write grants on estimate_items at all). Deliberately narrow:
+ * only these four fields, never name/room/notes/deletion, and itemId is
+ * checked against estimate_id so a valid token for one estimate can never
+ * touch another estimate's items.
+ */
+export const updateSharedEstimateItem = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => updateSharedItemSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: estimate } = await supabaseAdmin
+      .from("estimates")
+      .select("id,share_token")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!estimate || estimate.share_token !== data.token) throw new Error("Estimate not found");
+
+    const { data: item } = await supabaseAdmin
+      .from("estimate_items")
+      .select("id,estimate_id,length_cm,width_cm,height_cm,quantity")
+      .eq("id", data.itemId)
+      .maybeSingle();
+    if (!item || item.estimate_id !== data.id) throw new Error("Item not found");
+
+    const patch: Record<string, unknown> = { ...data.patch };
+    if (
+      data.patch.length_cm !== undefined ||
+      data.patch.width_cm !== undefined ||
+      data.patch.height_cm !== undefined ||
+      data.patch.quantity !== undefined
+    ) {
+      const length = data.patch.length_cm ?? item.length_cm;
+      const width = data.patch.width_cm ?? item.width_cm;
+      const height = data.patch.height_cm ?? item.height_cm;
+      const quantity = data.patch.quantity ?? item.quantity;
+      patch.volume_m3 = Math.round(((length * width * height * quantity) / 1_000_000) * 100) / 100;
+    }
+
+    const { error: updateError } = await supabaseAdmin
+      .from("estimate_items")
+      .update(patch)
+      .eq("id", data.itemId);
+    if (updateError) throw new Error("Could not update the item");
+
+    // Recompute the estimate's total — same math as the owner-side recalcTotal().
+    const { data: rows } = await supabaseAdmin
+      .from("estimate_items")
+      .select("volume_m3,is_included")
+      .eq("estimate_id", data.id)
+      .is("deleted_at", null);
+    const total =
+      Math.round(
+        (rows ?? [])
+          .filter((r) => r.is_included !== false)
+          .reduce((sum, r) => sum + Number(r.volume_m3), 0) * 100,
+      ) / 100;
+    await supabaseAdmin.from("estimates").update({ total_volume_m3: total }).eq("id", data.id);
+
+    return { ok: true };
+  });
+
 /**
  * A signed-in company takes ownership of an estimate that no company owns yet.
  * The caller must hold the secret share link for that exact estimate, so an

@@ -42,7 +42,7 @@ import { MoverOutreach } from "@/components/MoverOutreach";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
-import { claimEstimate, getSharedEstimate } from "@/lib/estimates.functions";
+import { claimEstimate, getSharedEstimate, updateSharedEstimateItem } from "@/lib/estimates.functions";
 import { m3, money, shortDate } from "@/lib/format";
 import { recommendVehicle, recommendedVolume, storageUnitM2 } from "@/lib/volume";
 
@@ -128,6 +128,7 @@ function EstimatePage() {
   const { session, loading: authLoading } = useAuth();
   const loadShared = useServerFn(getSharedEstimate);
   const claim = useServerFn(claimEstimate);
+  const updateSharedItem = useServerFn(updateSharedEstimateItem);
   const queryClient = useQueryClient();
 
   const [renamingRoom, setRenamingRoom] = useState<string | null>(null);
@@ -276,18 +277,40 @@ function EstimatePage() {
 
   const patchItem = useMutation({
     mutationFn: async ({ item, patch }: { item: Item; patch: Partial<Item> }) => {
-      const payload: TablesUpdate<"estimate_items"> = { ...patch };
-      if (
-        patch.length_cm !== undefined ||
-        patch.width_cm !== undefined ||
-        patch.height_cm !== undefined ||
-        patch.quantity !== undefined
-      ) {
-        payload.volume_m3 = itemVolume(item, patch);
+      // Owner, signed in: unchanged, direct RLS-scoped update.
+      if (session) {
+        const payload: TablesUpdate<"estimate_items"> = { ...patch };
+        if (
+          patch.length_cm !== undefined ||
+          patch.width_cm !== undefined ||
+          patch.height_cm !== undefined ||
+          patch.quantity !== undefined
+        ) {
+          payload.volume_m3 = itemVolume(item, patch);
+        }
+        const { error } = await supabase.from("estimate_items").update(payload).eq("id", item.id);
+        if (error) throw error;
+        await recalcTotal();
+        return;
       }
-      const { error } = await supabase.from("estimate_items").update(payload).eq("id", item.id);
-      if (error) throw error;
-      await recalcTotal();
+      // Anonymous customer holding the share link: token-gated server function
+      // (anon has no write grants on estimate_items at all, so this can't go
+      // through the RLS-scoped client).
+      if (!shareToken) throw new Error("Missing share token");
+      await updateSharedItem({
+        data: {
+          id,
+          token: shareToken,
+          itemId: item.id,
+          patch: {
+            ...(patch.quantity !== undefined ? { quantity: patch.quantity } : {}),
+            ...(patch.length_cm !== undefined ? { length_cm: patch.length_cm } : {}),
+            ...(patch.width_cm !== undefined ? { width_cm: patch.width_cm } : {}),
+            ...(patch.height_cm !== undefined ? { height_cm: patch.height_cm } : {}),
+            ...(patch.tags !== undefined ? { tags: patch.tags } : {}),
+          },
+        },
+      });
     },
     onSuccess: invalidate,
     onError: () => toast.error(rt("upload.failed")),
@@ -457,6 +480,11 @@ function EstimatePage() {
   const canEdit = Boolean(session) && !unclaimed;
   const businessView = canEdit && view === "business";
   const shareToken = (estimate.share_token as string | undefined) ?? token;
+  // Quantity/measurements/tags are editable by anyone holding a valid share
+  // link, not just the signed-in owner — reaching this point at all means
+  // either one is true (see the useQuery branch above). Business-only fields
+  // (hourly rate, internal notes, checklist) stay gated behind businessView.
+  const canEditItems = Boolean(shareToken);
   const reportTitle =
     ((estimate as Record<string, unknown>)['report_title'] as string | null) ||
     estimate.customer_name ||
@@ -858,7 +886,7 @@ function EstimatePage() {
                             {Math.round(item.height_cm)} cm · {m3(item.volume_m3)}
                           </p>
 
-                          {canEdit && (
+                          {canEditItems && (
                             <div className="no-print mt-2 flex flex-wrap items-center gap-2">
                               <div className="flex items-center gap-1 rounded-md border border-input">
                                 <Button
@@ -906,7 +934,11 @@ function EstimatePage() {
                                   }}
                                 />
                               ))}
+                            </div>
+                          )}
 
+                          {canEdit && (
+                            <div className="no-print mt-2 flex flex-wrap items-center gap-2">
                               <label className="sr-only" htmlFor={`room-${item.id}`}>
                                 {rt("res.moveRoom")}
                               </label>
@@ -950,12 +982,12 @@ function EstimatePage() {
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {TAGS.map((tag) => {
                               const active = (item.tags ?? []).includes(tag.value);
-                              if (!canEdit && !active) return null;
+                              if (!canEditItems && !active) return null;
                               return (
                                 <button
                                   key={tag.value}
                                   type="button"
-                                  disabled={!canEdit}
+                                  disabled={!canEditItems}
                                   onClick={() =>
                                     patchItem.mutate({
                                       item,
