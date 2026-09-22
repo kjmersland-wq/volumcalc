@@ -1,10 +1,41 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import { USER_VERIFIED_SECURITY_LABEL } from "./volume-database";
 
 type EstimateItemUpdate = Database["public"]["Tables"]["estimate_items"]["Update"];
+
+/**
+ * Server-verified caller identity from the bearer token attachSupabaseAuth
+ * already attaches globally (src/start.ts) when the caller has a session —
+ * returns null for a genuinely anonymous caller, same optional-auth pattern
+ * as resolveIdentity() in payments.functions.ts. Never trusts a client-
+ * supplied id, since createEstimate has no auth middleware (it must stay
+ * callable by anonymous customers).
+ */
+async function resolveVerifiedUserId(): Promise<string | null> {
+  const request = getRequest();
+  const authHeader = request?.headers?.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  const token = authHeader.slice("Bearer ".length);
+  if (!token || token.split(".").length !== 3) return null;
+
+  const SUPABASE_URL = process.env["SUPABASE_URL"];
+  const SUPABASE_PUBLISHABLE_KEY = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) return null;
+
+  const { createClient } = await import("@supabase/supabase-js");
+  const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    global: { headers: { apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${token}` } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data.user?.id) return null;
+  return data.user.id;
+}
 
 const manualItemSchema = z.object({
   room: z.string().trim().min(1).max(50),
@@ -180,6 +211,50 @@ export const createEstimate = createServerFn({ method: "POST" })
         .eq("id", data.company_id)
         .maybeSingle();
       companyId = company?.id ?? null;
+    }
+
+    // Gate/consume plan credits only for someone submitting under their own
+    // account — never for a company_token submission, since that's an
+    // anonymous customer filling out someone else's (the company's) public
+    // intake form and has no VolumCalc account of their own to check.
+    // Identity is server-verified (never client-supplied), so this can't be
+    // spoofed by passing a different company_id.
+    if (!data.company_token) {
+      const userId = await resolveVerifiedUserId();
+      if (userId) {
+        const { data: roles } = await supabaseAdmin
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .in("role", ["admin", "unlimited"]);
+        const hasRole = Boolean(roles && roles.length > 0);
+
+        if (!hasRole) {
+          const { data: credits } = await supabaseAdmin
+            .from("user_credits")
+            .select("credits, unlimited_until")
+            .eq("user_id", userId)
+            .maybeSingle();
+          const isUnlimited = Boolean(
+            credits?.unlimited_until && new Date(credits.unlimited_until) > new Date(),
+          );
+          const hasCredits = Boolean(credits?.credits && credits.credits > 0);
+
+          if (!isUnlimited && !hasCredits) {
+            throw new Error("NO_CREDITS");
+          }
+          if (!isUnlimited && hasCredits) {
+            // One credit per submitted estimate, regardless of room/photo
+            // count. Business/Enterprise (unlimited_until) never touch this
+            // counter, even though the webhook also grants them a credits
+            // value alongside it.
+            await supabaseAdmin
+              .from("user_credits")
+              .update({ credits: (credits!.credits ?? 0) - 1 })
+              .eq("user_id", userId);
+          }
+        }
+      }
     }
 
     const { data: estimate, error: insertError } = await supabaseAdmin

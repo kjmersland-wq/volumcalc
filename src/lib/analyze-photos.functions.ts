@@ -6,22 +6,31 @@ import { roomTemplateForName } from "./rooms";
 import { callAIGatewayVisionJson, GEMINI_3_8_FLASH_MODEL } from "./ai-gateway.server";
 
 /**
- * Confirms the signed-in caller holds the 'admin' or 'unlimited' role.
- * Same pattern as assertAdmin() in admin.functions.ts: the role is read
- * through the caller's own RLS-scoped client, so it can never be spoofed.
- * There is no automated way today for a paying company to receive
- * 'unlimited' beyond this manually-seeded role (no Stripe webhook wires a
- * subscription to it), so this intentionally only ever grants access to
- * accounts an operator has explicitly assigned the role to — never free by
- * default for an ordinary visitor.
+ * Confirms the signed-in caller holds the 'admin'/'unlimited' role, OR has
+ * an active paid plan (payments/webhook.ts grants these via
+ * grant_estimate_credits after a real Stripe payment): unlimited_until in
+ * the future (Business/Enterprise), or at least one remaining credit
+ * (single/3-estimate one-time purchases). Both reads go through the
+ * caller's own RLS-scoped client, so neither can be spoofed. Role is
+ * checked first and short-circuits — admin/unlimited accounts never touch
+ * user_credits at all.
  */
 async function assertUnlimitedOrAdmin(context: { supabase: any; userId: string }) {
-  const { data, error } = await context.supabase
+  const { data: roles, error: rolesError } = await context.supabase
     .from("user_roles")
     .select("role")
     .eq("user_id", context.userId)
     .in("role", ["admin", "unlimited"]);
-  if (error || !data || data.length === 0) {
+  if (!rolesError && roles && roles.length > 0) return;
+
+  const { data: credits } = await context.supabase
+    .from("user_credits")
+    .select("credits, unlimited_until")
+    .eq("user_id", context.userId)
+    .maybeSingle();
+  const isUnlimited = Boolean(credits?.unlimited_until && new Date(credits.unlimited_until) > new Date());
+  const hasCredits = Boolean(credits?.credits && credits.credits > 0);
+  if (!isUnlimited && !hasCredits) {
     throw new Error("AI photo analysis is not available on this account");
   }
 }

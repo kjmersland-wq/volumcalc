@@ -269,6 +269,11 @@ export const dict: Dict = {
     no: "Noe gikk galt. Prøv igjen.",
     en: "Something went wrong. Please try again.",
   },
+  "upload.noCredits": {
+    no: "Du har ingen gjenstående beregninger på kontoen din.",
+    en: "You have no remaining estimates left on your account.",
+  },
+  "upload.seePricing": { no: "Se priser", en: "See pricing" },
   "upload.aiCredits": {
     no: "Video- og sjekklisteflyten er midlertidig utilgjengelig. Prøv gjerne igjen om litt.",
     en: "The video + checklist flow is temporarily unavailable. Please try again shortly.",

@@ -730,6 +730,12 @@ function UploadPage() {
     } catch (error) {
       console.error(error);
       setStage("idle");
+      if (error instanceof Error && error.message === "NO_CREDITS") {
+        toast.error(t("upload.noCredits"), {
+          action: { label: t("upload.seePricing"), onClick: () => navigate({ to: "/pricing" }) },
+        });
+        return;
+      }
       toast.error(t("upload.failed"));
     }
   }
