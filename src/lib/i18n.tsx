@@ -179,6 +179,16 @@ export const dict: Dict = {
   },
   "upload.zoomIn": { no: "Zoom inn", en: "Zoom in" },
   "upload.zoomOut": { no: "Zoom ut", en: "Zoom out" },
+  "upload.takePhoto": { no: "Ta bilde / velg bilder", en: "Take photo / choose photos" },
+  "upload.removePhoto": { no: "Fjern bilde", en: "Remove photo" },
+  "upload.photoTooLarge": {
+    no: "Bildet var for stort og ble ikke lagret.",
+    en: "That photo was too large and wasn't saved.",
+  },
+  "upload.photoSaveFailed": {
+    no: "Kunne ikke lagre bildet akkurat nå. Prøv å legge det til på nytt.",
+    en: "Couldn't save that photo right now. Try adding it again.",
+  },
 
   "upload.roomTemplate": {
     no: "Sjekkliste",

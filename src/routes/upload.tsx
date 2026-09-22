@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Camera, Info, Loader2, Minus, Pencil, Plus, Trash2 } from "lucide-react";
@@ -10,7 +10,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useI18n } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
-import { createEstimate, uploadRoomVideo } from "@/lib/estimates.functions";
+import { createEstimate, uploadRoomVideo, uploadRoomPhoto } from "@/lib/estimates.functions";
 import { getCompanyByUploadToken } from "@/lib/admin.functions";
 import {
   USER_VERIFIED_SECURITY_LABEL,
@@ -107,6 +107,9 @@ function formatElapsed(totalSeconds: number): string {
 // Keeps each clip's base64 payload under the server's cap (see estimates.functions.ts).
 const MAX_VIDEO_BASE64_CHARS = 6_000_000;
 
+// Keeps each photo's base64 payload under the server's cap (see estimates.functions.ts).
+const MAX_PHOTO_BASE64_CHARS = 10_000_000;
+
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 3;
 const ZOOM_STEP = 0.25;
@@ -160,6 +163,7 @@ function UploadPage() {
   const navigate = useNavigate();
   const submitEstimate = useServerFn(createEstimate);
   const uploadVideo = useServerFn(uploadRoomVideo);
+  const uploadPhoto = useServerFn(uploadRoomPhoto);
   const { c: companyId, k: companyToken } = Route.useSearch();
   const { session } = useAuth();
   const { data: ownCompany } = useCompany();
@@ -173,9 +177,11 @@ function UploadPage() {
   const drawLoopRef = useRef<number | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<BlobPart[]>([]);
-  // Groups every clip filmed in this visit under one storage path prefix;
-  // no estimate id exists yet at record time. Lazily created on first upload.
+  // Groups every clip/photo captured in this visit under one storage path
+  // prefix; no estimate id exists yet at capture time. Lazily created on
+  // first upload (shared by both the video and photo paths).
   const sessionIdRef = useRef<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const { data: branding } = useQuery({
     queryKey: ["upload-branding", companyToken],
@@ -201,9 +207,12 @@ function UploadPage() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(MIN_ZOOM);
   const zoomLevelRef = useRef(MIN_ZOOM);
+  // Filming is currently unused (photos took its place below), kept intact
+  // in case it's re-enabled later — see startVideoCapture()/finishRecording().
   const [roomVideos, setRoomVideos] = useState<Record<string, { blob: Blob; seconds: number; url: string | null }>>(
     {},
   );
+  const [roomPhotos, setRoomPhotos] = useState<Record<string, { url: string }[]>>({});
   const [editingRooms, setEditingRooms] = useState(false);
   const [newRoom, setNewRoom] = useState("");
   const [stage, setStage] = useState<Stage>("idle");
@@ -513,6 +522,51 @@ function UploadPage() {
     stopCameraTracks();
   }
 
+  /** Handles the photo <input>'s onChange — one or more files picked via camera or gallery. */
+  function handlePhotoFilesSelected(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = ""; // allow picking the same file again later
+    const room = selectedRoom;
+    for (const file of files) {
+      void uploadRoomPhotoFile(room, file);
+    }
+  }
+
+  /** Uploads one picked photo right away, so it isn't lost if the visitor never submits the form. */
+  async function uploadRoomPhotoFile(room: string, file: File) {
+    try {
+      const base64 = await blobToBase64(file);
+      if (base64.length > MAX_PHOTO_BASE64_CHARS) {
+        toast.error(t("upload.photoTooLarge"));
+        return;
+      }
+      if (!sessionIdRef.current) sessionIdRef.current = crypto.randomUUID();
+      const result = await uploadPhoto({
+        data: {
+          session_id: sessionIdRef.current,
+          room,
+          mime_type: file.type || "image/jpeg",
+          data: base64,
+        },
+      });
+      setRoomPhotos((prev) => ({
+        ...prev,
+        [room]: [...(prev[room] ?? []), { url: result.url }],
+      }));
+      toast.success(`${t("upload.savedToRoom")} ${room}`);
+    } catch (error) {
+      console.error("Room photo upload failed", room, error);
+      toast.error(t("upload.photoSaveFailed"));
+    }
+  }
+
+  function removeRoomPhoto(room: string, index: number) {
+    setRoomPhotos((prev) => ({
+      ...prev,
+      [room]: (prev[room] ?? []).filter((_, i) => i !== index),
+    }));
+  }
+
   function changeQuantity(itemKey: string, delta: number) {
     setQuantities((prev) => {
       const current = prev[selectedRoom]?.[itemKey] ?? 0;
@@ -561,16 +615,20 @@ function UploadPage() {
     try {
       setStage("saving");
 
-      // Clips were already uploaded right after each "Stop filming" — just
+      // Clips/photos were already uploaded right after being captured — just
       // carry forward the ones that finished uploading successfully.
       const room_video_urls = Object.entries(roomVideos)
         .filter((entry): entry is [string, { blob: Blob; seconds: number; url: string }] => Boolean(entry[1].url))
         .map(([room, video]) => ({ room, url: video.url }));
+      const room_photo_urls = Object.entries(roomPhotos).flatMap(([room, photos]) =>
+        photos.map((photo) => ({ room, url: photo.url })),
+      );
 
       const created = await submitEstimate({
         data: {
           manual_items: manualItems,
           room_video_urls,
+          room_photo_urls,
           ...(form.name.trim() ? { customer_name: form.name.trim() } : {}),
           ...(form.phone.trim() ? { customer_phone: form.phone.trim() } : {}),
           ...(form.date ? { move_date: form.date } : {}),
@@ -857,22 +915,47 @@ function UploadPage() {
               </div>
 
 
+              {/* Filming (startVideoCapture, the canvas/zoom pipeline below) is currently
+                  unused in favor of photo upload here, kept intact in case it's re-enabled. */}
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                multiple
+                className="hidden"
+                onChange={handlePhotoFilesSelected}
+              />
               <Button
+                type="button"
                 size="lg"
                 className="mt-4 h-14 w-full text-base font-bold"
-                disabled={startingCamera}
-                onClick={startVideoCapture}
+                onClick={() => photoInputRef.current?.click()}
               >
-                {startingCamera ? (
-                  <Loader2 className="size-5 animate-spin" />
-                ) : (
-                  <Camera className="size-5" />
-                )}
-                {startingCamera ? t("upload.startingCamera") : t("upload.startRecording")}
+                <Camera className="size-5" />
+                {t("upload.takePhoto")}
               </Button>
-              <p className="mt-2 text-center text-sm text-muted-foreground">
-                {t("upload.skipToChecklist")}
-              </p>
+
+              {(roomPhotos[selectedRoom]?.length ?? 0) > 0 && (
+                <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
+                  {roomPhotos[selectedRoom]!.map((photo, index) => (
+                    <div
+                      key={photo.url}
+                      className="relative aspect-square overflow-hidden rounded-lg border border-border"
+                    >
+                      <img src={photo.url} alt="" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        aria-label={t("upload.removePhoto")}
+                        className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/70 text-white"
+                        onClick={() => removeRoomPhoto(selectedRoom, index)}
+                      >
+                        <Trash2 className="size-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="mt-7 flex gap-4 rounded-xl border border-primary/20 bg-primary-soft/70 p-5">
                 <Info className="mt-0.5 size-5 shrink-0 text-primary" />

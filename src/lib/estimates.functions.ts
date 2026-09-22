@@ -58,6 +58,58 @@ export const uploadRoomVideo = createServerFn({ method: "POST" })
     return { url: signed.signedUrl };
   });
 
+function photoExtensionForMimeType(mimeType: string): string {
+  if (mimeType.includes("png")) return "png";
+  if (mimeType.includes("webp")) return "webp";
+  if (mimeType.includes("heic")) return "heic";
+  if (mimeType.includes("heif")) return "heif";
+  return "jpg";
+}
+
+// Generous for a single phone photo (a few MB is typical; base64 inflates
+// size by ~33% over the raw file).
+const uploadRoomPhotoSchema = z.object({
+  session_id: z.string().uuid(),
+  room: z.string().trim().min(1).max(50),
+  mime_type: z.string().trim().min(1).max(80).default("image/jpeg"),
+  data: z
+    .string()
+    .min(1)
+    .max(10_000_000)
+    .regex(/^[A-Za-z0-9+/]+=*$/, "Invalid photo data"),
+});
+
+/**
+ * Uploads one room photo to the existing 'estimate-photos' bucket right
+ * after it's picked, mirroring uploadRoomVideo's pattern (same bucket, same
+ * <sessionId>/<room>-... path shape) but kept separate so the video upload
+ * path stays untouched. A short random suffix avoids collisions when several
+ * photos for the same room are picked at once.
+ */
+export const uploadRoomPhoto = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => uploadRoomPhotoSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const bytes = Uint8Array.from(atob(data.data), (c) => c.charCodeAt(0));
+    const extension = photoExtensionForMimeType(data.mime_type);
+    const safeRoom = data.room.replace(/[^a-zA-Z0-9-_]+/g, "-").slice(0, 60) || "room";
+    const suffix = Math.random().toString(36).slice(2, 8);
+    const path = `${data.session_id}/${safeRoom}-${Date.now()}-${suffix}.${extension}`;
+
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from("estimate-photos")
+      .upload(path, bytes, { contentType: data.mime_type, upsert: true });
+    if (uploadError) throw new Error("Could not upload the photo");
+
+    const { data: signed } = await supabaseAdmin.storage
+      .from("estimate-photos")
+      .createSignedUrl(path, 60 * 60 * 24 * 365);
+    if (!signed?.signedUrl) throw new Error("Could not create a link for the photo");
+
+    return { url: signed.signedUrl };
+  });
+
 const roomVideoUrlSchema = z.object({
   room: z.string().trim().min(1).max(50),
   url: z.string().trim().url().max(2000),
@@ -66,6 +118,7 @@ const roomVideoUrlSchema = z.object({
 const createSchema = z.object({
   manual_items: z.array(manualItemSchema).max(300).default([]),
   room_video_urls: z.array(roomVideoUrlSchema).max(20).default([]),
+  room_photo_urls: z.array(roomVideoUrlSchema).max(60).default([]),
   customer_name: z.string().trim().max(120).regex(/^[^\r\n]*$/, "Customer name cannot contain line breaks").optional(),
   customer_phone: z.string().trim().max(40).optional(),
   move_date: z
@@ -174,10 +227,16 @@ export const createEstimate = createServerFn({ method: "POST" })
       if (itemsError) throw new Error("Could not save the estimate items");
     }
 
-    // Room clips are already uploaded to 'estimate-photos' by uploadRoomVideo
-    // right after filming stopped (so a clip isn't lost if the visitor never
-    // finishes this form) — their signed URLs just get attached here.
-    const photoUrls = data.room_video_urls.map((video) => video.url);
+    // Room clips/photos are already uploaded to 'estimate-photos' by
+    // uploadRoomVideo/uploadRoomPhoto right after being captured (so nothing
+    // is lost if the visitor never finishes this form) — their signed URLs
+    // just get attached here. Filming is currently unused (photos took its
+    // place in the UI) but room_video_urls is kept so it still works if
+    // filming is re-enabled later.
+    const photoUrls = [
+      ...data.room_video_urls.map((video) => video.url),
+      ...data.room_photo_urls.map((photo) => photo.url),
+    ];
 
     await supabaseAdmin
       .from("estimates")
