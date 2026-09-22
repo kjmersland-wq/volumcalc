@@ -44,6 +44,7 @@ import { Route as DashboardAdminRouteImport } from './routes/dashboard.admin'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as EnMovingVanCalculatorRouteImport } from './routes/en.moving-van-calculator'
 import { Route as EstimateIdRouteImport } from './routes/estimate.$id'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -220,6 +221,12 @@ const EstimateIdRoute = EstimateIdRouteImport.update({
   path: '/estimate/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -257,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
   '/estimate/$id': typeof EstimateIdRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -293,6 +301,7 @@ export interface FileRoutesByTo {
   '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
   '/estimate/$id': typeof EstimateIdRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -331,6 +340,7 @@ export interface FileRoutesById {
   '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
   '/estimate/$id': typeof EstimateIdRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/en/moving-van-calculator'
     | '/estimate/$id'
     | '/dashboard/'
+    | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -406,6 +417,7 @@ export interface FileRouteTypes {
     | '/en/moving-van-calculator'
     | '/estimate/$id'
     | '/dashboard'
+    | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
@@ -443,6 +455,7 @@ export interface FileRouteTypes {
     | '/en/moving-van-calculator'
     | '/estimate/$id'
     | '/dashboard/'
+    | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -477,6 +490,7 @@ export interface RootRouteChildren {
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EnMovingVanCalculatorRoute: typeof EnMovingVanCalculatorRoute
   EstimateIdRoute: typeof EstimateIdRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -726,6 +740,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EstimateIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -779,6 +800,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutReturnRoute: CheckoutReturnRoute,
   EnMovingVanCalculatorRoute: EnMovingVanCalculatorRoute,
   EstimateIdRoute: EstimateIdRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
