@@ -590,9 +590,6 @@ function UploadPage() {
         toast.error(result.error);
         return;
       }
-      // TEMPORARY diagnostic logging — remove once the low/zero-match issue is resolved.
-      console.log("[analyze] catalog offered to AI:", result.debug_catalog_keys);
-      console.log("[analyze] raw AI suggestions (pre-filter):", result.debug_raw_items);
       let appliedCount = 0;
       setQuantities((prev) => {
         const current = prev[room] ?? {};

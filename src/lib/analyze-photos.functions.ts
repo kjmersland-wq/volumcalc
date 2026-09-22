@@ -114,16 +114,6 @@ export const analyzeRoomPhotos = createServerFn({ method: "POST" })
       return { error: message };
     }
 
-    // TEMPORARY diagnostic logging — remove once the low/zero-match issue is resolved.
-    console.error(
-      "analyzeRoomPhotos: raw AI suggestions for room",
-      data.room,
-      "(catalog keys offered:",
-      catalogKeys,
-      ") ->",
-      JSON.stringify(parsed.data.items),
-    );
-
     // Defense in depth: even though the schema's enum already restricts this,
     // never trust model output blindly — drop anything not in this room's
     // actual catalog and anything with a non-positive quantity.
@@ -132,8 +122,5 @@ export const analyzeRoomPhotos = createServerFn({ method: "POST" })
       (item) => catalogKeySet.has(item.key) && item.quantity > 0,
     );
 
-    // TEMPORARY: raw model output + the catalog keys it was constrained to,
-    // returned to the client so it's visible in the browser console during
-    // this investigation without needing Lovable Cloud's function logs.
-    return { suggestions, debug_raw_items: parsed.data.items, debug_catalog_keys: catalogKeys };
+    return { suggestions };
   });
