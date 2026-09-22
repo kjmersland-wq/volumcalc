@@ -274,6 +274,15 @@ export const dict: Dict = {
     en: "You have no remaining estimates left on your account.",
   },
   "upload.seePricing": { no: "Se priser", en: "See pricing" },
+  "upload.companyQuotaExceededPrefix": {
+    no: "Dette skjemaet kan ikke ta imot flere innsendelser akkurat nå. Ta kontakt med",
+    en: "This form can't accept any more submissions right now. Please contact",
+  },
+  "upload.companyQuotaExceededSuffix": {
+    no: "direkte for et tilbud.",
+    en: "directly for a quote.",
+  },
+  "upload.companyQuotaExceededFallbackName": { no: "bedriften", en: "the company" },
   "upload.aiCredits": {
     no: "Video- og sjekklisteflyten er midlertidig utilgjengelig. Prøv gjerne igjen om litt.",
     en: "The video + checklist flow is temporarily unavailable. Please try again shortly.",

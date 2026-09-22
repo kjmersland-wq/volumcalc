@@ -37,6 +37,43 @@ async function resolveVerifiedUserId(): Promise<string | null> {
   return data.user.id;
 }
 
+/**
+ * Checks whether `accountId` (a user, or — since companies.id references
+ * auth.users — a company acting on its own upload link) may create one more
+ * estimate: admin/unlimited role, an active unlimited_until window, or a
+ * positive credits balance. Consumes one credit only in that last case;
+ * role and unlimited_until never touch the credits counter. Shared by both
+ * a caller's own submission and a company_token submission, since a company
+ * is billed through the exact same user_roles/user_credits rows as any
+ * other account.
+ */
+async function consumePlanEntitlement(supabaseAdmin: any, accountId: string): Promise<boolean> {
+  const { data: roles } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", accountId)
+    .in("role", ["admin", "unlimited"]);
+  if (roles && roles.length > 0) return true;
+
+  const { data: credits } = await supabaseAdmin
+    .from("user_credits")
+    .select("credits, unlimited_until")
+    .eq("user_id", accountId)
+    .maybeSingle();
+  const isUnlimited = Boolean(credits?.unlimited_until && new Date(credits.unlimited_until) > new Date());
+  if (isUnlimited) return true;
+
+  const hasCredits = Boolean(credits?.credits && credits.credits > 0);
+  if (!hasCredits) return false;
+
+  // One credit per submitted estimate, regardless of room/photo count.
+  await supabaseAdmin
+    .from("user_credits")
+    .update({ credits: (credits!.credits ?? 0) - 1 })
+    .eq("user_id", accountId);
+  return true;
+}
+
 const manualItemSchema = z.object({
   room: z.string().trim().min(1).max(50),
   name: z.string().trim().min(1).max(120),
@@ -213,47 +250,26 @@ export const createEstimate = createServerFn({ method: "POST" })
       companyId = company?.id ?? null;
     }
 
-    // Gate/consume plan credits only for someone submitting under their own
-    // account — never for a company_token submission, since that's an
-    // anonymous customer filling out someone else's (the company's) public
-    // intake form and has no VolumCalc account of their own to check.
-    // Identity is server-verified (never client-supplied), so this can't be
-    // spoofed by passing a different company_id.
-    if (!data.company_token) {
+    // A company_token submission is billed against the COMPANY's own plan
+    // (companies.id === auth.users.id, so it shares the exact same
+    // user_roles/user_credits rows) — never against the anonymous visitor
+    // filling out that company's public form, who has no VolumCalc account
+    // of their own to check or top up. Exhausting the company's plan is a
+    // hard block with a neutral message; the company discovers this in
+    // their own dashboard, not via an automated alert. A caller submitting
+    // under their own account is gated the same way, against their own
+    // identity — server-verified, never client-supplied, so neither path
+    // can be spoofed by passing a different company_id.
+    if (data.company_token) {
+      if (companyId) {
+        const allowed = await consumePlanEntitlement(supabaseAdmin, companyId);
+        if (!allowed) throw new Error("COMPANY_QUOTA_EXCEEDED");
+      }
+    } else {
       const userId = await resolveVerifiedUserId();
       if (userId) {
-        const { data: roles } = await supabaseAdmin
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", userId)
-          .in("role", ["admin", "unlimited"]);
-        const hasRole = Boolean(roles && roles.length > 0);
-
-        if (!hasRole) {
-          const { data: credits } = await supabaseAdmin
-            .from("user_credits")
-            .select("credits, unlimited_until")
-            .eq("user_id", userId)
-            .maybeSingle();
-          const isUnlimited = Boolean(
-            credits?.unlimited_until && new Date(credits.unlimited_until) > new Date(),
-          );
-          const hasCredits = Boolean(credits?.credits && credits.credits > 0);
-
-          if (!isUnlimited && !hasCredits) {
-            throw new Error("NO_CREDITS");
-          }
-          if (!isUnlimited && hasCredits) {
-            // One credit per submitted estimate, regardless of room/photo
-            // count. Business/Enterprise (unlimited_until) never touch this
-            // counter, even though the webhook also grants them a credits
-            // value alongside it.
-            await supabaseAdmin
-              .from("user_credits")
-              .update({ credits: (credits!.credits ?? 0) - 1 })
-              .eq("user_id", userId);
-          }
-        }
+        const allowed = await consumePlanEntitlement(supabaseAdmin, userId);
+        if (!allowed) throw new Error("NO_CREDITS");
       }
     }
 

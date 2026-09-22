@@ -736,6 +736,13 @@ function UploadPage() {
         });
         return;
       }
+      if (error instanceof Error && error.message === "COMPANY_QUOTA_EXCEEDED") {
+        const companyName = branding?.company_name ?? t("upload.companyQuotaExceededFallbackName");
+        toast.error(
+          `${t("upload.companyQuotaExceededPrefix")} ${companyName} ${t("upload.companyQuotaExceededSuffix")}`,
+        );
+        return;
+      }
       toast.error(t("upload.failed"));
     }
   }
