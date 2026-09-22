@@ -123,6 +123,25 @@ function waitForVideoMetadata(video: HTMLVideoElement): Promise<void> {
   });
 }
 
+// H.264/mp4 first: hardware-accelerated on essentially every phone (and what
+// Safari's MediaRecorder actually records), smaller files than VP8 at the
+// same quality. VP9/webm next where mp4 isn't available — still smaller than
+// plain webm's implicit VP8. Bare "video/webm" and undefined are the same
+// fallbacks used before this change.
+const RECORDING_MIME_TYPE_CANDIDATES = [
+  "video/mp4;codecs=h264",
+  "video/mp4",
+  "video/webm;codecs=vp9",
+  "video/webm",
+];
+
+function pickRecordingMimeType(): string | undefined {
+  if (typeof MediaRecorder === "undefined" || typeof MediaRecorder.isTypeSupported !== "function") {
+    return undefined;
+  }
+  return RECORDING_MIME_TYPE_CANDIDATES.find((candidate) => MediaRecorder.isTypeSupported(candidate));
+}
+
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -386,10 +405,7 @@ function UploadPage() {
       canvasStreamRef.current = canvasStream;
 
       recordedChunksRef.current = [];
-      const mimeType = typeof MediaRecorder.isTypeSupported === "function" &&
-        MediaRecorder.isTypeSupported("video/webm")
-        ? "video/webm"
-        : undefined;
+      const mimeType = pickRecordingMimeType();
       const recorder = mimeType
         ? new MediaRecorder(canvasStream, { mimeType })
         : new MediaRecorder(canvasStream);
