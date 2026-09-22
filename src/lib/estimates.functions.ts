@@ -16,9 +16,10 @@ const manualItemSchema = z.object({
   security_label: z.literal(USER_VERIFIED_SECURITY_LABEL),
 });
 
-// Kept comfortably under Cloudflare Workers' request body limit even with a
-// handful of rooms filmed (base64 inflates size by ~33% over the raw clip).
-const roomVideoSchema = z.object({
+// Kept comfortably under Cloudflare Workers' request body limit even for a
+// single clip (base64 inflates size by ~33% over the raw clip).
+const uploadRoomVideoSchema = z.object({
+  session_id: z.string().uuid(),
   room: z.string().trim().min(1).max(50),
   mime_type: z.string().trim().min(1).max(80).default("video/webm"),
   data: z
@@ -28,9 +29,43 @@ const roomVideoSchema = z.object({
     .regex(/^[A-Za-z0-9+/]+=*$/, "Invalid video data"),
 });
 
+/**
+ * Uploads one room's clip to the existing 'estimate-photos' bucket right
+ * after filming stops, keyed under a client-generated session id (no
+ * estimate exists yet at this point). Returns a long-lived signed URL that
+ * createEstimate later carries into estimates.photo_urls as-is.
+ */
+export const uploadRoomVideo = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => uploadRoomVideoSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const bytes = Uint8Array.from(atob(data.data), (c) => c.charCodeAt(0));
+    const extension = data.mime_type.includes("mp4") ? "mp4" : "webm";
+    const safeRoom = data.room.replace(/[^a-zA-Z0-9-_]+/g, "-").slice(0, 60) || "room";
+    const path = `${data.session_id}/${safeRoom}-${Date.now()}.${extension}`;
+
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from("estimate-photos")
+      .upload(path, bytes, { contentType: data.mime_type, upsert: true });
+    if (uploadError) throw new Error("Could not upload the recording");
+
+    const { data: signed } = await supabaseAdmin.storage
+      .from("estimate-photos")
+      .createSignedUrl(path, 60 * 60 * 24 * 365);
+    if (!signed?.signedUrl) throw new Error("Could not create a link for the recording");
+
+    return { url: signed.signedUrl };
+  });
+
+const roomVideoUrlSchema = z.object({
+  room: z.string().trim().min(1).max(50),
+  url: z.string().trim().url().max(2000),
+});
+
 const createSchema = z.object({
   manual_items: z.array(manualItemSchema).max(300).default([]),
-  room_videos: z.array(roomVideoSchema).max(20).default([]),
+  room_video_urls: z.array(roomVideoUrlSchema).max(20).default([]),
   customer_name: z.string().trim().max(120).regex(/^[^\r\n]*$/, "Customer name cannot contain line breaks").optional(),
   customer_phone: z.string().trim().max(40).optional(),
   move_date: z
@@ -139,31 +174,10 @@ export const createEstimate = createServerFn({ method: "POST" })
       if (itemsError) throw new Error("Could not save the estimate items");
     }
 
-    // Room clips go into the existing 'estimate-photos' bucket, under
-    // <estimateId>/... — the path shape the storage RLS policies already
-    // expect (they match on the first path segment). One long-lived signed
-    // URL per clip is stored so a shared report link can play it back
-    // without requiring the viewer to be authenticated.
-    const photoUrls: string[] = [];
-    for (const video of data.room_videos) {
-      try {
-        const bytes = Uint8Array.from(atob(video.data), (c) => c.charCodeAt(0));
-        const extension = video.mime_type.includes("mp4") ? "mp4" : "webm";
-        const safeRoom = video.room.replace(/[^a-zA-Z0-9-_]+/g, "-").slice(0, 60) || "room";
-        const path = `${estimate.id}/${safeRoom}-${Date.now()}.${extension}`;
-        const { error: uploadError } = await supabaseAdmin.storage
-          .from("estimate-photos")
-          .upload(path, bytes, { contentType: video.mime_type, upsert: true });
-        if (uploadError) throw uploadError;
-
-        const { data: signed } = await supabaseAdmin.storage
-          .from("estimate-photos")
-          .createSignedUrl(path, 60 * 60 * 24 * 365);
-        if (signed?.signedUrl) photoUrls.push(signed.signedUrl);
-      } catch (error) {
-        console.error("Room video upload failed", video.room, error);
-      }
-    }
+    // Room clips are already uploaded to 'estimate-photos' by uploadRoomVideo
+    // right after filming stopped (so a clip isn't lost if the visitor never
+    // finishes this form) — their signed URLs just get attached here.
+    const photoUrls = data.room_video_urls.map((video) => video.url);
 
     await supabaseAdmin
       .from("estimates")

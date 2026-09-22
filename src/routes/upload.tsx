@@ -10,7 +10,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useI18n } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
-import { createEstimate } from "@/lib/estimates.functions";
+import { createEstimate, uploadRoomVideo } from "@/lib/estimates.functions";
 import { getCompanyByUploadToken } from "@/lib/admin.functions";
 import {
   USER_VERIFIED_SECURITY_LABEL,
@@ -124,6 +124,7 @@ function UploadPage() {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const submitEstimate = useServerFn(createEstimate);
+  const uploadVideo = useServerFn(uploadRoomVideo);
   const { c: companyId, k: companyToken } = Route.useSearch();
   const { session } = useAuth();
   const { data: ownCompany } = useCompany();
@@ -132,6 +133,9 @@ function UploadPage() {
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<BlobPart[]>([]);
+  // Groups every clip filmed in this visit under one storage path prefix;
+  // no estimate id exists yet at record time. Lazily created on first upload.
+  const sessionIdRef = useRef<string | null>(null);
 
   const { data: branding } = useQuery({
     queryKey: ["upload-branding", companyToken],
@@ -155,7 +159,9 @@ function UploadPage() {
   const [recording, setRecording] = useState(false);
   const [startingCamera, setStartingCamera] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [roomVideos, setRoomVideos] = useState<Record<string, { blob: Blob; seconds: number }>>({});
+  const [roomVideos, setRoomVideos] = useState<Record<string, { blob: Blob; seconds: number; url: string | null }>>(
+    {},
+  );
   const [editingRooms, setEditingRooms] = useState(false);
   const [newRoom, setNewRoom] = useState("");
   const [stage, setStage] = useState<Stage>("idle");
@@ -352,12 +358,42 @@ function UploadPage() {
       const blob = new Blob(recordedChunksRef.current, { type: recorder.mimeType || "video/webm" });
       recordedChunksRef.current = [];
       if (blob.size > 0) {
-        setRoomVideos((prev) => ({ ...prev, [room]: { blob, seconds } }));
+        setRoomVideos((prev) => ({ ...prev, [room]: { blob, seconds, url: null } }));
         toast.success(`${t("upload.savedToRoom")} ${room}`);
+        void uploadRecordedVideo(room, blob);
       }
       stopCameraTracks();
     };
     recorder.stop();
+  }
+
+  /** Uploads a just-recorded clip right away, so it isn't lost if the visitor never submits the form. */
+  async function uploadRecordedVideo(room: string, blob: Blob) {
+    try {
+      const base64 = await blobToBase64(blob);
+      if (base64.length > MAX_VIDEO_BASE64_CHARS) {
+        toast.error(t("upload.videoTooLarge"));
+        return;
+      }
+      if (!sessionIdRef.current) sessionIdRef.current = crypto.randomUUID();
+      const result = await uploadVideo({
+        data: {
+          session_id: sessionIdRef.current,
+          room,
+          mime_type: blob.type || "video/webm",
+          data: base64,
+        },
+      });
+      setRoomVideos((prev) => {
+        const current = prev[room];
+        // Ignore a stale result if the room was re-filmed while this upload was in flight.
+        if (!current || current.blob !== blob) return prev;
+        return { ...prev, [room]: { ...current, url: result.url } };
+      });
+    } catch (error) {
+      console.error("Room video upload failed", room, error);
+      toast.error(t("upload.videoSaveFailed"));
+    }
   }
 
   /** Discards the current take (no save) and stops the camera. */
@@ -421,22 +457,16 @@ function UploadPage() {
     try {
       setStage("saving");
 
-      const roomVideoEntries = await Promise.all(
-        Object.entries(roomVideos).map(async ([room, video]) => ({
-          room,
-          mime_type: video.blob.type || "video/webm",
-          data: await blobToBase64(video.blob),
-        })),
-      );
-      const room_videos = roomVideoEntries.filter((v) => v.data.length <= MAX_VIDEO_BASE64_CHARS);
-      if (room_videos.length < roomVideoEntries.length) {
-        toast.error(t("upload.videoTooLarge"));
-      }
+      // Clips were already uploaded right after each "Stop filming" — just
+      // carry forward the ones that finished uploading successfully.
+      const room_video_urls = Object.entries(roomVideos)
+        .filter((entry): entry is [string, { blob: Blob; seconds: number; url: string }] => Boolean(entry[1].url))
+        .map(([room, video]) => ({ room, url: video.url }));
 
       const created = await submitEstimate({
         data: {
           manual_items: manualItems,
-          room_videos,
+          room_video_urls,
           ...(form.name.trim() ? { customer_name: form.name.trim() } : {}),
           ...(form.phone.trim() ? { customer_phone: form.phone.trim() } : {}),
           ...(form.date ? { move_date: form.date } : {}),

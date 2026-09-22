@@ -170,8 +170,12 @@ export const dict: Dict = {
   "upload.filmingRoom": { no: "Filmer rom", en: "Filming room" },
   "upload.savedToRoom": { no: "Lagret til", en: "Saved to" },
   "upload.videoTooLarge": {
-    no: "Én opptak var for stort og ble ikke lagret. De andre ble sendt inn som vanlig.",
-    en: "One recording was too large and wasn't saved. The rest were submitted as usual.",
+    no: "Opptaket var for stort og ble ikke lagret.",
+    en: "That recording was too large and wasn't saved.",
+  },
+  "upload.videoSaveFailed": {
+    no: "Kunne ikke lagre opptaket akkurat nå. Du kan filme rommet på nytt.",
+    en: "Couldn't save that recording right now. You can film the room again.",
   },
 
   "upload.roomTemplate": {
