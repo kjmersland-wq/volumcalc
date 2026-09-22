@@ -107,6 +107,22 @@ function formatElapsed(totalSeconds: number): string {
 // Keeps each clip's base64 payload under the server's cap (see estimates.functions.ts).
 const MAX_VIDEO_BASE64_CHARS = 6_000_000;
 
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 3;
+const ZOOM_STEP = 0.25;
+
+/** Waits for a live <video> to know its native frame size, so the canvas can be sized to match. */
+function waitForVideoMetadata(video: HTMLVideoElement): Promise<void> {
+  if (video.readyState >= 1 && video.videoWidth > 0) return Promise.resolve();
+  return new Promise((resolve) => {
+    const onLoaded = () => {
+      video.removeEventListener("loadedmetadata", onLoaded);
+      resolve();
+    };
+    video.addEventListener("loadedmetadata", onLoaded);
+  });
+}
+
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -129,8 +145,13 @@ function UploadPage() {
   const { session } = useAuth();
   const { data: ownCompany } = useCompany();
   const brandingFn = useServerFn(getCompanyByUploadToken);
+  // Holds the raw camera feed off-screen; frames are drawn from here onto
+  // canvasRef so zoom can be baked into what's actually recorded.
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const canvasStreamRef = useRef<MediaStream | null>(null);
+  const drawLoopRef = useRef<number | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<BlobPart[]>([]);
   // Groups every clip filmed in this visit under one storage path prefix;
@@ -159,6 +180,8 @@ function UploadPage() {
   const [recording, setRecording] = useState(false);
   const [startingCamera, setStartingCamera] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [zoomLevel, setZoomLevel] = useState(MIN_ZOOM);
+  const zoomLevelRef = useRef(MIN_ZOOM);
   const [roomVideos, setRoomVideos] = useState<Record<string, { blob: Blob; seconds: number; url: string | null }>>(
     {},
   );
@@ -271,11 +294,27 @@ function UploadPage() {
     setSelectedRoom(roomNames[(index + 1) % roomNames.length] ?? selectedRoom);
   }
 
+  function adjustZoom(delta: number) {
+    setZoomLevel((current) => {
+      const next = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round((current + delta) * 100) / 100));
+      zoomLevelRef.current = next;
+      return next;
+    });
+  }
+
 
   useEffect(() => {
     return () => {
+      if (drawLoopRef.current !== null) {
+        cancelAnimationFrame(drawLoopRef.current);
+        drawLoopRef.current = null;
+      }
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
         mediaRecorderRef.current.stop();
+      }
+      if (canvasStreamRef.current) {
+        canvasStreamRef.current.getTracks().forEach((track) => track.stop());
+        canvasStreamRef.current = null;
       }
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
@@ -291,6 +330,29 @@ function UploadPage() {
     }
   }, [recording]);
 
+  /** Draws the raw camera frame onto the visible canvas, cropped/scaled by the current zoom
+   * level — this is the frame MediaRecorder actually captures, so zoom ends up in the saved clip. */
+  function drawZoomedFrame() {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (video && canvas && video.videoWidth > 0) {
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+        }
+        const zoom = zoomLevelRef.current;
+        const sw = video.videoWidth / zoom;
+        const sh = video.videoHeight / zoom;
+        const sx = (video.videoWidth - sw) / 2;
+        const sy = (video.videoHeight - sh) / 2;
+        ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+      }
+    }
+    drawLoopRef.current = requestAnimationFrame(drawZoomedFrame);
+  }
+
   async function startVideoCapture() {
     if (recording || startingCamera) return;
     if (freePlan && secondsLeft <= 0) {
@@ -304,18 +366,33 @@ function UploadPage() {
         toast.error(t("upload.cameraUnsupported"));
         return;
       }
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      if (!video || !canvas) return;
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: "environment" } },
         audio: false,
       });
       streamRef.current = stream;
 
+      video.srcObject = stream;
+      await video.play().catch(() => undefined);
+      await waitForVideoMetadata(video);
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const canvasStream = canvas.captureStream(30);
+      canvasStreamRef.current = canvasStream;
+
       recordedChunksRef.current = [];
       const mimeType = typeof MediaRecorder.isTypeSupported === "function" &&
         MediaRecorder.isTypeSupported("video/webm")
         ? "video/webm"
         : undefined;
-      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      const recorder = mimeType
+        ? new MediaRecorder(canvasStream, { mimeType })
+        : new MediaRecorder(canvasStream);
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) recordedChunksRef.current.push(event.data);
       };
@@ -323,10 +400,7 @@ function UploadPage() {
       recorder.start();
 
       setRecording(true);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        void videoRef.current.play().catch(() => undefined);
-      }
+      drawLoopRef.current = requestAnimationFrame(drawZoomedFrame);
     } catch {
       toast.error(t("upload.cameraFailed"));
       setRecording(false);
@@ -336,11 +410,21 @@ function UploadPage() {
   }
 
   function stopCameraTracks() {
+    if (drawLoopRef.current !== null) {
+      cancelAnimationFrame(drawLoopRef.current);
+      drawLoopRef.current = null;
+    }
+    if (canvasStreamRef.current) {
+      canvasStreamRef.current.getTracks().forEach((track) => track.stop());
+      canvasStreamRef.current = null;
+    }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     if (videoRef.current) videoRef.current.srcObject = null;
+    setZoomLevel(MIN_ZOOM);
+    zoomLevelRef.current = MIN_ZOOM;
     setRecording(false);
   }
 
@@ -604,13 +688,16 @@ function UploadPage() {
               </div>
 
               <div className="relative overflow-hidden rounded-2xl border border-border bg-black">
+                {/* Off-screen: the raw camera feed, used only as the source drawZoomedFrame() reads from. */}
                 <video
                   ref={videoRef}
                   autoPlay
                   playsInline
                   muted
-                  className="aspect-video w-full object-cover"
+                  style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }}
                 />
+                {/* Visible preview — also what MediaRecorder actually captures, so zoom is real. */}
+                <canvas ref={canvasRef} className="aspect-video w-full object-cover" />
                 <span className="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-black/70 px-3 py-1 text-xs font-bold text-white">
                   <span className="size-2 animate-pulse rounded-full bg-red-500" aria-hidden="true" />
                   🔴 {t("upload.recordingLive")} · {formatElapsed(elapsedSeconds)}
@@ -623,6 +710,33 @@ function UploadPage() {
                     {t("upload.freeLeft")}: {secondsLeft}s
                   </span>
                 )}
+                <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/70 p-1">
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="size-8 rounded-full text-white hover:bg-white/20 hover:text-white"
+                    aria-label={t("upload.zoomOut")}
+                    disabled={zoomLevel <= MIN_ZOOM}
+                    onClick={() => adjustZoom(-ZOOM_STEP)}
+                  >
+                    <Minus className="size-4" />
+                  </Button>
+                  <span className="min-w-10 text-center text-xs font-bold text-white tabular-nums">
+                    {Number(zoomLevel.toFixed(2))}x
+                  </span>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="size-8 rounded-full text-white hover:bg-white/20 hover:text-white"
+                    aria-label={t("upload.zoomIn")}
+                    disabled={zoomLevel >= MAX_ZOOM}
+                    onClick={() => adjustZoom(ZOOM_STEP)}
+                  >
+                    <Plus className="size-4" />
+                  </Button>
+                </div>
               </div>
 
               <p className="text-xs text-muted-foreground">

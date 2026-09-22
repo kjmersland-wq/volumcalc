@@ -177,6 +177,8 @@ export const dict: Dict = {
     no: "Kunne ikke lagre opptaket akkurat nå. Du kan filme rommet på nytt.",
     en: "Couldn't save that recording right now. You can film the room again.",
   },
+  "upload.zoomIn": { no: "Zoom inn", en: "Zoom in" },
+  "upload.zoomOut": { no: "Zoom ut", en: "Zoom out" },
 
   "upload.roomTemplate": {
     no: "Sjekkliste",
