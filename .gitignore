@@ -16,6 +16,12 @@ dist-ssr
 .nitro
 *.local
 
+# Environment variables — never commit these; keep only a checked-in
+# .env.example with placeholder values if one is needed.
+.env
+.env.*
+!.env.example
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
