@@ -34,6 +34,7 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://www.volumcalc.com/pricing" }],
   }),
   component: Pricing,
 });
@@ -175,7 +176,7 @@ function Pricing() {
                     {t("price.popular")}
                   </span>
                 )}
-                <h2 className="text-lg font-semibold">{plan.name}</h2>
+                <h3 className="text-lg font-semibold">{plan.name}</h3>
                 <p className="mt-4 text-3xl font-bold">
                   {plan.price}
                   {plan.price.match(/^[0-9\s]+$/) && (

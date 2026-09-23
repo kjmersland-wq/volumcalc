@@ -24,6 +24,7 @@ export const Route = createFileRoute("/demo")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://www.volumcalc.com/demo" }],
   }),
   component: DemoPage,
 });

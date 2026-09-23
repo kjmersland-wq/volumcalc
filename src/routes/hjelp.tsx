@@ -285,6 +285,7 @@ export const Route = createFileRoute("/hjelp")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://www.volumcalc.com/hjelp" }],
     scripts: [{ type: "application/ld+json", children: JSON.stringify(faqSchema) }],
   }),
   component: HelpPage,

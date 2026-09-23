@@ -70,7 +70,7 @@ export function LandingPage() {
             <div className="relative">
               <img
                 src={heroRoom}
-                alt="Living room with furniture and moving boxes ready to be measured"
+                alt={t("hero.imageAlt")}
                 width={1408}
                 height={1008}
                 className="w-full rounded-2xl border border-border object-cover shadow-[var(--shadow-lift)]"

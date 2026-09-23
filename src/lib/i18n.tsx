@@ -82,6 +82,10 @@ export const dict: Dict = {
   "hero.stat1": { no: "raskere enn befaring", en: "faster than a survey" },
   "hero.stat2": { no: "gjenstander gjenkjent", en: "standard items available" },
   "hero.stat3": { no: "færre tvister", en: "fewer disputes" },
+  "hero.imageAlt": {
+    no: "Stue med møbler og flytteesker klare til å bli målt opp",
+    en: "Living room with furniture and moving boxes ready to be measured",
+  },
 
   "how.title": { no: "Fra bilder til tilbud i tre steg", en: "From photos to quote in three simple steps" },
   "how.1t": { no: "Ta bilder av rommet i ditt tempo", en: "Snap a few photos, at your own pace" },

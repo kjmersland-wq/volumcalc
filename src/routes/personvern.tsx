@@ -17,6 +17,7 @@ export const Route = createFileRoute("/personvern")({
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://www.volumcalc.com/personvern" }],
   }),
   component: PrivacyPage,
 });

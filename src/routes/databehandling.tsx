@@ -17,6 +17,7 @@ export const Route = createFileRoute("/databehandling")({
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://www.volumcalc.com/databehandling" }],
   }),
   component: DpaPage,
 });
