@@ -23,7 +23,9 @@ export function LandingShareButtons() {
   const copy = shareCopy[lang];
 
   function shareUrl() {
-    return typeof window === "undefined" ? "https://www.volumcalc.com/" : window.location.href.split("?")[0].split("#")[0];
+    return typeof window === "undefined"
+      ? "https://www.volumcalc.com/"
+      : `${window.location.origin}${window.location.pathname}`;
   }
 
   function open(href: string) {
