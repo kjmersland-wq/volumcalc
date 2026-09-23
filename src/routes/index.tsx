@@ -2,6 +2,21 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LandingPage } from "@/components/LandingPage";
 import { hreflangLinks } from "@/lib/language-page-meta";
 
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "VolumCalc",
+  url: "https://www.volumcalc.com/",
+  logo: "https://www.volumcalc.com/favicon.svg",
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "VolumCalc",
+  url: "https://www.volumcalc.com/",
+};
+
 export const Route = createFileRoute("/")({
   staticData: { sitemap: true },
   head: () => ({
@@ -30,6 +45,10 @@ export const Route = createFileRoute("/")({
       { name: "twitter:image", content: "https://www.volumcalc.com/og-volumcalc-en.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://www.volumcalc.com/" }, ...hreflangLinks()],
+    scripts: [
+      { type: "application/ld+json", children: JSON.stringify(organizationSchema) },
+      { type: "application/ld+json", children: JSON.stringify(websiteSchema) },
+    ],
   }),
   component: LandingPage,
 });
