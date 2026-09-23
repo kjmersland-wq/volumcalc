@@ -11,8 +11,26 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { LanguageProvider, type Lang } from "@/lib/i18n";
+import { LanguageProvider, translate, type Lang } from "@/lib/i18n";
 import { Toaster } from "@/components/ui/sonner";
+
+// Path-segment codes used by the og-volumcalc-*.jpg filenames (see
+// language-page-meta.ts) — differ from the Lang codes for Swedish/Danish,
+// which use their /se and /dk URL prefixes instead of sv/da.
+const LANG_TO_IMAGE_CODE: Record<Lang, string> = {
+  no: "no",
+  en: "en",
+  sv: "se",
+  da: "dk",
+  fi: "fi",
+  de: "de",
+  nl: "nl",
+  fr: "fr",
+  pl: "pl",
+  es: "es",
+  it: "it",
+  pt: "pt",
+};
 
 function NotFoundComponent() {
   return (
@@ -79,10 +97,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; init
   validateSearch: (search: Record<string, unknown>): { lang?: "no" | "en" } =>
     search["lang"] === "no" || search["lang"] === "en" ? { lang: search["lang"] } : {},
   head: ({ match }) => {
-    const norwegian = match.search.lang === "no";
-    const socialImage = norwegian
-      ? "https://volumcalc.com/og-volumcalc-no.jpg"
-      : "https://volumcalc.com/og-volumcalc-en.jpg";
+    const lang = match.context.initialLang;
+    const imageCode = LANG_TO_IMAGE_CODE[lang] ?? "en";
+    const socialImage = `https://volumcalc.com/og-volumcalc-${imageCode}.jpg`;
     return {
       meta: [
         { charSet: "utf-8" },
@@ -113,9 +130,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; init
         { property: "og:image:height", content: "630" },
         {
           property: "og:image:alt",
-          content: norwegian
-            ? "VolumCalc – romvis volumberegning fra bilder"
-            : "VolumCalc — room-by-room volume estimates from your own photos",
+          content: `VolumCalc — ${translate("hero.badge", lang)}`,
         },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:image", content: socialImage },
