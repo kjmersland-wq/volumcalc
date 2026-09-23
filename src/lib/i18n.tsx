@@ -667,46 +667,69 @@ function isLang(value: unknown): value is Lang {
   return typeof value === "string" && (SUPPORTED_LANGS as string[]).includes(value);
 }
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("en");
+const PATH_LANG: Record<string, Lang> = {
+  "/no": "no",
+  "/se": "sv",
+  "/dk": "da",
+  "/fi": "fi",
+  "/de": "de",
+  "/nl": "nl",
+  "/fr": "fr",
+  "/pl": "pl",
+  "/es": "es",
+  "/it": "it",
+  "/pt": "pt",
+};
+
+/**
+ * Pure — no window/localStorage access — so server (via the request URL) and
+ * client (via window.location, before first render) can compute the exact
+ * same value from equivalent input. That's what keeps SSR and hydration in
+ * sync: this must never be called from inside an effect, or the server-
+ * rendered page would show English while the client silently swaps language
+ * after the fact (which is what happened before this existed).
+ */
+export function resolveLangFromRequest(pathname: string, search: string, host: string): Lang {
+  const params = new URLSearchParams(search);
+  const urlLang = params.get("lang");
+  if (isLang(urlLang)) return urlLang;
+  const normalizedPath = pathname.replace(/\/$/, "");
+  const firstSegment = `/${normalizedPath.split("/").filter(Boolean)[0] ?? ""}`;
+  const fromPath = PATH_LANG[normalizedPath] ?? PATH_LANG[firstSegment];
+  if (fromPath) return fromPath;
+  // No path/query signal: .com and other hosts start in English, .no starts in Norwegian
+  if (host.endsWith(".no")) return "no";
+  return "en";
+}
+
+export function LanguageProvider({
+  children,
+  initialLang = "en",
+}: {
+  children: ReactNode;
+  initialLang?: Lang;
+}) {
+  const [lang, setLangState] = useState<Lang>(initialLang);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const urlLang = params.get("lang");
-    if (isLang(urlLang)) {
-      setLangState(urlLang);
-      window.localStorage.setItem("volumcalc-lang", urlLang);
-      return;
+    // The initial render (server and client alike) already resolved the
+    // language from the URL/host via resolveLangFromRequest — this effect
+    // only handles what genuinely can't be known before hydration: a
+    // returning visitor's saved preference on a page with no language
+    // signal of its own in the URL (e.g. a direct visit to /upload).
+    if (window.localStorage.getItem("volumcalc-lang") === null) {
+      window.localStorage.setItem("volumcalc-lang", initialLang);
     }
-    const pathLang: Record<string, Lang> = {
-      "/no": "no",
-      "/se": "sv",
-      "/dk": "da",
-      "/fi": "fi",
-      "/de": "de",
-      "/nl": "nl",
-      "/fr": "fr",
-      "/pl": "pl",
-      "/es": "es",
-      "/it": "it",
-      "/pt": "pt",
-    };
+    const params = new URLSearchParams(window.location.search);
+    const hasUrlSignal = isLang(params.get("lang"));
     const normalizedPath = window.location.pathname.replace(/\/$/, "");
     const firstSegment = `/${normalizedPath.split("/").filter(Boolean)[0] ?? ""}`;
-    const fromPath = pathLang[normalizedPath] ?? pathLang[firstSegment];
-    if (fromPath) {
-      setLangState(fromPath);
-      window.localStorage.setItem("volumcalc-lang", fromPath);
-      return;
-    }
+    const hasPathSignal = Boolean(PATH_LANG[normalizedPath] ?? PATH_LANG[firstSegment]);
+    if (hasUrlSignal || hasPathSignal) return;
+
     const stored = window.localStorage.getItem("volumcalc-lang");
-    if (isLang(stored)) {
-      setLangState(stored);
-      return;
-    }
-    // No saved choice: .com and other hosts start in English, .no starts in Norwegian
-    const host = window.location.hostname;
-    if (host.endsWith(".no")) setLangState("no");
+    if (isLang(stored) && stored !== initialLang) setLangState(stored);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setLang = useCallback((l: Lang) => {
