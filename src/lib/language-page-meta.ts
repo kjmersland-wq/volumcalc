@@ -4,6 +4,34 @@ export type LanguagePageMeta = {
   path: string;
 };
 
+// The homepage's 12 language variants — every hreflang-tagged page must
+// list all of these (including itself), so search engines know they're
+// alternates of the same content, not duplicates or unrelated pages.
+const HREFLANG_PATHS: Record<string, string> = {
+  en: "/",
+  no: "/no",
+  sv: "/se",
+  da: "/dk",
+  fi: "/fi",
+  de: "/de",
+  nl: "/nl",
+  fr: "/fr",
+  pl: "/pl",
+  es: "/es",
+  it: "/it",
+  pt: "/pt",
+};
+
+export function hreflangLinks(): { rel: "alternate"; hreflang: string; href: string }[] {
+  const links = Object.entries(HREFLANG_PATHS).map(([hreflang, path]) => ({
+    rel: "alternate" as const,
+    hreflang,
+    href: `https://www.volumcalc.com${path}`,
+  }));
+  links.push({ rel: "alternate", hreflang: "x-default", href: "https://www.volumcalc.com/" });
+  return links;
+}
+
 export function languagePageHead({ title, description, path }: LanguagePageMeta) {
   const languageCode = path.slice(1);
   const image = `https://www.volumcalc.com/og-volumcalc-${languageCode}.jpg`;
@@ -21,6 +49,6 @@ export function languagePageHead({ title, description, path }: LanguagePageMeta)
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: image },
     ],
-    links: [{ rel: "canonical", href: `https://www.volumcalc.com${path}` }],
+    links: [{ rel: "canonical", href: `https://www.volumcalc.com${path}` }, ...hreflangLinks()],
   };
 }

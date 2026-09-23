@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LandingPage } from "@/components/LandingPage";
+import { hreflangLinks } from "@/lib/language-page-meta";
 
 export const Route = createFileRoute("/")({
   staticData: { sitemap: true },
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: "https://www.volumcalc.com/og-volumcalc-en.jpg" },
     ],
-    links: [{ rel: "canonical", href: "https://www.volumcalc.com/" }],
+    links: [{ rel: "canonical", href: "https://www.volumcalc.com/" }, ...hreflangLinks()],
   }),
   component: LandingPage,
 });
