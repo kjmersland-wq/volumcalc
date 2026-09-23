@@ -1,5 +1,8 @@
-// UI translations (sv, da, pl, de). English is the source of truth.
-export const extraTranslations: Record<"sv" | "da" | "pl" | "de", Record<string, string>> = {
+// UI translations (sv, da, pl, de, fi, nl, fr, es, it, pt). English is the source of truth.
+export const extraTranslations: Record<
+  "sv" | "da" | "pl" | "de" | "fi" | "nl" | "fr" | "es" | "it" | "pt",
+  Record<string, string>
+> = {
   "sv": {
     "nav.contact": "Kontakt",
     "contact.badge": "Kontakta oss",
@@ -1240,5 +1243,11 @@ export const extraTranslations: Record<"sv" | "da" | "pl" | "de", Record<string,
     "demo.sub": "Ein Beispiel mit einem fiktiven Unternehmen. Ihr eigenes Logo und Ihre Firmendaten oben, Ihr eigener geheimer Freigabelink, und in der Liste nur Ihre eigenen Schätzungen.",
     "demo.isolation": "Jedes Konto ist getrennt: Ein Unternehmen kann niemals Schätzungen eines anderen Unternehmens sehen.",
     "demo.cta": "Möchten Sie auch so ein Konto?"
-  }
+  },
+  "fi": {},
+  "nl": {},
+  "fr": {},
+  "es": {},
+  "it": {},
+  "pt": {}
 } as const;
