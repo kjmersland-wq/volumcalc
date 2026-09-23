@@ -725,7 +725,7 @@ export function translate(key: string, lang: Lang): string {
   const entry = dict[key];
   if (!entry) return key;
   if (lang === "no" || lang === "en") return entry[lang];
-  if (lang === "sv" || lang === "da" || lang === "pl") {
+  if (lang === "sv" || lang === "da" || lang === "pl" || lang === "de") {
     return extraTranslations[lang]?.[key] ?? entry.en;
   }
   return entry.en;

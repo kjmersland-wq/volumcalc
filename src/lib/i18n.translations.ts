@@ -1,5 +1,5 @@
-// Auto-generated UI translations (sv, da, pl). English is the source of truth.
-export const extraTranslations: Record<"sv" | "da" | "pl", Record<string, string>> = {
+// UI translations (sv, da, pl, de). English is the source of truth.
+export const extraTranslations: Record<"sv" | "da" | "pl" | "de", Record<string, string>> = {
   "sv": {
     "nav.contact": "Kontakt",
     "contact.badge": "Kontakta oss",
@@ -1013,5 +1013,6 @@ export const extraTranslations: Record<"sv" | "da" | "pl", Record<string, string
     "dash.quotesEmpty": "Brak zapytań.",
     "dash.markHandled": "Oznacz jako załatwione",
     "dash.handled": "Załatwione"
-  }
+  },
+  "de": {}
 } as const;
