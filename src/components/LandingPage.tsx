@@ -6,6 +6,7 @@ import { ContactForm, ContactDetails } from "@/components/ContactForm";
 import { useI18n } from "@/lib/i18n";
 import heroRoom from "@/assets/hero-room.jpg";
 import { Link } from "@tanstack/react-router";
+import { LandingShareButtons } from "@/components/LandingShareButtons";
 
 export function LandingPage() {
   const { t } = useI18n();
@@ -100,6 +101,8 @@ export function LandingPage() {
             ))}
           </div>
         </section>
+
+        <LandingShareButtons />
 
         <section className="bg-muted/40 py-20">
           <div className="mx-auto max-w-6xl px-4">
