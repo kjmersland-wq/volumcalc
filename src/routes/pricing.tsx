@@ -12,6 +12,7 @@ import {
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
+import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
 import { useI18n } from "@/lib/i18n";
 import { approxPrice, formatApproxInline } from "@/lib/currency";
 import { cn } from "@/lib/utils";
@@ -145,16 +146,27 @@ function Pricing() {
                     ))}
                   </ul>
                   {plan.priceId ? (
-                    <Button
-                      className="mt-8"
-                      variant={
-                        plan.priceId === "volumcalc_single_estimate_nok" ? "default" : "outline"
-                      }
-                      onClick={() => setCheckout({ priceId: plan.priceId, name: plan.name })}
-                    >
-                      <LockKeyhole className="size-4" />
-                      {t("payment.buy")}
-                    </Button>
+                    <>
+                      <Button
+                        className="mt-8"
+                        variant={
+                          plan.priceId === "volumcalc_single_estimate_nok" ? "default" : "outline"
+                        }
+                        disabled={!PURCHASES_ENABLED}
+                        onClick={() =>
+                          PURCHASES_ENABLED &&
+                          setCheckout({ priceId: plan.priceId, name: plan.name })
+                        }
+                      >
+                        <LockKeyhole className="size-4" />
+                        {t("payment.buy")}
+                      </Button>
+                      {!PURCHASES_ENABLED && (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {PURCHASES_PAUSED_MESSAGE[lang]}
+                        </p>
+                      )}
+                    </>
                   ) : (
                     <Button asChild className="mt-8" variant="outline">
                       <Link to="/upload">{t("price.cta")}</Link>
@@ -213,14 +225,25 @@ function Pricing() {
                     ))}
                   </ul>
                   {plan.priceId ? (
-                    <Button
-                      className="mt-8"
-                      variant="default"
-                      onClick={() => setCheckout({ priceId: plan.priceId, name: plan.name })}
-                    >
-                      <LockKeyhole className="size-4" />
-                      {t("payment.subscribe")}
-                    </Button>
+                    <>
+                      <Button
+                        className="mt-8"
+                        variant="default"
+                        disabled={!PURCHASES_ENABLED}
+                        onClick={() =>
+                          PURCHASES_ENABLED &&
+                          setCheckout({ priceId: plan.priceId, name: plan.name })
+                        }
+                      >
+                        <LockKeyhole className="size-4" />
+                        {t("payment.subscribe")}
+                      </Button>
+                      {!PURCHASES_ENABLED && (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {PURCHASES_PAUSED_MESSAGE[lang]}
+                        </p>
+                      )}
+                    </>
                   ) : (
                     <Button asChild className="mt-8" variant="outline">
                       <Link to="/auth">{t("price.cta")}</Link>

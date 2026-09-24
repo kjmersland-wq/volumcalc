@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import type Stripe from "stripe";
 import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib/stripe.server";
+import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
 
 type CheckoutResult = { clientSecret: string } | { error: string };
 
@@ -61,6 +62,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     return { priceId: data.priceId, returnUrl: data.returnUrl, environment: data.environment };
   })
   .handler(async ({ data }): Promise<CheckoutResult> => {
+    if (!PURCHASES_ENABLED) return { error: PURCHASES_PAUSED_MESSAGE.en };
     try {
       const identity = await resolveIdentity();
       const stripe = createStripeClient(data.environment);
