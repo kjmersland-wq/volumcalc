@@ -137,6 +137,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; init
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:image", content: socialImage },
       ],
+      scripts: [
+        {
+          src: "https://km-techlabs.com/t.js",
+          defer: true,
+          "data-site": "volumcalc.com",
+        },
+      ],
       links: [
         {
           rel: "stylesheet",
