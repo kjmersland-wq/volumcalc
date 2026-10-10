@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -13,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LanguageProvider, translate, type Lang } from "@/lib/i18n";
 import { Toaster } from "@/components/ui/sonner";
+import { MaintenanceGate } from "@/components/MaintenanceGate";
 
 // Path-segment codes used by the og-volumcalc-*.jpg filenames (see
 // language-page-meta.ts) — differ from the Lang codes for Swedish/Danish,
@@ -54,7 +56,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -178,7 +180,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <LanguageProvider initialLang={initialLang}>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
+        <MaintenanceGate>
+          <Outlet />
+        </MaintenanceGate>
         <Toaster position="top-center" richColors />
       </LanguageProvider>
     </QueryClientProvider>
