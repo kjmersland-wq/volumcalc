@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireOwner } from "@/lib/owner-middleware";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import { USER_VERIFIED_SECURITY_LABEL } from "./volume-database";
 
@@ -117,6 +117,7 @@ const uploadRoomPhotoSchema = z.object({
  * picked at once.
  */
 export const uploadRoomPhoto = createServerFn({ method: "POST" })
+  .middleware([requireOwner])
   .inputValidator((data: unknown) => uploadRoomPhotoSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -183,6 +184,7 @@ const sharedSchema = z.object({
  * the share token for the estimate it just created.
  */
 export const createEstimate = createServerFn({ method: "POST" })
+  .middleware([requireOwner])
   .inputValidator((data: unknown) => createSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -299,6 +301,7 @@ export const createEstimate = createServerFn({ method: "POST" })
  * customer's data.
  */
 export const getSharedEstimate = createServerFn({ method: "POST" })
+  .middleware([requireOwner])
   .inputValidator((data: unknown) => sharedSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -353,6 +356,7 @@ const quoteSchema = z.object({
  * The token is validated server-side before anything is written.
  */
 export const requestQuote = createServerFn({ method: "POST" })
+  .middleware([requireOwner])
   .inputValidator((data: unknown) => quoteSchema.parse(data))
   .handler(async ({ data }) => {
     if (!data.phone && !data.email) throw new Error("A phone number or email is required");
@@ -411,6 +415,7 @@ const updateSharedItemSchema = z.object({
  * touch another estimate's items.
  */
 export const updateSharedEstimateItem = createServerFn({ method: "POST" })
+  .middleware([requireOwner])
   .inputValidator((data: unknown) => updateSharedItemSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -477,7 +482,7 @@ export const updateSharedEstimateItem = createServerFn({ method: "POST" })
  * estimate can never be claimed by guessing ids.
  */
 export const claimEstimate = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .inputValidator((data: unknown) => sharedSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

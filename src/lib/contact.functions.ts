@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireOwner } from "@/lib/owner-middleware";
 import { z } from "zod";
 
 const schema = z.object({
@@ -12,6 +13,7 @@ const schema = z.object({
 });
 
 export const sendContactMessage = createServerFn({ method: "POST" })
+  .middleware([requireOwner])
   .inputValidator((data: unknown) => schema.parse(data))
   .handler(async ({ data }) => {
     if (data.company) return { ok: true, emailed: false };

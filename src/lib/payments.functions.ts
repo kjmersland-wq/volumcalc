@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireOwner } from "@/lib/owner-middleware";
 import { getRequest } from "@tanstack/react-start/server";
 import type Stripe from "stripe";
 import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib/stripe.server";
@@ -54,6 +55,7 @@ async function resolveOrCreateCustomer(
 }
 
 export const createCheckoutSession = createServerFn({ method: "POST" })
+  .middleware([requireOwner])
   .inputValidator((data: { priceId: string; returnUrl: string; environment: StripeEnv }) => {
     if (!/^[a-zA-Z0-9_-]+$/.test(data.priceId)) throw new Error("Invalid priceId");
     if (!data.returnUrl.startsWith("http://") && !data.returnUrl.startsWith("https://")) {

@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireOwner } from "@/lib/owner-middleware";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { catalogForRoom } from "./volume-database";
 import { roomTemplateForName } from "./rooms";
 import { callAIGatewayVisionJson, GEMINI_3_8_FLASH_MODEL } from "./ai-gateway.server";
@@ -57,7 +57,7 @@ const suggestedItemSchema = z.object({
  * regardless of what the model claims.
  */
 export const analyzeRoomPhotos = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .inputValidator((data: unknown) => analyzeSchema.parse(data))
   .handler(async ({ data, context }) => {
     await assertUnlimitedOrAdmin(context as any);

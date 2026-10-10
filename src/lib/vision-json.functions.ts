@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireOwner } from "@/lib/owner-middleware";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { callAIGatewayVisionJson, GEMINI_3_8_FLASH_MODEL } from "./ai-gateway.server";
 
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
@@ -31,7 +31,7 @@ const inputSchema = z.object({
 });
 
 export const extractStructuredJsonFromImage = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .inputValidator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data }) => {
     try {
