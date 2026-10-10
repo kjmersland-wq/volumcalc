@@ -620,6 +620,7 @@ export const dict: Dict = {
   "mtime.crew2": { no: "1 flyttekar + 1 hjelper", en: "1 mover + 1 helper" },
   "mtime.includePacking": { no: "Flyttefolkene pakker ned innboet", en: "The crew packs your belongings" },
   "mtime.includeUnpacking": { no: "Flyttefolkene pakker også ut på ny adresse", en: "The crew also unpacks at the new address" },
+  "mtime.share": { no: "Ta med tidsestimat i PDF og e-post til flyttefirma", en: "Include the time estimate in the PDF and mover e-mails" },
   "mtime.total": { no: "Samlet estimert tid", en: "Total estimated time" },
   "mtime.range": { no: "Typisk spenn", en: "Typical range" },
   "mtime.pickup": { no: "Hos avsender: til bilen er lastet og sikret", en: "At the old address: until the truck is loaded and secured" },

@@ -910,6 +910,7 @@ export const reportLangs: Record<string, Record<string, string>> = {
     "mov.failed": "Wysłanie nie powiodło się",
     "mov.missing": "Podaj swoje imię, e-mail i co najmniej jednego odbiorcę.",
     "mtime.title": "Szacowany czas przeprowadzki",
+    "mtime.share": "Dołącz szacowany czas do PDF i e-maili do firm przeprowadzkowych",
     "mtime.sub": "Pakowanie, demontaż, wynoszenie i załadunek, zabezpieczenie na czas transportu oraz montaż – wyliczone osobno dla każdego przedmiotu, na podstawie rozmiaru, oznaczeń i dostępu.",
     "mtime.crew": "Ekipa",
     "mtime.persons": "osoby",

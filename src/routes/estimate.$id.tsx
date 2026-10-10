@@ -156,6 +156,23 @@ function EstimatePage() {
   const [crew, setCrew] = useState(2);
   const [includePacking, setIncludePacking] = useState(true);
   const [includeUnpacking, setIncludeUnpacking] = useState(false);
+  // Whether the time estimate goes into the PDF and the mover e-mail. Remembered per report in this browser.
+  const [shareTime, setShareTime] = useState(true);
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(`volumcalc.shareTime.${id}`) === "0") setShareTime(false);
+    } catch {
+      /* ignore unreadable storage */
+    }
+  }, [id]);
+  function changeShareTime(value: boolean) {
+    setShareTime(value);
+    try {
+      window.localStorage.setItem(`volumcalc.shareTime.${id}`, value ? "1" : "0");
+    } catch {
+      /* ignore unwritable storage */
+    }
+  }
 
   // Report labels follow the chosen report language; user-entered text is untouched.
   const rt = (key: string) =>
@@ -803,6 +820,8 @@ function EstimatePage() {
             includeUnpacking={includeUnpacking}
             onIncludePackingChange={setIncludePacking}
             onIncludeUnpackingChange={setIncludeUnpacking}
+            shareWithMovers={shareTime}
+            onShareWithMoversChange={changeShareTime}
           />
 
           {!businessView && !tenderMode && (
@@ -834,12 +853,16 @@ function EstimatePage() {
               token={shareToken}
               rt={rt}
               defaultLang={reportLang}
-              time={{
-                crew: moveTime.crew,
-                total: Math.round(moveTime.total),
-                low: Math.round(moveTime.low),
-                high: Math.round(moveTime.high),
-              }}
+              {...(shareTime
+                ? {
+                    time: {
+                      crew: moveTime.crew,
+                      total: Math.round(moveTime.total),
+                      low: Math.round(moveTime.low),
+                      high: Math.round(moveTime.high),
+                    },
+                  }
+                : {})}
             />
           )}
 
@@ -965,18 +988,18 @@ function EstimatePage() {
                             {Math.round(item.length_cm)} × {Math.round(item.width_cm)} ×{" "}
                             {Math.round(item.height_cm)} cm · {m3(item.volume_m3)}
                             {moveTime.perItem[item.id] !== undefined && (
-                              <>
-                                {" · "}
-                                <span title={`${rt("mtime.perItem")} (${crew} ${rt("mtime.persons")})`}>
-                                  ≈{" "}
-                                  {formatDuration(
-                                    Math.max(1, moveTime.perItem[item.id]!),
-                                    rt("mtime.hour"),
-                                    rt("mtime.minute"),
-                                    1,
-                                  )}
-                                </span>
-                              </>
+                              <span
+                                className={shareTime ? undefined : "print:hidden"}
+                                title={`${rt("mtime.perItem")} (${crew} ${rt("mtime.persons")})`}
+                              >
+                                {" · ≈ "}
+                                {formatDuration(
+                                  Math.max(1, moveTime.perItem[item.id]!),
+                                  rt("mtime.hour"),
+                                  rt("mtime.minute"),
+                                  1,
+                                )}
+                              </span>
                             )}
                           </p>
 

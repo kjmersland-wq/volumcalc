@@ -23,6 +23,9 @@ type Props = {
   includeUnpacking: boolean;
   onIncludePackingChange: (value: boolean) => void;
   onIncludeUnpackingChange: (value: boolean) => void;
+  /** Whether the estimate appears in the printed/PDF report and the mover e-mail. */
+  shareWithMovers: boolean;
+  onShareWithMoversChange: (value: boolean) => void;
 };
 
 export function MoveTimeEstimator({
@@ -36,6 +39,8 @@ export function MoveTimeEstimator({
   includeUnpacking,
   onIncludePackingChange,
   onIncludeUnpackingChange,
+  shareWithMovers,
+  onShareWithMoversChange,
 }: Props) {
   const result = useMemo(
     () => estimateMoveTime(items, { crew, pickup, delivery, includePacking, includeUnpacking }),
@@ -89,7 +94,7 @@ export function MoveTimeEstimator({
   }
 
   return (
-    <section className="mt-6 rounded-xl border border-border bg-card p-6">
+    <section className={cn("mt-6 rounded-xl border border-border bg-card p-6", !shareWithMovers && "print:hidden")}>
       <div className="flex items-center gap-2">
         <Clock className="size-5 text-primary" />
         <h2 className="text-lg font-semibold">{rt("mtime.title")}</h2>
@@ -127,6 +132,10 @@ export function MoveTimeEstimator({
           <div className="flex items-center gap-2">
             <Switch id="mt-pack" checked={includePacking} onCheckedChange={onIncludePackingChange} />
             <Label htmlFor="mt-pack">{rt("mtime.includePacking")}</Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch id="mt-share" checked={shareWithMovers} onCheckedChange={onShareWithMoversChange} />
+            <Label htmlFor="mt-share">{rt("mtime.share")}</Label>
           </div>
           <div className="flex items-center gap-2">
             <Switch id="mt-unpack" checked={includeUnpacking} onCheckedChange={onIncludeUnpackingChange} />
