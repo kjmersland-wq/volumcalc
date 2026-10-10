@@ -38,6 +38,8 @@ import { QuoteRequestDialog } from "@/components/QuoteRequestDialog";
 import { useI18n, translate, SUPPORTED_LANGS, LANG_LABELS, type Lang } from "@/lib/i18n";
 import { reportLangs } from "@/lib/report-langs";
 import { MovePriceEstimator } from "@/components/MovePriceEstimator";
+import { MoveTimeEstimator } from "@/components/MoveTimeEstimator";
+import { estimateMoveTime, formatDuration, siteFrom } from "@/lib/move-time";
 import { MoverOutreach } from "@/components/MoverOutreach";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -149,6 +151,10 @@ function EstimatePage() {
   const [titleDraft, setTitleDraft] = useState<string | null>(null);
   const [tenderMode, setTenderMode] = useState(false);
   const [logistics, setLogistics] = useState<Logistics | null>(null);
+  // Default crew: one mover plus one helper.
+  const [crew, setCrew] = useState(2);
+  const [includePacking, setIncludePacking] = useState(true);
+  const [includeUnpacking, setIncludeUnpacking] = useState(false);
 
   // Report labels follow the chosen report language; user-entered text is untouched.
   const rt = (key: string) =>
@@ -443,6 +449,28 @@ function EstimatePage() {
   const included = items.filter((item) => item.is_included !== false);
   const netVolume = Math.round(included.reduce((sum, i) => sum + Number(i.volume_m3), 0) * 100) / 100;
   const gross = recommendedVolume(netVolume);
+
+  // Pickup uses the "Access & conditions" fields; delivery uses the delivery
+  // fields. Both update live as they are edited.
+  const pickupSite = useMemo(
+    () => siteFrom(access?.access_floor, access?.has_elevator, access?.carry_distance_m),
+    [access?.access_floor, access?.has_elevator, access?.carry_distance_m],
+  );
+  const deliverySite = useMemo(
+    () => siteFrom(logistics?.delivery_floor, logistics?.delivery_elevator, logistics?.delivery_carry_distance),
+    [logistics?.delivery_floor, logistics?.delivery_elevator, logistics?.delivery_carry_distance],
+  );
+  const moveTime = useMemo(
+    () =>
+      estimateMoveTime(items, {
+        crew,
+        pickup: pickupSite,
+        delivery: deliverySite,
+        includePacking,
+        includeUnpacking,
+      }),
+    [items, crew, pickupSite, deliverySite, includePacking, includeUnpacking],
+  );
 
   if (isLoading || authLoading) {
     return (
@@ -747,6 +775,19 @@ function EstimatePage() {
             </div>
           </div>
 
+          <MoveTimeEstimator
+            items={items}
+            pickup={pickupSite}
+            delivery={deliverySite}
+            rt={rt}
+            crew={crew}
+            onCrewChange={setCrew}
+            includePacking={includePacking}
+            includeUnpacking={includeUnpacking}
+            onIncludePackingChange={setIncludePacking}
+            onIncludeUnpackingChange={setIncludeUnpacking}
+          />
+
           {!businessView && !tenderMode && (
             <MovePriceEstimator
               volumeM3={gross}
@@ -884,6 +925,20 @@ function EstimatePage() {
                           <p className="mt-1 text-xs text-muted-foreground">
                             {Math.round(item.length_cm)} × {Math.round(item.width_cm)} ×{" "}
                             {Math.round(item.height_cm)} cm · {m3(item.volume_m3)}
+                            {moveTime.perItem[item.id] !== undefined && (
+                              <>
+                                {" · "}
+                                <span title={`${rt("mtime.perItem")} (${crew} ${rt("mtime.persons")})`}>
+                                  ≈{" "}
+                                  {formatDuration(
+                                    Math.max(1, moveTime.perItem[item.id]!),
+                                    rt("mtime.hour"),
+                                    rt("mtime.minute"),
+                                    1,
+                                  )}
+                                </span>
+                              </>
+                            )}
                           </p>
 
                           {canEditItems && (
