@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Clock, TriangleAlert, Users } from "lucide-react";
+import { Car, Clock, TriangleAlert, Users } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
@@ -8,8 +8,8 @@ import {
   estimateMoveTime,
   formatDuration,
   type MoveTimeItem,
-  type PhaseKey,
   type SiteAccess,
+  type TimelineStep,
 } from "@/lib/move-time";
 
 type Props = {
@@ -25,18 +25,6 @@ type Props = {
   onIncludeUnpackingChange: (value: boolean) => void;
 };
 
-const PHASE_ORDER: PhaseKey[] = [
-  "pack",
-  "dismantle",
-  "setup",
-  "loadOut",
-  "secure",
-  "unload",
-  "reassemble",
-  "breaks",
-  "unpack",
-];
-
 export function MoveTimeEstimator({
   items,
   pickup,
@@ -49,20 +37,17 @@ export function MoveTimeEstimator({
   onIncludePackingChange,
   onIncludeUnpackingChange,
 }: Props) {
-  const options = { crew, pickup, delivery, includePacking, includeUnpacking };
   const result = useMemo(
-    () => estimateMoveTime(items, options),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items, crew, pickup.floor, pickup.elevator, pickup.carryM, delivery.floor, delivery.elevator, delivery.carryM, includePacking, includeUnpacking],
+    () => estimateMoveTime(items, { crew, pickup, delivery, includePacking, includeUnpacking }),
+    [items, crew, pickup, delivery, includePacking, includeUnpacking],
   );
   const comparison = useMemo(
     () =>
       CREW_SIZES.map((size) => ({
         size,
-        moveDay: estimateMoveTime(items, { ...options, crew: size }).moveDay,
+        total: estimateMoveTime(items, { crew: size, pickup, delivery, includePacking, includeUnpacking }).total,
       })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [items, pickup.floor, pickup.elevator, pickup.carryM, delivery.floor, delivery.elevator, delivery.carryM, includePacking, includeUnpacking],
+    [items, pickup, delivery, includePacking, includeUnpacking],
   );
 
   if (result.total <= 0) return null;
@@ -70,8 +55,38 @@ export function MoveTimeEstimator({
   const h = rt("mtime.hour");
   const min = rt("mtime.minute");
   const fmt = (minutes: number) => formatDuration(minutes, h, min);
-  const rows = PHASE_ORDER.filter((key) => result.phases[key] >= 1);
-  const largest = Math.max(...rows.map((key) => result.phases[key]));
+
+  const pickupSteps = result.steps.filter((step) => step.side === "pickup");
+  const deliverySteps = result.steps.filter((step) => step.side === "delivery");
+
+  function renderSteps(steps: TimelineStep[], total: number) {
+    return (
+      <ol className="mt-3 space-y-3">
+        {steps.map((step, index) => (
+          <li key={`${step.key}-${step.side}`} className="flex gap-3">
+            <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary print:border print:border-current">
+              {index + 1}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline justify-between gap-3 text-sm">
+                <span>{rt(`mtime.ph.${step.key}`)}</span>
+                <span className="shrink-0 font-medium tabular-nums">{fmt(step.minutes)}</span>
+              </div>
+              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted print:border print:border-current">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{ width: `${Math.max(3, (step.minutes / total) * 100)}%` }}
+                />
+              </div>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {rt("mtime.startAt")} {fmt(step.startsAt)}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    );
+  }
 
   return (
     <section className="mt-6 rounded-xl border border-border bg-card p-6">
@@ -126,49 +141,37 @@ export function MoveTimeEstimator({
         <p className="mt-1 text-sm text-muted-foreground">
           {rt("mtime.range")}: {fmt(result.low)} – {fmt(result.high)}
         </p>
-
-        <dl className="mt-4 grid gap-3 sm:grid-cols-3">
-          {(
-            [
-              ["mtime.beforeMove", result.beforeMove],
-              ["mtime.moveDay", result.moveDay],
-              ["mtime.afterMove", result.afterMove],
-            ] as const
-          )
-            .filter(([, minutes]) => minutes >= 1)
-            .map(([key, minutes]) => (
-              <div key={key} className="rounded-lg bg-background/70 p-3">
-                <dt className="text-xs text-muted-foreground">{rt(key)}</dt>
-                <dd className="mt-0.5 text-lg font-semibold">{fmt(minutes)}</dd>
-              </div>
-            ))}
-        </dl>
       </div>
 
-      <div className="mt-5">
-        <p className="text-sm font-semibold">{rt("mtime.breakdown")}</p>
-        <ul className="mt-2 space-y-2.5">
-          {rows.map((key) => (
-            <li key={key}>
-              <div className="flex items-baseline justify-between gap-3 text-sm">
-                <span>{rt(`mtime.ph.${key}`)}</span>
-                <span className="shrink-0 font-medium tabular-nums">{fmt(result.phases[key])}</span>
-              </div>
-              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted print:border print:border-current">
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{ width: `${Math.max(3, (result.phases[key] / largest) * 100)}%` }}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
+      <p className="mt-6 text-sm font-semibold">{rt("mtime.timeline")}</p>
+
+      <div className="mt-3 rounded-lg border border-border p-4">
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="text-sm font-semibold">{rt("mtime.pickup")}</p>
+          <p className="shrink-0 font-semibold tabular-nums text-primary">{fmt(result.pickupTotal)}</p>
+        </div>
+        {renderSteps(pickupSteps, result.pickupTotal)}
       </div>
+
+      <p className="my-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+        <Car className="size-4" />
+        {rt("mtime.drive")}
+      </p>
+
+      {deliverySteps.length > 0 && (
+        <div className="rounded-lg border border-border p-4">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="text-sm font-semibold">{rt("mtime.delivery")}</p>
+            <p className="shrink-0 font-semibold tabular-nums text-primary">{fmt(result.deliveryTotal)}</p>
+          </div>
+          {renderSteps(deliverySteps, result.deliveryTotal)}
+        </div>
+      )}
 
       <div className="mt-5 rounded-lg border border-border p-4">
         <p className="text-sm font-semibold">{rt("mtime.compare")}</p>
         <div className="mt-2 grid grid-cols-3 gap-2 text-center">
-          {comparison.map(({ size, moveDay }) => (
+          {comparison.map(({ size, total }) => (
             <div
               key={size}
               className={cn("rounded-md p-2", size === crew ? "bg-primary/10 text-primary" : "bg-muted/50")}
@@ -176,7 +179,7 @@ export function MoveTimeEstimator({
               <p className="text-xs text-muted-foreground">
                 {size} {rt("mtime.persons")}
               </p>
-              <p className="font-semibold tabular-nums">{fmt(moveDay)}</p>
+              <p className="font-semibold tabular-nums">{fmt(total)}</p>
             </div>
           ))}
         </div>

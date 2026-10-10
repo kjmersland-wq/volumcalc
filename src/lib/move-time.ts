@@ -34,14 +34,15 @@ export type SiteAccess = {
 };
 
 export type PhaseKey =
+  | "arrive"
   | "pack"
   | "dismantle"
   | "loadOut"
   | "secure"
+  | "arriveDelivery"
   | "unload"
   | "reassemble"
   | "unpack"
-  | "setup"
   | "breaks";
 
 export type MoveTimeOptions = {
@@ -52,13 +53,24 @@ export type MoveTimeOptions = {
   includeUnpacking: boolean;
 };
 
+/** One step of the job, in the order the crew does it. */
+export type TimelineStep = {
+  key: PhaseKey;
+  side: "pickup" | "delivery";
+  /** Clock minutes this step takes. */
+  minutes: number;
+  /** Clock minutes from the crew walking in until this step starts. */
+  startsAt: number;
+};
+
 export type MoveTimeResult = {
   crew: number;
-  /** Clock minutes per phase. */
-  phases: Record<PhaseKey, number>;
-  beforeMove: number;
-  moveDay: number;
-  afterMove: number;
+  /** Chronological steps; steps with no time are left out. */
+  steps: TimelineStep[];
+  /** Crew arrives at the old address → truck is loaded and secured. */
+  pickupTotal: number;
+  /** Crew arrives at the new address → everything is in and assembled. */
+  deliveryTotal: number;
   total: number;
   low: number;
   high: number;
@@ -248,8 +260,10 @@ const CREW_EFFICIENCY: Record<number, number> = { 1: 1, 2: 0.88, 3: 0.82, 4: 0.7
 
 /** Unloading is quicker than loading: no puzzle to solve, nothing to wedge. */
 const UNLOAD_FACTOR = 0.85;
-/** Walk-through, floor/door protection, ramp and trolleys: pickup + delivery. */
-const SETUP_MIN = 25;
+/** Crew walks in, goes through the report with the customer, protects floors and doors, rigs ramp and trolleys. */
+const ARRIVE_PICKUP_MIN = 15;
+/** Same at the new address: floor protection, ramp, agreeing where things go. */
+const ARRIVE_DELIVERY_MIN = 10;
 /** Straps, load bars and blankets, once the last item is on board. */
 const SECURE_FIXED_MIN = 10;
 /** Roughly 10 minutes of rest per 2 hours of heavy work. */
@@ -266,7 +280,7 @@ export function estimateMoveTime(items: MoveTimeItem[], options: MoveTimeOptions
   const outFactor = siteFactor(options.pickup);
   const inFactor = siteFactor(options.delivery);
 
-  const person: Record<Exclude<PhaseKey, "setup" | "breaks">, number> = {
+  const person: Record<"pack" | "dismantle" | "loadOut" | "secure" | "unload" | "reassemble" | "unpack", number> = {
     pack: 0,
     dismantle: 0,
     loadOut: 0,
@@ -309,33 +323,48 @@ export function estimateMoveTime(items: MoveTimeItem[], options: MoveTimeOptions
   }
 
   const empty = counted === 0;
-  const phases: Record<PhaseKey, number> = {
-    pack: person.pack / speed,
-    dismantle: person.dismantle / speed,
-    loadOut: person.loadOut / speed,
-    secure: empty ? 0 : person.secure / speed + SECURE_FIXED_MIN,
-    unload: person.unload / speed,
-    reassemble: person.reassemble / speed,
-    unpack: person.unpack / speed,
-    setup: empty ? 0 : SETUP_MIN,
-    breaks: 0,
-  };
+  const w = (minutes: number) => minutes / speed;
 
-  const moveDayWork =
-    phases.dismantle + phases.loadOut + phases.secure + phases.unload + phases.reassemble + phases.setup;
-  phases.breaks = moveDayWork * BREAK_SHARE;
+  const pickupWork: [PhaseKey, number][] = [
+    ["arrive", empty ? 0 : ARRIVE_PICKUP_MIN],
+    ["pack", w(person.pack)],
+    ["dismantle", w(person.dismantle)],
+    ["loadOut", w(person.loadOut)],
+    ["secure", empty ? 0 : w(person.secure) + SECURE_FIXED_MIN],
+  ];
+  const deliveryWork: [PhaseKey, number][] = [
+    ["arriveDelivery", empty ? 0 : ARRIVE_DELIVERY_MIN],
+    ["unload", w(person.unload)],
+    ["reassemble", w(person.reassemble)],
+    ["unpack", w(person.unpack)],
+  ];
+  const sum = (rows: [PhaseKey, number][]) => rows.reduce((acc, [, minutes]) => acc + minutes, 0);
+  pickupWork.push(["breaks", sum(pickupWork) * BREAK_SHARE]);
+  deliveryWork.push(["breaks", sum(deliveryWork) * BREAK_SHARE]);
 
-  const beforeMove = phases.pack;
-  const moveDay = moveDayWork + phases.breaks;
-  const afterMove = phases.unpack;
-  const total = beforeMove + moveDay + afterMove;
+  const steps: TimelineStep[] = [];
+  for (const [side, rows] of [
+    ["pickup", pickupWork],
+    ["delivery", deliveryWork],
+  ] as const) {
+    // The clock restarts at the new address: driving time sits in between.
+    let clock = 0;
+    for (const [key, minutes] of rows) {
+      if (minutes < 1) continue;
+      steps.push({ key, side, minutes, startsAt: clock });
+      clock += minutes;
+    }
+  }
+
+  const pickupTotal = sum(pickupWork);
+  const deliveryTotal = sum(deliveryWork);
+  const total = pickupTotal + deliveryTotal;
 
   return {
     crew,
-    phases,
-    beforeMove,
-    moveDay,
-    afterMove,
+    steps,
+    pickupTotal,
+    deliveryTotal,
     total,
     low: total * RANGE_LOW,
     high: total * RANGE_HIGH,
