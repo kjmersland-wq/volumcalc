@@ -186,7 +186,7 @@ const sharedSchema = z.object({
 export const createEstimate = createServerFn({ method: "POST" })
   .middleware([requireOwner])
   .inputValidator((data: unknown) => createSchema.parse(data))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { analyzeManualItems } = await import("./analyze.server");
 
@@ -220,7 +220,9 @@ export const createEstimate = createServerFn({ method: "POST" })
     // under their own account is gated the same way, against their own
     // identity — server-verified, never client-supplied, so neither path
     // can be spoofed by passing a different company_id.
-    if (data.company_token) {
+    if (context.isOwner) {
+      // Owner is never limited by credits or plan quotas.
+    } else if (data.company_token) {
       if (companyId) {
         const allowed = await consumePlanEntitlement(supabaseAdmin, companyId);
         if (!allowed) throw new Error("COMPANY_QUOTA_EXCEEDED");

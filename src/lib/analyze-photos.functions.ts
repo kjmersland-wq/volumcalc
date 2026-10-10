@@ -60,7 +60,7 @@ export const analyzeRoomPhotos = createServerFn({ method: "POST" })
   .middleware([requireOwner])
   .inputValidator((data: unknown) => analyzeSchema.parse(data))
   .handler(async ({ data, context }) => {
-    await assertUnlimitedOrAdmin(context as any);
+    if (!context.isOwner) await assertUnlimitedOrAdmin(context as any);
 
     const template = roomTemplateForName(data.room);
     const catalog = catalogForRoom(template);

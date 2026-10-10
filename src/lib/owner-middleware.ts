@@ -1,5 +1,6 @@
 import { createMiddleware } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isOwnerEmail } from "@/lib/owner";
 
 /**
  * While the site is closed, every server function is callable by the owner
@@ -10,15 +11,13 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
  * payload, and must be confirmed. To reopen the site, remove this middleware
  * from the server functions (or relax the check below).
  */
-const OWNER_EMAILS = ["kjmersland@gmail.com"];
-
 export const requireOwner = createMiddleware({ type: "function" })
   .middleware([requireSupabaseAuth])
   .server(async ({ next, context }) => {
     const { data, error } = await context.supabase.auth.getUser();
-    const email = data.user?.email?.toLowerCase();
-    if (error || !email || !data.user?.email_confirmed_at || !OWNER_EMAILS.includes(email)) {
+    if (error || !data.user?.email_confirmed_at || !isOwnerEmail(data.user.email)) {
       throw new Error("Forbidden: this site is currently closed");
     }
-    return next();
+    // The owner is never limited by credits, plans or quotas.
+    return next({ context: { isOwner: true as const } });
   });

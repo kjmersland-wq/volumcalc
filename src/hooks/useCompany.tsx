@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { isOwnerEmail } from "@/lib/owner";
 
 export type CompanyProfile = {
   company_name: string;
@@ -64,7 +65,8 @@ function usePlanEntitlement() {
     },
   });
 
-  const hasRole = (roles ?? []).some((row) => row.role === "unlimited" || row.role === "admin");
+  const hasRole =
+    isOwnerEmail(session?.user.email) || (roles ?? []).some((row) => row.role === "unlimited" || row.role === "admin");
   const isUnlimited = Boolean(credits?.unlimited_until && new Date(credits.unlimited_until) > new Date());
   const hasCredits = Boolean(credits?.credits && credits.credits > 0);
   return { hasRole, isUnlimited, hasCredits };
