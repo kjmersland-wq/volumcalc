@@ -478,6 +478,103 @@ export const updateSharedEstimateItem = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+const addItemsSchema = z.object({
+  id: z.string().uuid(),
+  token: z
+    .string()
+    .trim()
+    .min(8)
+    .max(64)
+    .regex(/^[a-f0-9]+$/i),
+  room_id: z.string().uuid().nullable().default(null),
+  items: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1).max(120),
+        name_no: z.string().trim().min(1).max(120),
+        category: z.string().trim().min(1).max(80).default("other"),
+        quantity: z.number().int().min(1).max(999),
+        length_cm: z.number().min(1).max(5000),
+        width_cm: z.number().min(1).max(5000),
+        height_cm: z.number().min(1).max(5000),
+        confidence: z.number().min(0).max(1).default(1),
+        photo_url: z.string().trim().url().max(2000).nullable().default(null),
+      }),
+    )
+    .min(1)
+    .max(40),
+});
+
+/**
+ * Adds new items (typed in, picked from the catalogue or suggested from a new
+ * photo) to an existing report, in one room, and refreshes the report total.
+ * Same share-token check as the other report edits; photo URLs must point at
+ * our own storage so a report can't be made to embed arbitrary images.
+ */
+export const addEstimateItems = createServerFn({ method: "POST" })
+  .middleware([requireOwner])
+  .inputValidator((data: unknown) => addItemsSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: estimate } = await supabaseAdmin
+      .from("estimates")
+      .select("id,share_token")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!estimate || estimate.share_token !== data.token) throw new Error("Estimate not found");
+
+    if (data.room_id) {
+      const { data: room } = await supabaseAdmin
+        .from("estimate_rooms")
+        .select("id,estimate_id")
+        .eq("id", data.room_id)
+        .maybeSingle();
+      if (!room || room.estimate_id !== data.id) throw new Error("Room not found");
+    }
+
+    const storageOrigin = process.env["SUPABASE_URL"];
+    for (const item of data.items) {
+      if (item.photo_url && (!storageOrigin || !item.photo_url.startsWith(`${storageOrigin}/storage/`))) {
+        throw new Error("Invalid photo");
+      }
+    }
+
+    const { error: insertError } = await supabaseAdmin.from("estimate_items").insert(
+      data.items.map((item) => ({
+        estimate_id: data.id,
+        room_id: data.room_id,
+        name: item.name,
+        name_no: item.name_no,
+        category: item.category,
+        quantity: item.quantity,
+        length_cm: item.length_cm,
+        width_cm: item.width_cm,
+        height_cm: item.height_cm,
+        volume_m3:
+          Math.round(((item.length_cm * item.width_cm * item.height_cm * item.quantity) / 1_000_000) * 100) / 100,
+        confidence: item.confidence,
+        photo_url: item.photo_url,
+      })),
+    );
+    if (insertError) throw new Error("Could not add the items");
+
+    const { data: rows } = await supabaseAdmin
+      .from("estimate_items")
+      .select("volume_m3,is_included")
+      .eq("estimate_id", data.id)
+      .is("deleted_at", null);
+    const total =
+      Math.round(
+        (rows ?? [])
+          .filter((r) => r.is_included !== false)
+          .reduce((sum, r) => sum + Number(r.volume_m3), 0) * 100,
+      ) / 100;
+    await supabaseAdmin.from("estimates").update({ total_volume_m3: total }).eq("id", data.id);
+
+    return { added: data.items.length };
+  });
+
 /**
  * A signed-in company takes ownership of an estimate that no company owns yet.
  * The caller must hold the secret share link for that exact estimate, so an

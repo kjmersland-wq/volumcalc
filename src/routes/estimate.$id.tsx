@@ -39,6 +39,7 @@ import { useI18n, translate, SUPPORTED_LANGS, LANG_LABELS, type Lang } from "@/l
 import { reportLangs } from "@/lib/report-langs";
 import { MovePriceEstimator } from "@/components/MovePriceEstimator";
 import { MoveTimeEstimator } from "@/components/MoveTimeEstimator";
+import { AddItemsPanel } from "@/components/AddItemsPanel";
 import { estimateMoveTime, formatDuration, siteFrom } from "@/lib/move-time";
 import { MoverOutreach } from "@/components/MoverOutreach";
 import { useAuth } from "@/hooks/useAuth";
@@ -846,6 +847,17 @@ function EstimatePage() {
             title={`${rt("res.title")} — VolumCalc`}
             text={`${rt("res.title")}: ${m3(netVolume)} · ${included.length} ${rt("res.items")}`}
           />
+
+          {canEditItems && shareToken && (
+            <AddItemsPanel
+              estimateId={String(estimate.id)}
+              token={shareToken}
+              rooms={rooms.map((room) => ({ id: room.id, name: room.name }))}
+              lang={lang}
+              rt={rt}
+              onAdded={invalidate}
+            />
+          )}
 
           {/* Rooms & items */}
           <div className="mt-8 space-y-6">
