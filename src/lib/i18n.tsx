@@ -610,6 +610,7 @@ export const dict: Dict = {
     en: "The estimate is indicative and depends on distance, timing, access and what you agree with the mover.",
   },
 
+  "rep.pdfHint": { no: "I dialogen: velg «Lagre som PDF» som skriver. Filen kan du legge ved i e-post.", en: "In the dialog, choose “Save as PDF” as the printer. You can then attach the file to an e-mail." },
   "mtime.title": { no: "Estimert tidsbruk for flyttingen", en: "Estimated time for the move" },
   "mtime.sub": {
     no: "Pakking, demontering, bæring ut og inn av bil, sikring for transport og montering – beregnet gjenstand for gjenstand ut fra størrelse, tags og adkomst.",

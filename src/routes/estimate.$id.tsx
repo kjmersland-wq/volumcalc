@@ -550,7 +550,16 @@ function EstimatePage() {
   // (choose "Save as PDF" there). The visible language stays until changed back.
   function printIn(code: Lang) {
     setReportLang(code);
-    window.setTimeout(() => window.print(), 400);
+    toast(rt("rep.pdfHint"));
+    window.setTimeout(() => {
+      // Browsers suggest the page title as the PDF's file name, so give it a
+      // readable one for the moment the dialog is open, then put it back.
+      const previousTitle = document.title;
+      const safeTitle = String(reportTitle).replace(/[\\/:*?"<>|]+/g, " ").trim().slice(0, 80);
+      document.title = `VolumCalc – ${safeTitle} (${code.toUpperCase()})`;
+      window.addEventListener("afterprint", () => (document.title = previousTitle), { once: true });
+      window.print();
+    }, 900);
   }
 
   function copySecretLink() {
