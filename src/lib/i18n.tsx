@@ -670,6 +670,7 @@ export const dict: Dict = {
   "mov.send": { no: "Send rapport til valgte firma", en: "Send report to selected companies" },
   "mov.sent": { no: "Rapporten er sendt", en: "Report sent" },
   "mov.failed": { no: "Utsending feilet", en: "Sending failed" },
+  "mov.lang": { no: "Språk på e-posten", en: "Email language" },
   "mov.missing": { no: "Fyll inn navn, din e-post og minst én mottaker.", en: "Fill in your name, email and at least one recipient." },
 };
 

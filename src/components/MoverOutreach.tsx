@@ -22,10 +22,21 @@ type Props = {
   estimateId: string;
   token: string;
   rt: (key: string) => string;
+  /** Language the report is shown in; used as the e-mail's starting language. */
+  defaultLang?: string;
+  /** Time estimate from the report, included in the e-mail when present. */
+  time?: { crew: number; total: number; low: number; high: number };
 };
 
+const MAIL_LANGS = [
+  { value: "no", label: "Norsk" },
+  { value: "en", label: "English" },
+  { value: "pl", label: "Polski" },
+] as const;
+type MailLang = (typeof MAIL_LANGS)[number]["value"];
+
 /** Catalogue of movers that accept tenders + email delivery of the report. */
-export function MoverOutreach({ estimateId, token, rt }: Props) {
+export function MoverOutreach({ estimateId, token, rt, defaultLang, time }: Props) {
   const send = useServerFn(sendEstimateToMovers);
   const [country, setCountry] = useState("all");
   const [rows, setRows] = useState<Row[]>([]);
@@ -33,6 +44,9 @@ export function MoverOutreach({ estimateId, token, rt }: Props) {
   const [replyTo, setReplyTo] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [mailLang, setMailLang] = useState<MailLang>(
+    MAIL_LANGS.some((l) => l.value === defaultLang) ? (defaultLang as MailLang) : "en",
+  );
 
   const list = useMemo(
     () => (country === "all" ? MOVERS : MOVERS.filter((m) => m.country === country)),
@@ -53,7 +67,17 @@ export function MoverOutreach({ estimateId, token, rt }: Props) {
     try {
       const reportUrl = `${window.location.origin}/estimate/${estimateId}?token=${token}`;
       const result = await send({
-        data: { estimateId, token, recipients, replyTo: replyTo.trim(), senderName: name.trim(), message, reportUrl },
+        data: {
+          estimateId,
+          token,
+          recipients,
+          replyTo: replyTo.trim(),
+          senderName: name.trim(),
+          message,
+          reportUrl,
+          lang: mailLang,
+          ...(time ? { time } : {}),
+        },
       });
       if (result.sent > 0) toast.success(`${rt("mov.sent")} (${result.sent})`);
       if (result.failed.length) toast.error(`${rt("mov.failed")}: ${result.failed.join(", ")}`);
@@ -152,6 +176,21 @@ export function MoverOutreach({ estimateId, token, rt }: Props) {
         <div className="space-y-1.5">
           <Label htmlFor="mov-email">{rt("mov.yourEmail")}</Label>
           <Input id="mov-email" type="email" value={replyTo} onChange={(e) => setReplyTo(e.target.value)} />
+        </div>
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="mov-lang">{rt("mov.lang")}</Label>
+          <Select value={mailLang} onValueChange={(value) => setMailLang(value as MailLang)}>
+            <SelectTrigger id="mov-lang" className="max-w-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {MAIL_LANGS.map((l) => (
+                <SelectItem key={l.value} value={l.value}>
+                  {l.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="mov-msg">{rt("mov.message")}</Label>

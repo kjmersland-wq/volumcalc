@@ -528,6 +528,13 @@ function EstimatePage() {
       : []),
   ].filter((group) => group.items.length > 0);
 
+  // Switch the report language, let it re-render, then open the print dialog
+  // (choose "Save as PDF" there). The visible language stays until changed back.
+  function printIn(code: Lang) {
+    setReportLang(code);
+    window.setTimeout(() => window.print(), 400);
+  }
+
   function copySecretLink() {
     const url = `${window.location.origin}/estimate/${id}${shareToken ? `?token=${shareToken}` : ""}`;
     navigator.clipboard.writeText(url);
@@ -673,10 +680,19 @@ function EstimatePage() {
                   {rt("rep.shareSecret")}
                 </Button>
               )}
-              <Button variant="outline" size="sm" onClick={() => window.print()}>
-                <Download className="size-4" />
-                {rt("rep.pdf")}
-              </Button>
+              {/* Print / save as PDF in Norwegian, English or Polish. */}
+              {(
+                [
+                  ["no", "Norsk"],
+                  ["en", "English"],
+                  ["pl", "Polski"],
+                ] as const
+              ).map(([code, label]) => (
+                <Button key={code} variant="outline" size="sm" onClick={() => printIn(code)}>
+                  <Download className="size-4" />
+                  PDF · {label}
+                </Button>
+              ))}
               {!businessView && shareToken && <QuoteRequestDialog id={String(estimate.id)} token={shareToken} />}
               {canEdit && estimate.status !== "approved" && (
                 <Button size="sm" onClick={() => approve.mutate()}>
@@ -812,7 +828,18 @@ function EstimatePage() {
           )}
 
           {!businessView && shareToken && (
-            <MoverOutreach estimateId={String(estimate.id)} token={shareToken} rt={rt} />
+            <MoverOutreach
+              estimateId={String(estimate.id)}
+              token={shareToken}
+              rt={rt}
+              defaultLang={reportLang}
+              time={{
+                crew: moveTime.crew,
+                total: Math.round(moveTime.total),
+                low: Math.round(moveTime.low),
+                high: Math.round(moveTime.high),
+              }}
+            />
           )}
 
           <ShareButtons
