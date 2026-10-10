@@ -89,9 +89,14 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         managed_payments: { enabled: true },
         ...(customerId && { customer: customerId }),
         ...(!isRecurring && { payment_intent_data: { description: productDescription } }),
-        ...(identity && {
-          metadata: { userId: identity.userId, managed_payments: "true" },
-          ...(isRecurring && { subscription_data: { metadata: { userId: identity.userId } } }),
+        metadata: {
+          site: "volumcalc.com",
+          ...(identity && { userId: identity.userId, managed_payments: "true" }),
+        },
+        ...(isRecurring && {
+          subscription_data: {
+            metadata: { site: "volumcalc.com", ...(identity && { userId: identity.userId }) },
+          },
         }),
       } as Stripe.Checkout.SessionCreateParams);
 
