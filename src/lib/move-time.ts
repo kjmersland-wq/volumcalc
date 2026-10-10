@@ -204,7 +204,13 @@ function itemMinutes(item: MoveTimeItem): ItemMinutes {
     reassemble = rates.reassemble * assembly;
   }
 
-  if (tags.includes("disassemble") && dismantle === 0) {
+  // Dismantling and reassembly only count for items tagged "disassemble" in
+  // the report. Categories with typical times (beds, tables, wardrobes) use
+  // them; anything else gets a size-based default.
+  if (!tags.includes("disassemble")) {
+    dismantle = 0;
+    reassemble = 0;
+  } else if (dismantle === 0) {
     dismantle = 6 + 4 * Math.sqrt(unitVolume);
     reassemble = 8 + 5 * Math.sqrt(unitVolume);
   }
