@@ -159,7 +159,7 @@ export function ContactDetails() {
   return (
     <div className="space-y-4 text-sm">
       <a
-        href="mailto:kjell@volumcalc.com"
+        href="mailto:support@volumcalc.com"
         className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
       >
         <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -167,7 +167,7 @@ export function ContactDetails() {
         </span>
         <span>
           <span className="block font-medium text-foreground">{t("contact.emailUs")}</span>
-          <span className="text-muted-foreground">kjell@volumcalc.com</span>
+          <span className="text-muted-foreground">support@volumcalc.com</span>
         </span>
       </a>
       <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
