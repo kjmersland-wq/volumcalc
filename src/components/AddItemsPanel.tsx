@@ -10,7 +10,7 @@ import { addEstimateItems, uploadRoomPhoto } from "@/lib/estimates.functions";
 import { analyzeRoomPhotos } from "@/lib/analyze-photos.functions";
 import { compressImage, blobToDataUrl } from "@/lib/images";
 import { roomTemplateForName } from "@/lib/rooms";
-import { catalogForRoom } from "@/lib/volume-database";
+import { catalogForRoom, itemDisplayName, roomDisplayName } from "@/lib/volume-database";
 
 type Props = {
   estimateId: string;
@@ -49,7 +49,7 @@ export function AddItemsPanel({ estimateId, token, rooms, lang, rt, onAdded }: P
   const roomName = rooms.find((room) => room.id === roomId)?.name ?? "Other";
   const catalog = useMemo(() => catalogForRoom(roomTemplateForName(roomName)), [roomName]);
   const catalogByKey = useMemo(() => new Map(catalog.map((item) => [item.key, item])), [catalog]);
-  const label = (item: { name: string; name_no: string }) => (lang === "no" ? item.name_no : item.name);
+  const label = (item: { name: string; name_no: string }) => itemDisplayName(item, lang);
 
   async function onFiles(files: FileList | null) {
     if (!files?.length) return;
@@ -173,8 +173,8 @@ export function AddItemsPanel({ estimateId, token, rooms, lang, rt, onAdded }: P
     const picked = catalogKey ? catalogByKey.get(catalogKey) : undefined;
     void save([
       {
-        name: picked && picked.name_no === name ? picked.name : name,
-        name_no: name,
+        name: picked && label(picked) === name ? picked.name : name,
+        name_no: picked && label(picked) === name ? picked.name_no : name,
         category: picked?.category ?? "other",
         quantity,
         length_cm: l,
@@ -223,7 +223,7 @@ export function AddItemsPanel({ estimateId, token, rooms, lang, rt, onAdded }: P
           <option value={NO_ROOM}>{rt("res.other")}</option>
           {rooms.map((room) => (
             <option key={room.id} value={room.id}>
-              {room.name}
+              {roomDisplayName(room.name, lang)}
             </option>
           ))}
         </select>

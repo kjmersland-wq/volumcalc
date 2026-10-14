@@ -17,9 +17,13 @@ import {
   USER_VERIFIED_SECURITY_LABEL,
   VOLUME_DATABASE,
   CROSS_ROOM_ITEMS,
+  itemDisplayName,
+  roomDisplayName,
   catalogForRoom,
   type VolumeDatabaseItem,
 } from "@/lib/volume-database";
+import { m3 } from "@/lib/format";
+import { PhotoGuide } from "@/components/PhotoGuide";
 import { recommendedVolume } from "@/lib/volume";
 import { useAuth } from "@/hooks/useAuth";
 import { useCompany, useUnlimitedPhotos } from "@/hooks/useCompany";
@@ -319,9 +323,9 @@ function UploadPage() {
         className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
       >
         <div>
-          <p className="font-medium">{lang === "no" ? item.name_no : item.name}</p>
+          <p className="font-medium">{itemDisplayName(item, lang)}</p>
           <p className="text-sm text-muted-foreground">
-            {item.length_cm}×{item.width_cm}×{item.height_cm} cm · {item.volume_m3.toFixed(2)} m³
+            {item.length_cm}×{item.width_cm}×{item.height_cm} cm · {m3(item.volume_m3, lang)}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -331,7 +335,7 @@ function UploadPage() {
             size="icon"
             onClick={() => changeQuantity(item.key, -1)}
             disabled={qty <= 0}
-            aria-label={`Decrease quantity ${lang === "no" ? item.name_no : item.name}`}
+            aria-label={`Decrease quantity ${itemDisplayName(item, lang)}`}
           >
             <Minus className="size-4" />
           </Button>
@@ -341,7 +345,7 @@ function UploadPage() {
             variant="outline"
             size="icon"
             onClick={() => changeQuantity(item.key, 1)}
-            aria-label={`Increase quantity ${lang === "no" ? item.name_no : item.name}`}
+            aria-label={`Increase quantity ${itemDisplayName(item, lang)}`}
           >
             <Plus className="size-4" />
           </Button>
@@ -483,7 +487,7 @@ function UploadPage() {
                 >
                   {roomNames.map((room) => (
                     <option key={room} value={room}>
-                      {room}
+                      {roomDisplayName(room, lang)}
                     </option>
                   ))}
                 </select>
@@ -536,6 +540,8 @@ function UploadPage() {
                   {t("upload.roomHint")}
                 </p>
               </div>
+
+              <PhotoGuide />
 
               <input
                 ref={photoInputRef}
@@ -620,10 +626,10 @@ function UploadPage() {
 
               <div className="mt-6 rounded-xl border border-border bg-muted/30 p-4">
                 <p className="text-sm text-muted-foreground">
-                  {t("upload.netVolumeLabel")}: {netVolume.toFixed(2)} m³
+                  {t("upload.netVolumeLabel")}: {m3(netVolume, lang)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {t("upload.grossVolumeLabel")}: {grossVolume.toFixed(2)} m³
+                  {t("upload.grossVolumeLabel")}: {m3(grossVolume, lang)}
                 </p>
               </div>
 

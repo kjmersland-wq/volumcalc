@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { extraTranslations } from "./i18n.translations";
+import { reportLangs } from "./report-langs";
+import { fillTranslations } from "./translations-fill";
 
 export type Lang =
   "no" | "en" | "sv" | "da" | "fi" | "de" | "nl" | "fr" | "pl" | "es" | "it" | "pt";
@@ -696,6 +698,29 @@ export const dict: Dict = {
   "mov.failed": { no: "Utsending feilet", en: "Sending failed" },
   "mov.lang": { no: "Språk på e-posten", en: "Email language" },
   "mov.missing": { no: "Fyll inn navn, din e-post og minst én mottaker.", en: "Fill in your name, email and at least one recipient." },
+  "rep.cancel": { no: "Avbryt", en: "Cancel" },
+  "mtime.show": { no: "Vis tidsestimat", en: "Show time estimate" },
+  "trust.title": { no: "Hvem står bak VolumCalc", en: "Who is behind VolumCalc" },
+  "trust.about": { no: "VolumCalc er utviklet og drevet av KM TECH LABS i Kristiansand, Norge. Vi bygger enkle verktøy som gjør flytting tryggere og mer forutsigbar – for privatpersoner og flyttebyråer.", en: "VolumCalc is built and run by KM TECH LABS in Kristiansand, Norway. We make simple tools that make moving safer and more predictable — for households and moving companies." },
+  "trust.p1t": { no: "Bildene dine er private", en: "Your photos stay private" },
+  "trust.p1d": { no: "Bilder lagres privat og er bare tilgjengelige via din egen innlogging eller en hemmelig lenke du selv deler.", en: "Photos are stored privately and are only reachable through your own login or a secret link you choose to share." },
+  "trust.p2t": { no: "AI kun til gjenkjenning", en: "AI only for recognition" },
+  "trust.p2d": { no: "AI brukes bare til å gjenkjenne gjenstander i bildene – aldri til reklame eller til å dele dem videre.", en: "AI is used only to recognise items in your photos — never for advertising or to share them further." },
+  "trust.p3t": { no: "Data slettes", en: "Data is deleted" },
+  "trust.p3d": { no: "Beregninger med bilder slettes senest 12 måneder etter siste aktivitet – eller tidligere hvis du ber om det.", en: "Estimates with photos are deleted at the latest 12 months after last activity — or sooner if you ask." },
+  "agency.title": { no: "For flyttebyråer", en: "For moving companies" },
+  "agency.sub": { no: "Gi kundene et profesjonelt estimat med din egen profil – og spar tid på befaring.", en: "Give customers a professional estimate under your own brand — and save time on site visits." },
+  "agency.b1": { no: "Egen logo, farger og firmadetaljer øverst i rapporten og PDF-en", en: "Your logo, colours and company details at the top of the report and PDF" },
+  "agency.b2": { no: "Dashboard med alle beregninger, godkjenning og pris per m³", en: "Dashboard with all estimates, approval and your price per m³" },
+  "agency.b3": { no: "Del rapporten med kunden via hemmelig lenke eller PDF – på kundens eget språk", en: "Share the report with the customer by secret link or PDF — in the customer's own language" },
+  "agency.cta": { no: "Se løsningen for byråer", en: "See the agency solution" },
+  "photo.title": { no: "Slik tar du best bilder", en: "How to take the best photos" },
+  "photo.1t": { no: "1–3 bilder per rom", en: "1–3 photos per room" },
+  "photo.1d": { no: "Ta ett oversiktsbilde fra døra og gjerne ett fra hver side.", en: "Take one overview photo from the door, and ideally one from each side." },
+  "photo.2t": { no: "God belysning", en: "Good lighting" },
+  "photo.2d": { no: "Skru på lyset og unngå motlys fra vinduer.", en: "Turn the lights on and avoid backlight from windows." },
+  "photo.3t": { no: "Få med det meste", en: "Capture most of it" },
+  "photo.3d": { no: "Ta med møbler, skap og esker – åpne dører så innholdet synes.", en: "Include furniture, cupboards and boxes — open doors so the contents show." },
 };
 
 export const LANG_LABELS: Record<Lang, string> = {
@@ -817,7 +842,7 @@ export function translate(key: string, lang: Lang): string {
   const entry = dict[key];
   if (!entry) return key;
   if (lang === "no" || lang === "en") return entry[lang];
-  return extraTranslations[lang]?.[key] ?? entry.en;
+  return extraTranslations[lang]?.[key] ?? reportLangs[lang]?.[key] ?? fillTranslations[lang]?.[key] ?? entry.en;
 }
 
 export function useI18n() {

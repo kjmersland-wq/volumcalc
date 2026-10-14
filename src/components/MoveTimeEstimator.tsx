@@ -24,8 +24,6 @@ type Props = {
   onIncludePackingChange: (value: boolean) => void;
   onIncludeUnpackingChange: (value: boolean) => void;
   /** Whether the estimate appears in the printed/PDF report and the mover e-mail. */
-  shareWithMovers: boolean;
-  onShareWithMoversChange: (value: boolean) => void;
 };
 
 export function MoveTimeEstimator({
@@ -39,8 +37,6 @@ export function MoveTimeEstimator({
   includeUnpacking,
   onIncludePackingChange,
   onIncludeUnpackingChange,
-  shareWithMovers,
-  onShareWithMoversChange,
 }: Props) {
   const result = useMemo(
     () => estimateMoveTime(items, { crew, pickup, delivery, includePacking, includeUnpacking }),
@@ -50,7 +46,13 @@ export function MoveTimeEstimator({
     () =>
       CREW_SIZES.map((size) => ({
         size,
-        total: estimateMoveTime(items, { crew: size, pickup, delivery, includePacking, includeUnpacking }).total,
+        total: estimateMoveTime(items, {
+          crew: size,
+          pickup,
+          delivery,
+          includePacking,
+          includeUnpacking,
+        }).total,
       })),
     [items, pickup, delivery, includePacking, includeUnpacking],
   );
@@ -94,7 +96,7 @@ export function MoveTimeEstimator({
   }
 
   return (
-    <section className={cn("mt-6 rounded-xl border border-border bg-card p-6", !shareWithMovers && "print:hidden")}>
+    <section className={cn("mt-6 rounded-xl border border-border bg-card p-6")}>
       <div className="flex items-center gap-2">
         <Clock className="size-5 text-primary" />
         <h2 className="text-lg font-semibold">{rt("mtime.title")}</h2>
@@ -107,7 +109,11 @@ export function MoveTimeEstimator({
             <Users className="size-4 text-muted-foreground" />
             {rt("mtime.crew")}
           </p>
-          <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label={rt("mtime.crew")}>
+          <div
+            className="mt-2 flex flex-wrap gap-2"
+            role="radiogroup"
+            aria-label={rt("mtime.crew")}
+          >
             {CREW_SIZES.map((size) => (
               <button
                 key={size}
@@ -126,26 +132,34 @@ export function MoveTimeEstimator({
               </button>
             ))}
           </div>
-          {crew === 2 && <p className="mt-1.5 text-xs text-muted-foreground">{rt("mtime.crew2")}</p>}
+          {crew === 2 && (
+            <p className="mt-1.5 text-xs text-muted-foreground">{rt("mtime.crew2")}</p>
+          )}
         </div>
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <Switch id="mt-pack" checked={includePacking} onCheckedChange={onIncludePackingChange} />
+            <Switch
+              id="mt-pack"
+              checked={includePacking}
+              onCheckedChange={onIncludePackingChange}
+            />
             <Label htmlFor="mt-pack">{rt("mtime.includePacking")}</Label>
           </div>
           <div className="flex items-center gap-2">
-            <Switch id="mt-share" checked={shareWithMovers} onCheckedChange={onShareWithMoversChange} />
-            <Label htmlFor="mt-share">{rt("mtime.share")}</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch id="mt-unpack" checked={includeUnpacking} onCheckedChange={onIncludeUnpackingChange} />
+            <Switch
+              id="mt-unpack"
+              checked={includeUnpacking}
+              onCheckedChange={onIncludeUnpackingChange}
+            />
             <Label htmlFor="mt-unpack">{rt("mtime.includeUnpacking")}</Label>
           </div>
         </div>
       </div>
 
       <div className="mt-5 rounded-lg bg-primary/5 p-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{rt("mtime.total")}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {rt("mtime.total")}
+        </p>
         <p className="mt-1 text-3xl font-bold text-primary">≈ {fmt(result.total)}</p>
         <p className="mt-1 text-sm text-muted-foreground">
           {rt("mtime.range")}: {fmt(result.low)} – {fmt(result.high)}
@@ -157,7 +171,9 @@ export function MoveTimeEstimator({
       <div className="mt-3 rounded-lg border border-border p-4">
         <div className="flex items-baseline justify-between gap-3">
           <p className="text-sm font-semibold">{rt("mtime.pickup")}</p>
-          <p className="shrink-0 font-semibold tabular-nums text-primary">{fmt(result.pickupTotal)}</p>
+          <p className="shrink-0 font-semibold tabular-nums text-primary">
+            {fmt(result.pickupTotal)}
+          </p>
         </div>
         {renderSteps(pickupSteps, result.pickupTotal)}
       </div>
@@ -171,7 +187,9 @@ export function MoveTimeEstimator({
         <div className="rounded-lg border border-border p-4">
           <div className="flex items-baseline justify-between gap-3">
             <p className="text-sm font-semibold">{rt("mtime.delivery")}</p>
-            <p className="shrink-0 font-semibold tabular-nums text-primary">{fmt(result.deliveryTotal)}</p>
+            <p className="shrink-0 font-semibold tabular-nums text-primary">
+              {fmt(result.deliveryTotal)}
+            </p>
           </div>
           {renderSteps(deliverySteps, result.deliveryTotal)}
         </div>
@@ -183,7 +201,10 @@ export function MoveTimeEstimator({
           {comparison.map(({ size, total }) => (
             <div
               key={size}
-              className={cn("rounded-md p-2", size === crew ? "bg-primary/10 text-primary" : "bg-muted/50")}
+              className={cn(
+                "rounded-md p-2",
+                size === crew ? "bg-primary/10 text-primary" : "bg-muted/50",
+              )}
             >
               <p className="text-xs text-muted-foreground">
                 {size} {rt("mtime.persons")}

@@ -161,6 +161,13 @@ function categoryOf(item: MoveTimeItem): Category {
   return "generic";
 }
 
+/**
+ * Field calibration of the base rates above: experienced crews pack in bulk,
+ * use trolleys and strap as they go, so a typical 25–30 m³ move with two
+ * people and full packing lands around 6–8 hours.
+ */
+const CALIBRATION = { pack: 0.62, carry: 0.78, secure: 0.7, assembly: 0.8 };
+
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 
 type ItemMinutes = {
@@ -226,11 +233,11 @@ function itemMinutes(item: MoveTimeItem): ItemMinutes {
   }
 
   return {
-    pack,
-    dismantle,
-    carry,
-    secure,
-    reassemble,
+    pack: pack * CALIBRATION.pack,
+    dismantle: dismantle * CALIBRATION.assembly,
+    carry: carry * CALIBRATION.carry,
+    secure: secure * CALIBRATION.secure,
+    reassemble: reassemble * CALIBRATION.assembly,
     specialist: category === "piano" || (heavy && unitVolume >= 1.5),
   };
 }
@@ -278,7 +285,7 @@ const BREAK_SHARE = 10 / 120;
 const RANGE_LOW = 0.85;
 const RANGE_HIGH = 1.3;
 
-export const CREW_SIZES = [2, 3, 4] as const;
+export const CREW_SIZES = [1, 2, 3, 4] as const;
 
 export function estimateMoveTime(items: MoveTimeItem[], options: MoveTimeOptions): MoveTimeResult {
   const crew = clamp(Math.round(options.crew), 1, 4);

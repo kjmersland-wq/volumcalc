@@ -1,4 +1,4 @@
-import { Camera, Sparkles, FileText, ShieldCheck, Palette, ArrowRight, Check } from "lucide-react";
+import { Camera, Sparkles, FileText, ShieldCheck, Palette, ArrowRight, Check, Lock, ScanSearch, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -145,6 +145,51 @@ export function LandingPage() {
             </Button>
           </div>
         </section>
+        <section className="border-t border-border bg-muted/30 py-16">
+          <div className="mx-auto max-w-6xl px-4">
+            <h2 className="text-2xl font-bold sm:text-3xl">{t("trust.title")}</h2>
+            <p className="mt-3 max-w-3xl text-muted-foreground">{t("trust.about")}</p>
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
+              {[
+                { icon: Lock, title: t("trust.p1t"), body: t("trust.p1d") },
+                { icon: ScanSearch, title: t("trust.p2t"), body: t("trust.p2d") },
+                { icon: Trash2, title: t("trust.p3t"), body: t("trust.p3d") },
+              ].map((p) => (
+                <div key={p.title} className="card-soft flex gap-3 p-5">
+                  <p.icon className="mt-0.5 size-5 shrink-0 text-primary" />
+                  <div>
+                    <h3 className="text-sm font-semibold">{p.title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{p.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-4 py-20">
+          <div className="card-soft flex flex-col items-start gap-6 p-10 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-bold sm:text-3xl">{t("agency.title")}</h2>
+              <p className="mt-2 text-muted-foreground">{t("agency.sub")}</p>
+              <ul className="mt-4 space-y-1.5 text-sm text-muted-foreground">
+                {[t("agency.b1"), t("agency.b2"), t("agency.b3")].map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <Check className="mt-0.5 size-4 shrink-0 text-success" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/pricing">
+                {t("agency.cta")}
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+          </div>
+        </section>
+
         <section id="kontakt" className="border-t border-border bg-muted/30">
           <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 lg:grid-cols-[1fr_1.2fr]">
             <div>
