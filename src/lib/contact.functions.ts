@@ -38,7 +38,7 @@ export const sendContactMessage = createServerFn({ method: "POST" })
     try {
       const { sendMailViaSmtp } = await import("./smtp.server");
       const sender = process.env["MIGADU_SMTP_USER"]!;
-      const recipient = process.env["CONTACT_RECIPIENT_EMAIL"] || sender;
+      const recipient = "support@volumcalc.com";
       const lines = [
         `Navn / Name: ${data.name}`,
         `E-post / Email: ${data.email}`,
