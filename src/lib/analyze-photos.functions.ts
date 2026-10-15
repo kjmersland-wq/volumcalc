@@ -42,11 +42,9 @@ async function assertUnlimitedOrAdmin(context: { supabase: any; userId: string }
 
 const analyzeSchema = z.object({
   room: z.string().trim().min(1).max(50),
-  photo_urls: z.array(z.string().trim().url().max(2000)).min(1).max(60),
+  photo_urls: z.array(z.string().trim().url().max(2000)).min(1),
 });
 
-/** Photos sent per Gateway call; more adds latency/payload with little gain. */
-const MAX_IMAGES_PER_CALL = 6;
 const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 
 /**
@@ -119,7 +117,7 @@ async function runAnalysis(
 ) {
     if (!context.isOwner) await assertUnlimitedOrAdmin(context);
 
-    const { reachable, problems } = await filterReachableImages(data.photo_urls.slice(0, MAX_IMAGES_PER_CALL));
+    const { reachable, problems } = await filterReachableImages(data.photo_urls);
     if (problems.length > 0) console.error("analyzeRoomPhotos: unusable photos:", problems.join(" | "));
     if (reachable.length === 0) {
       throw new AIGatewayError("images", `None of the photos could be fetched: ${problems.join(" | ")}`);

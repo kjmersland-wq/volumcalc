@@ -271,7 +271,7 @@ function UploadPage() {
     setAnalyzingPhotos(true);
     try {
       const result = await Promise.race([
-        analyzePhotos({ data: { room, photo_urls: photos.slice(0, 6).map((photo) => photo.url) } }),
+        analyzePhotos({ data: { room, photo_urls: photos.map((photo) => photo.url) } }),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error("Photo analysis timed out")), 150_000),
         ),
