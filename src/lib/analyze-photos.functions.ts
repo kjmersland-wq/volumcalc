@@ -42,7 +42,7 @@ async function assertUnlimitedOrAdmin(context: { supabase: any; userId: string }
 
 const analyzeSchema = z.object({
   room: z.string().trim().min(1).max(50),
-  photo_urls: z.array(z.string().trim().url().max(2000)).min(1).max(10),
+  photo_urls: z.array(z.string().trim().url().max(2000)).min(1).max(60),
 });
 
 /** Photos sent per Gateway call; more adds latency/payload with little gain. */
