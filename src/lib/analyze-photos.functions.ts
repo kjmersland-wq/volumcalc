@@ -3,7 +3,12 @@ import { requireOwner } from "@/lib/owner-middleware";
 import { z } from "zod";
 import { catalogForRoom } from "./volume-database";
 import { roomTemplateForName } from "./rooms";
-import { callAIGatewayVisionJson, GEMINI_3_8_FLASH_MODEL } from "./ai-gateway.server";
+import {
+  AIGatewayError,
+  callAIGatewayVisionJson,
+  GEMINI_3_8_FLASH_MODEL,
+  type AIFailureKind,
+} from "./ai-gateway.server";
 
 /**
  * Confirms the signed-in caller holds the 'admin'/'unlimited' role, OR has
@@ -31,7 +36,7 @@ async function assertUnlimitedOrAdmin(context: { supabase: any; userId: string }
   const isUnlimited = Boolean(credits?.unlimited_until && new Date(credits.unlimited_until) > new Date());
   const hasCredits = Boolean(credits?.credits && credits.credits > 0);
   if (!isUnlimited && !hasCredits) {
-    throw new Error("AI photo analysis is not available on this account");
+    throw new AIGatewayError("access", "AI photo analysis is not available on this account");
   }
 }
 
@@ -39,6 +44,42 @@ const analyzeSchema = z.object({
   room: z.string().trim().min(1).max(50),
   photo_urls: z.array(z.string().trim().url().max(2000)).min(1).max(10),
 });
+
+/** Photos sent per Gateway call; more adds latency/payload with little gain. */
+const MAX_IMAGES_PER_CALL = 6;
+const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
+
+/**
+ * Confirms each photo URL is reachable from the public internet (the same
+ * way the external Gateway will fetch it), is an image, and isn't huge.
+ * Unreachable photos are dropped; the failure reasons are returned for logs.
+ */
+async function filterReachableImages(urls: string[]) {
+  const checks = await Promise.all(
+    urls.map(async (url) => {
+      try {
+        let res = await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(8000) });
+        if (res.status === 405 || res.status === 501) {
+          res = await fetch(url, { headers: { Range: "bytes=0-0" }, signal: AbortSignal.timeout(8000) });
+        }
+        if (!res.ok && res.status !== 206) return { url, ok: false, reason: `HTTP ${res.status}` };
+        const type = res.headers.get("content-type") ?? "";
+        if (!type.startsWith("image/")) return { url, ok: false, reason: `not an image (${type || "no content-type"})` };
+        const length = Number(res.headers.get("content-length") ?? 0);
+        if (length > MAX_IMAGE_BYTES) return { url, ok: false, reason: `too large (${length} bytes)` };
+        return { url, ok: true as const, reason: "" };
+      } catch (error) {
+        return { url, ok: false, reason: String(error) };
+      }
+    }),
+  );
+  return {
+    reachable: checks.filter((c) => c.ok).map((c) => c.url),
+    problems: checks.filter((c) => !c.ok).map((c) => `${c.url.split("?")[0]}: ${c.reason}`),
+  };
+}
+
+export type AnalyzeFailureKind = AIFailureKind;
 
 const suggestedItemSchema = z.object({
   key: z.string(),
@@ -60,7 +101,29 @@ export const analyzeRoomPhotos = createServerFn({ method: "POST" })
   .middleware([requireOwner])
   .inputValidator((data: unknown) => analyzeSchema.parse(data))
   .handler(async ({ data, context }) => {
-    if (!context.isOwner) await assertUnlimitedOrAdmin(context as any);
+    try {
+      return await runAnalysis(data, context);
+    } catch (error) {
+      // Always return a structured failure instead of throwing across the
+      // server-fn boundary, so the client can show a specific reason.
+      const kind: AnalyzeFailureKind = error instanceof AIGatewayError ? error.kind : "unknown";
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`analyzeRoomPhotos failed [${kind}]:`, message);
+      return { error: message, kind };
+    }
+  });
+
+async function runAnalysis(
+  data: z.infer<typeof analyzeSchema>,
+  context: { isOwner?: boolean; supabase: any; userId: string },
+) {
+    if (!context.isOwner) await assertUnlimitedOrAdmin(context);
+
+    const { reachable, problems } = await filterReachableImages(data.photo_urls.slice(0, MAX_IMAGES_PER_CALL));
+    if (problems.length > 0) console.error("analyzeRoomPhotos: unusable photos:", problems.join(" | "));
+    if (reachable.length === 0) {
+      throw new AIGatewayError("images", `None of the photos could be fetched: ${problems.join(" | ")}`);
+    }
 
     const template = roomTemplateForName(data.room);
     const catalog = catalogForRoom(template);
@@ -95,32 +158,21 @@ export const analyzeRoomPhotos = createServerFn({ method: "POST" })
       additionalProperties: false,
     };
 
-    // Caught here (rather than left to throw across the server-fn RPC
-    // boundary) so the exact diagnostic message — status code, response
-    // body, etc. — reaches the client unmodified instead of risking being
-    // generalized by the framework's error serialization, same reasoning as
-    // createCheckoutSession's error handling in payments.functions.ts.
-    let result: unknown;
-    try {
-      result = await callAIGatewayVisionJson({
-        model: GEMINI_3_8_FLASH_MODEL,
-        systemPrompt,
-        userPrompt,
-        imageUrls: data.photo_urls,
-        jsonSchemaName: "room_items",
-        jsonSchema,
-      });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error("analyzeRoomPhotos: AI Gateway call failed", message);
-      return { error: message };
-    }
+    const result = await callAIGatewayVisionJson({
+      model: GEMINI_3_8_FLASH_MODEL,
+      systemPrompt,
+      userPrompt,
+      imageUrls: reachable,
+      jsonSchemaName: "room_items",
+      jsonSchema,
+    });
 
     const parsed = z.object({ items: z.array(suggestedItemSchema) }).safeParse(result);
     if (!parsed.success) {
-      const message = `AI response did not match the expected format: ${JSON.stringify(result).slice(0, 300)}`;
-      console.error("analyzeRoomPhotos:", message);
-      return { error: message };
+      throw new AIGatewayError(
+        "bad_response",
+        `AI response did not match the expected format: ${JSON.stringify(result).slice(0, 300)}`,
+      );
     }
 
     // Defense in depth: even though the schema's enum already restricts this,
@@ -132,4 +184,4 @@ export const analyzeRoomPhotos = createServerFn({ method: "POST" })
     );
 
     return { suggestions };
-  });
+}

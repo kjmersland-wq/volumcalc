@@ -188,6 +188,22 @@ export const dict: Dict = {
     no: "Kunne ikke analysere bildene akkurat nå.",
     en: "Couldn't analyze the photos right now.",
   },
+  "upload.analyzeTemporary": {
+    no: "AI-tjenesten er midlertidig utilgjengelig. Prøv igjen om litt, eller legg til manuelt.",
+    en: "The AI service is temporarily unavailable. Try again shortly, or add items by hand.",
+  },
+  "upload.analyzeNoCredits": {
+    no: "AI-analyse er midlertidig utilgjengelig (tjenestens kreditt er brukt opp). Legg til manuelt.",
+    en: "AI analysis is unavailable (the service has run out of credits). Add items by hand.",
+  },
+  "upload.analyzeImages": {
+    no: "Bildene kunne ikke leses av AI-tjenesten (for store eller utilgjengelige). Prøv mindre bilder, eller legg til manuelt.",
+    en: "The AI service couldn't read the photos (too large or not accessible). Try smaller photos, or add items by hand.",
+  },
+  "upload.analyzeAccess": {
+    no: "AI-analyse er ikke tilgjengelig på denne kontoen.",
+    en: "AI analysis isn't available on this account.",
+  },
   "upload.roomSpecificItems": { no: "Vanlig for dette rommet", en: "Common for this room" },
   "upload.crossRoomItems": { no: "Andre vanlige gjenstander", en: "Other common items" },
 

@@ -270,14 +270,25 @@ function UploadPage() {
     if (photos.length === 0 || analyzingPhotos) return;
     setAnalyzingPhotos(true);
     try {
-      const result = await analyzePhotos({
-        data: { room, photo_urls: photos.map((photo) => photo.url) },
-      });
+      const result = await Promise.race([
+        analyzePhotos({ data: { room, photo_urls: photos.map((photo) => photo.url) } }),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Photo analysis timed out")), 150_000),
+        ),
+      ]);
       if ("error" in result) {
-        // Admin/unlimited-only button — safe and actively useful right now to
-        // show the exact diagnostic message instead of a generic toast.
-        console.error("Photo analysis failed", room, result.error);
-        toast.error(result.error);
+        // Full diagnostic goes to the console; the visitor gets a specific,
+        // friendly reason and can always continue by adding items by hand.
+        console.error("Photo analysis failed", room, result.kind, result.error);
+        const keyByKind: Record<string, string> = {
+          temporary: "upload.analyzeTemporary",
+          rate_limit: "upload.analyzeTemporary",
+          timeout: "upload.analyzeTemporary",
+          no_credits: "upload.analyzeNoCredits",
+          images: "upload.analyzeImages",
+          access: "upload.analyzeAccess",
+        };
+        toast.error(t((keyByKind[result.kind] ?? "upload.analyzeFailed") as never));
         return;
       }
       let appliedCount = 0;
