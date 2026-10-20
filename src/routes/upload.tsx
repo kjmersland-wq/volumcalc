@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, Copy, Loader2, LockKeyhole, Minus, Plus, Printer, Search, Send, Trash2, Truck } from "lucide-react";
+import { Check, ChevronDown, Copy, Loader2, LockKeyhole, Minus, Plus, Printer, Search, Send, Trash2, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -152,6 +153,7 @@ function CalculatorPage() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState<{ id: string; token: string; emailed: boolean } | null>(null);
   const [blocked, setBlocked] = useState(false);
+  const [roomSheet, setRoomSheet] = useState(false);
 
   // Restore after mount (SSR renders the empty state, so no hydration mismatch).
   useEffect(() => {
@@ -307,6 +309,7 @@ function CalculatorPage() {
     setRooms((prev) => [...prev, { id, navn: name }]);
     setActiveRoom(id);
     setNewRoom("");
+    setRoomSheet(false);
   }
 
   function removeRoom(id: string) {
@@ -482,6 +485,58 @@ function CalculatorPage() {
   const today = new Date().toLocaleDateString(pdfLang === "no" ? "nb-NO" : pdfLang === "en" ? "en-GB" : pdfLang);
   const bufferPercent = Math.round((factor - 1) * 100);
 
+  const pickRoom = (id: string) => {
+    setActiveRoom(id);
+    setQuery("");
+    setRoomSheet(false);
+  };
+
+  const roomButton = (room: RoomDef) => {
+    const stats = perRoom[room.id];
+    const active = room.id === activeRoom && !trimmed;
+    return (
+      <button
+        type="button"
+        onClick={() => pickRoom(room.id)}
+        aria-current={active ? "true" : undefined}
+        className={`w-full rounded-xl px-3 py-2 text-left text-sm transition-colors ${
+          active ? "bg-background font-semibold shadow-sm ring-1 ring-border" : "hover:bg-background/60"
+        }`}
+      >
+        <span className="block">
+          {stats ? `(${stats.antall} ${T("pcs")}) ` : ""}
+          {roomName(room.id)}
+        </span>
+        {stats && (
+          <span className="block text-xs font-normal text-muted-foreground">{T("roomTotal", { n: fmt(stats.m3, 1) })}</span>
+        )}
+      </button>
+    );
+  }
+
+  const addRoomForm = (className = "") => {
+    return (
+      <form
+        className={`flex gap-2 ${className}`}
+        onSubmit={(e) => {
+          e.preventDefault();
+          addRoom();
+        }}
+      >
+        <Input
+          value={newRoom}
+          onChange={(e) => setNewRoom(e.target.value)}
+          placeholder={T("ownRoom")}
+          maxLength={40}
+          aria-label={T("ownRoomAria")}
+        />
+        <Button type="submit" variant="outline" size="icon" aria-label={T("addRoom")}>
+          <Plus className="h-4 w-4" />
+        </Button>
+      </form>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="print:hidden">
@@ -508,53 +563,42 @@ function CalculatorPage() {
             <div className="grid overflow-hidden rounded-2xl border border-border bg-card md:grid-cols-[260px_1fr]">
               {/* Rooms */}
               <div className="min-w-0 border-b border-border bg-muted/40 p-3 md:border-b-0 md:border-r">
-                <div className="flex gap-2 overflow-x-auto pb-1 md:flex-col md:overflow-visible">
-                  {rooms.map((room) => {
-                    const stats = perRoom[room.id];
-                    const active = room.id === activeRoom && !trimmed;
-                    return (
-                      <button
-                        key={room.id}
-                        type="button"
-                        onClick={() => {
-                          setActiveRoom(room.id);
-                          setQuery("");
-                        }}
-                        className={`shrink-0 rounded-xl px-3 py-2 text-left text-sm transition-colors md:w-full ${
-                          active ? "bg-background font-semibold shadow-sm ring-1 ring-border" : "hover:bg-background/60"
-                        }`}
-                      >
-                        <span className="block">
-                          {stats ? `(${stats.antall} ${T("pcs")}) ` : ""}
-                          {roomName(room.id)}
-                        </span>
-                        {stats && (
-                          <span className="block text-xs font-normal text-muted-foreground">
-                            {T("roomTotal", { n: fmt(stats.m3, 1) })}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-                <form
-                  className="mt-3 flex gap-2"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    addRoom();
-                  }}
-                >
-                  <Input
-                    value={newRoom}
-                    onChange={(e) => setNewRoom(e.target.value)}
-                    placeholder={T("ownRoom")}
-                    maxLength={40}
-                    aria-label={T("ownRoomAria")}
-                  />
-                  <Button type="submit" variant="outline" size="icon" aria-label={T("addRoom")}>
+                {/* Mobile: one button that opens the full room list */}
+                <div className="flex gap-2 md:hidden">
+                  <button
+                    type="button"
+                    onClick={() => setRoomSheet(true)}
+                    className="flex min-w-0 flex-1 items-center justify-between gap-3 rounded-xl bg-background px-3 py-2.5 text-left shadow-sm ring-1 ring-border"
+                    aria-haspopup="dialog"
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-xs text-muted-foreground">{T("chooseRoom")}</span>
+                      <span className="block truncate text-sm font-semibold">{roomName(activeRoom)}</span>
+                    </span>
+                    <span className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+                      {perRoom[activeRoom] ? `${perRoom[activeRoom]!.antall} ${T("pcs")}` : ""}
+                      <ChevronDown className="size-4" />
+                    </span>
+                  </button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="size-auto min-h-11 w-11 shrink-0 rounded-xl"
+                    aria-label={T("addRoom")}
+                    onClick={() => setRoomSheet(true)}
+                  >
                     <Plus className="h-4 w-4" />
                   </Button>
-                </form>
+                </div>
+
+                {/* Desktop: full sidebar */}
+                <div className="hidden md:block">
+                  <div className="flex flex-col gap-2">
+                    {rooms.map(roomButton)}
+                  </div>
+                  {addRoomForm("mt-3")}
+                </div>
               </div>
 
               {/* Items */}
@@ -736,6 +780,17 @@ function CalculatorPage() {
                 </Button>
               </div>
             </div>
+
+            <Sheet open={roomSheet} onOpenChange={setRoomSheet}>
+              <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl px-4 pb-6 pt-5">
+                <SheetTitle>{T("chooseRoom")}</SheetTitle>
+                <SheetDescription className="sr-only">{T("chooseRoom")}</SheetDescription>
+                {addRoomForm("mt-3")}
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {rooms.map(roomButton)}
+                </div>
+              </SheetContent>
+            </Sheet>
           </section>
         )}
 

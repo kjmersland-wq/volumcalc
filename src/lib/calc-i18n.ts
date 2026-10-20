@@ -96,7 +96,8 @@ export type CalcKey =
   | "payNoCredits"
   | "saveUnlock"
   | "payPrintNote"
-  | "sentCompany";
+  | "sentCompany"
+  | "chooseRoom";
 
 type Table = Record<CalcKey, string>;
 
@@ -193,6 +194,7 @@ const en: Table = {
   saveUnlock: "Save and unlock PDF + link",
   payPrintNote: "PDF download is available with a paid estimate — see volumcalc.com/pricing.",
   sentCompany: "Your request has been sent to the moving company.",
+  chooseRoom: "Choose room",
 };
 
 const no: Table = {
@@ -288,6 +290,7 @@ const no: Table = {
   saveUnlock: "Lagre og lås opp PDF + lenke",
   payPrintNote: "PDF-nedlasting er tilgjengelig med en betalt beregning — se volumcalc.com/pricing.",
   sentCompany: "Forespørselen din er sendt til flyttefirmaet.",
+  chooseRoom: "Velg rom",
 };
 
 const sv: Table = {
@@ -383,6 +386,7 @@ const sv: Table = {
   saveUnlock: "Spara och lås upp PDF + länk",
   payPrintNote: "PDF-nedladdning ingår i en betald beräkning — se volumcalc.com/pricing.",
   sentCompany: "Din förfrågan har skickats till flyttfirman.",
+  chooseRoom: "Välj rum",
 };
 
 const da: Table = {
@@ -478,6 +482,7 @@ const da: Table = {
   saveUnlock: "Gem og lås op for PDF + link",
   payPrintNote: "PDF-download er tilgængelig med en betalt beregning — se volumcalc.com/pricing.",
   sentCompany: "Din forespørgsel er sendt til flyttefirmaet.",
+  chooseRoom: "Vælg rum",
 };
 
 const fi: Table = {
@@ -573,6 +578,7 @@ const fi: Table = {
   saveUnlock: "Tallenna ja avaa PDF + linkki",
   payPrintNote: "PDF:n lataus kuuluu maksulliseen laskelmaan — katso volumcalc.com/pricing.",
   sentCompany: "Pyyntösi on lähetetty muuttofirmalle.",
+  chooseRoom: "Valitse huone",
 };
 
 const de: Table = {
@@ -668,6 +674,7 @@ const de: Table = {
   saveUnlock: "Speichern und PDF + Link freischalten",
   payPrintNote: "Der PDF-Download ist mit einer bezahlten Berechnung verfügbar — siehe volumcalc.com/pricing.",
   sentCompany: "Ihre Anfrage wurde an die Umzugsfirma gesendet.",
+  chooseRoom: "Raum wählen",
 };
 
 const nl: Table = {
@@ -763,6 +770,7 @@ const nl: Table = {
   saveUnlock: "Opslaan en pdf + link ontgrendelen",
   payPrintNote: "Pdf-download is beschikbaar met een betaalde berekening — zie volumcalc.com/pricing.",
   sentCompany: "Je aanvraag is naar het verhuisbedrijf gestuurd.",
+  chooseRoom: "Kies kamer",
 };
 
 const fr: Table = {
@@ -858,6 +866,7 @@ const fr: Table = {
   saveUnlock: "Enregistrer et débloquer PDF + lien",
   payPrintNote: "Le téléchargement du PDF est disponible avec une estimation payante — voir volumcalc.com/pricing.",
   sentCompany: "Votre demande a été envoyée au déménageur.",
+  chooseRoom: "Choisir une pièce",
 };
 
 const pl: Table = {
@@ -953,6 +962,7 @@ const pl: Table = {
   saveUnlock: "Zapisz i odblokuj PDF + link",
   payPrintNote: "Pobieranie PDF jest dostępne z płatnym wyliczeniem — zobacz volumcalc.com/pricing.",
   sentCompany: "Twoje zapytanie zostało wysłane do firmy przeprowadzkowej.",
+  chooseRoom: "Wybierz pomieszczenie",
 };
 
 const es: Table = {
@@ -1048,6 +1058,7 @@ const es: Table = {
   saveUnlock: "Guardar y desbloquear PDF + enlace",
   payPrintNote: "La descarga del PDF está disponible con una estimación de pago — consulta volumcalc.com/pricing.",
   sentCompany: "Tu solicitud se ha enviado a la empresa de mudanzas.",
+  chooseRoom: "Elegir habitación",
 };
 
 const it: Table = {
@@ -1143,6 +1154,7 @@ const it: Table = {
   saveUnlock: "Salva e sblocca PDF + link",
   payPrintNote: "Il download del PDF è disponibile con una stima a pagamento — vedi volumcalc.com/pricing.",
   sentCompany: "La tua richiesta è stata inviata all’azienda di traslochi.",
+  chooseRoom: "Scegli stanza",
 };
 
 const pt: Table = {
@@ -1238,6 +1250,7 @@ const pt: Table = {
   saveUnlock: "Guardar e desbloquear PDF + ligação",
   payPrintNote: "A transferência do PDF está disponível com uma estimativa paga — veja volumcalc.com/pricing.",
   sentCompany: "O seu pedido foi enviado à empresa de mudanças.",
+  chooseRoom: "Escolher divisão",
 };
 
 const TABLES: Record<Lang, Table> = { en, no, sv, da, fi, de, nl, fr, pl, es, it, pt };
