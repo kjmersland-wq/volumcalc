@@ -34,28 +34,20 @@ export const sendContactMessage = createServerFn({ method: "POST" })
 
     let emailed = false;
     try {
-      const { sendMailViaSmtp } = await import("./smtp.server");
-      const sender = process.env["MIGADU_SMTP_USER"]!;
-      const recipient = "support@volumcalc.com";
-      const lines = [
-        `Navn / Name: ${data.name}`,
-        `E-post / Email: ${data.email}`,
-        `Telefon / Phone: ${data.phone || "-"}`,
-        `Språk / Language: ${data.locale}`,
-        "",
-        data.message,
-        "",
-        "---",
-        "Sendt fra kontaktskjemaet på volumcalc.com",
-      ];
-      await sendMailViaSmtp({
-        from: sender,
-        fromName: "VolumCalc kontaktskjema",
-        to: recipient,
+      const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+      const result = await sendTemplateEmail("contact-notification", "kjmersland@gmail.com", {
+        templateData: {
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          subject: data.subject,
+          message: data.message,
+          locale: data.locale,
+        },
+        idempotencyKey: `contact-notification-${row.id}`,
         replyTo: data.email,
-        subject: `[VolumCalc] ${data.subject}`,
-        text: lines.join("\n"),
       });
+      if (!result.sent) throw new Error("Recipient suppressed");
       emailed = true;
       await supabaseAdmin.from("contact_messages").update({ email_sent: true }).eq("id", row.id);
     } catch (sendError) {
