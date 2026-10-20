@@ -34,7 +34,7 @@ const ContactNotification = ({ name, email, phone, subject, message, locale }: P
 
 export const template = {
   component: ContactNotification,
-  subject: (d: Record<string, any>) => `[VolumCalc] ${d.subject ?? 'Ny henvendelse'}`,
+  subject: (d: Record<string, any>) => `[VolumCalc] ${d['subject'] ?? 'Ny henvendelse'}`,
   displayName: 'Kontaktskjema – varsel til eier',
   to: 'kjmersland@gmail.com',
   previewData: { name: 'Ola Nordmann', email: 'ola@example.com', phone: '12345678', subject: 'Spørsmål om flytting', message: 'Hei, jeg lurer på...', locale: 'no' },
