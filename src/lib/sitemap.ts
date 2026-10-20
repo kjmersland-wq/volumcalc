@@ -57,6 +57,8 @@ export function sitemapPathForLocation(
 export interface SitemapEntry {
   path: string;
   lastmod?: string;
+  /** Language alternates (hreflang → path); emitted as xhtml:link so crawlers see the full set. */
+  alternates?: { hreflang: string; path: string }[];
 }
 
 function isSafeSitemapPath(pathname: string): boolean {
@@ -93,9 +95,16 @@ export function sitemapXML(baseURL: string, entries: SitemapEntry[]): string {
     const url = new URL(entry.path, origin);
     if (seen.has(url.href)) continue;
     seen.add(url.href);
+    const alternates = (entry.alternates ?? [])
+      .filter((alt) => isSafeSitemapPath(alt.path))
+      .map(
+        (alt) =>
+          `<xhtml:link rel="alternate" hreflang="${escape(alt.hreflang)}" href="${escape(new URL(alt.path, origin).href)}"/>`,
+      )
+      .join("");
     urls.push(
-      `<url><loc>${escape(url.href)}</loc>${entry.lastmod ? `<lastmod>${escape(entry.lastmod)}</lastmod>` : ""}</url>`,
+      `<url><loc>${escape(url.href)}</loc>${entry.lastmod ? `<lastmod>${escape(entry.lastmod)}</lastmod>` : ""}${alternates}</url>`,
     );
   }
-  return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join("")}</urlset>`;
+  return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${urls.join("")}</urlset>`;
 }

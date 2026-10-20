@@ -259,12 +259,12 @@ export const dict: Dict = {
   },
 
   "price.title": {
-    no: "Enkle priser, uansett hvordan du flytter",
-    en: "Simple pricing, however you move",
+    no: "Priser for flyttevolum-kalkulatoren",
+    en: "Pricing for the moving volume calculator",
   },
   "price.sub": {
-    no: "Velg en enkelt beregning for din egen flytting, eller en plan for flyttebyrået.",
-    en: "Choose a one-off estimate for your own move, or a plan for your moving company.",
+    no: "m³-kalkulatoren er gratis. Velg en enkelt beregning for å lagre og dele din egen flytting, eller en plan for flyttebyrået.",
+    en: "The m³ calculator is free. Choose a one-off estimate to save and share your own move, or a plan for your moving company.",
   },
   "price.private": { no: "For privatpersoner", en: "For private individuals" },
   "price.business": { no: "For flyttebyråer", en: "For moving companies" },

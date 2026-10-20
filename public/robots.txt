@@ -1,8 +1,16 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /dashboard
+Disallow: /estimate/
+Disallow: /api/
+Disallow: /checkout/
 
 User-agent: Bingbot
 Allow: /
+Disallow: /dashboard
+Disallow: /estimate/
+Disallow: /api/
+Disallow: /checkout/
 
 User-agent: Twitterbot
 Allow: /
@@ -12,5 +20,9 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /estimate/
+Disallow: /api/
+Disallow: /checkout/
 
 Sitemap: https://www.volumcalc.com/sitemap.xml

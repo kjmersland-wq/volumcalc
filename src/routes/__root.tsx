@@ -33,6 +33,21 @@ const LANG_TO_IMAGE_CODE: Record<Lang, string> = {
   pt: "pt",
 };
 
+const OG_LOCALE: Record<Lang, string> = {
+  no: "nb_NO",
+  en: "en_US",
+  sv: "sv_SE",
+  da: "da_DK",
+  fi: "fi_FI",
+  de: "de_DE",
+  nl: "nl_NL",
+  fr: "fr_FR",
+  pl: "pl_PL",
+  es: "es_ES",
+  it: "it_IT",
+  pt: "pt_PT",
+};
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -97,19 +112,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; init
   staticData: { sitemap: false },
   validateSearch: (search: Record<string, unknown>): { lang?: "no" | "en" } =>
     search["lang"] === "no" || search["lang"] === "en" ? { lang: search["lang"] } : {},
-  head: ({ match }) => {
+  head: ({ match, matches }) => {
     const lang = match.context.initialLang;
+    // Self-referencing og:url from the deepest matched route (query strings never included).
+    const leafPath = matches[matches.length - 1]?.pathname ?? "/";
+    const pageUrl = `https://www.volumcalc.com${leafPath === "/" ? "/" : leafPath.replace(/\/+$/, "")}`;
     const imageCode = LANG_TO_IMAGE_CODE[lang] ?? "en";
-    const socialImage = `https://volumcalc.com/og-volumcalc-${imageCode}.jpg`;
+    const socialImage = `https://www.volumcalc.com/og-volumcalc-${imageCode}.jpg`;
     return {
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { title: "VolumCalc — Clear moving volume in minutes, room by room" },
+        { title: "VolumCalc — Moving volume calculator: clear m³ estimate, room by room" },
         {
           name: "description",
           content:
-            "Pick items from the checklist, get an accurate m³ estimate, a recommended vehicle and a shareable report. Perfect for households and moving companies.",
+            "Free moving volume calculator. Pick items from the checklist, get an accurate m³ estimate, a recommended vehicle and a shareable report. Perfect for households and moving companies.",
         },
         { name: "author", content: "VolumCalc" },
         {
@@ -118,14 +136,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; init
         },
         {
           property: "og:title",
-          content: "VolumCalc — Clear moving volume in minutes, room by room",
+          content: "VolumCalc — Moving volume calculator: clear m³ estimate, room by room",
         },
         {
           property: "og:description",
           content:
-            "Pick items from the checklist, get an accurate m³ estimate, a recommended vehicle and a shareable report. Perfect for households and moving companies.",
+            "Free moving volume calculator. Pick items from the checklist, get an accurate m³ estimate, a recommended vehicle and a shareable report. Perfect for households and moving companies.",
         },
         { property: "og:type", content: "website" },
+        { property: "og:url", content: pageUrl },
+        { property: "og:site_name", content: "VolumCalc" },
+        { property: "og:locale", content: OG_LOCALE[lang] },
         { property: "og:image", content: socialImage },
         { property: "og:image:width", content: "1200" },
         { property: "og:image:height", content: "630" },

@@ -3,39 +3,48 @@ import { Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, type Lang } from "@/lib/i18n";
 import { FAQ } from "@/lib/faq-content";
 
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: FAQ.en.groups.flatMap((group) =>
-    group.items.map((item) => ({
-      "@type": "Question",
-      name: item.q,
-      acceptedAnswer: { "@type": "Answer", text: item.a },
-    })),
-  ),
-};
+/** FAQPage structured data in the same language as the visible questions and answers. */
+function faqSchemaFor(lang: Lang) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    inLanguage: lang === "no" ? "nb" : lang,
+    mainEntity: (FAQ[lang] ?? FAQ.en).groups.flatMap((group) =>
+      group.items.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+      })),
+    ),
+  };
+}
 
 export const Route = createFileRoute("/hjelp")({
   staticData: { sitemap: true },
-  head: () => ({
-    meta: [
-      { title: "Hjelp og FAQ / Help and FAQ — VolumCalc" },
-      {
-        name: "description",
-        content:
-          "Answers to the most common questions about VolumCalc: checklist, volume, vehicle, PDF, sharing, pricing and privacy.",
-      },
-      { property: "og:title", content: "Hjelp og FAQ — VolumCalc" },
-      { property: "og:description", content: "Alt du lurer på om volumberegning med VolumCalc." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [{ rel: "canonical", href: "https://www.volumcalc.com/hjelp" }],
-    scripts: [{ type: "application/ld+json", children: JSON.stringify(faqSchema) }],
-  }),
+  head: ({ match }) => {
+    const no = match.context.initialLang === "no";
+    const title = no
+      ? "Hjelp og FAQ — flyttevolum-kalkulator (m³) | VolumCalc"
+      : "Help and FAQ — moving volume calculator (m³ estimate) | VolumCalc";
+    const description = no
+      ? "Svar på de vanligste spørsmålene om VolumCalc: sjekkliste, flyttevolum i m³, anbefalt bil, PDF, deling, priser og personvern."
+      : "Answers to the most common questions about the VolumCalc moving volume calculator: checklist, m³ estimate, vehicle, PDF, sharing, pricing and privacy.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [{ rel: "canonical", href: "https://www.volumcalc.com/hjelp" }],
+      scripts: [{ type: "application/ld+json", children: JSON.stringify(faqSchemaFor(match.context.initialLang)) }],
+    };
+  },
   component: HelpPage,
 });
 

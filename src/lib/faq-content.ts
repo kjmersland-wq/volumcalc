@@ -16,7 +16,7 @@ export type FaqContent = {
 export const FAQ: Record<Lang, FaqContent> = {
   en: {
     title: "Help and frequently asked questions",
-    intro: "Everything you need to get started with VolumCalc — from the checklist to a polished report, sharing and pricing.",
+    intro: "Everything you need to use the VolumCalc moving volume calculator — from the checklist and m³ estimate to a polished report, sharing and pricing.",
     ctaTitle: "Didn't find your answer?",
     ctaText: "Send us a few words and we usually reply within one business day.",
     cta: "Start a free estimate",
@@ -70,7 +70,7 @@ export const FAQ: Record<Lang, FaqContent> = {
   },
   no: {
     title: "Hjelp og ofte stilte spørsmål",
-    intro: "Alt du trenger for å komme i gang med VolumCalc – fra sjekkliste til ferdig rapport, deling og priser.",
+    intro: "Alt du trenger for å bruke flyttevolum-kalkulatoren VolumCalc – fra sjekkliste og m³-beregning til ferdig rapport, deling og priser.",
     ctaTitle: "Fant du ikke svaret?",
     ctaText: "Send oss noen ord, så svarer vi vanligvis innen én virkedag.",
     cta: "Start en gratis beregning",

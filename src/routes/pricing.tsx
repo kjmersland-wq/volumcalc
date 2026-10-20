@@ -24,17 +24,17 @@ export const Route = createFileRoute("/pricing")({
   staticData: { sitemap: true },
   head: () => ({
     meta: [
-      { title: "Pricing for individuals and movers — VolumCalc" },
+      { title: "Pricing — moving volume calculator and m³ estimates | VolumCalc" },
       {
         name: "description",
         content:
-          "Plans for movers and storage providers, from a free starter tier to unlimited estimates.",
+          "The m³ moving volume calculator is free. Buy a single estimate or a 3-pack to save, share and download a PDF — or choose a plan for your moving company.",
       },
-      { property: "og:title", content: "Pricing for individuals and movers — VolumCalc" },
+      { property: "og:title", content: "Pricing — moving volume calculator and m³ estimates | VolumCalc" },
       {
         property: "og:description",
         content:
-          "Simple monthly plans for checklist-based cubic volume estimates and shareable reports.",
+          "Free moving volume calculator. Single estimates, 3-packs and plans for moving companies.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

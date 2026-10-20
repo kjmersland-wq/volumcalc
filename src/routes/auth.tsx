@@ -15,7 +15,7 @@ export const Route = createFileRoute("/auth")({
   staticData: { sitemap: false },
   head: () => ({
     meta: [
-      { title: "Company login — VolumCalc" },
+      { title: "Company login — VolumCalc" }, { name: "robots", content: "noindex" },
       { name: "description", content: "Sign in to manage incoming estimates and quotes." },
       { property: "og:title", content: "Company login — VolumCalc" },
       { property: "og:description", content: "Sign in to manage incoming estimates and quotes." },
