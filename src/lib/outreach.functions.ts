@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireOwner } from "@/lib/owner-middleware";
 import { formatDuration } from "@/lib/move-time";
 
 const schema = z.object({
@@ -166,7 +165,6 @@ function composeMail(lang: MailLang, facts: Facts, input: MailInput): { subject:
  * report can only be sent by someone who already holds the link.
  */
 export const sendEstimateToMovers = createServerFn({ method: "POST" })
-  .middleware([requireOwner])
   .inputValidator((data: unknown) => schema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

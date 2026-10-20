@@ -14,7 +14,6 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LanguageProvider, translate, type Lang } from "@/lib/i18n";
 import { Toaster } from "@/components/ui/sonner";
-import { MaintenanceGate } from "@/components/MaintenanceGate";
 
 // Path-segment codes used by the og-volumcalc-*.jpg filenames (see
 // language-page-meta.ts) — differ from the Lang codes for Swedish/Danish,
@@ -187,9 +186,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <LanguageProvider initialLang={initialLang}>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <MaintenanceGate>
-          <Outlet />
-        </MaintenanceGate>
+        <Outlet />
         <Toaster position="top-center" richColors />
       </LanguageProvider>
     </QueryClientProvider>

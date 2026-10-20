@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireOwner } from "@/lib/owner-middleware";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 /**
@@ -52,7 +52,7 @@ export type AdminCompanyRow = {
 
 /** All company accounts with their private upload link and estimate counts. */
 export const adminListCompanies = createServerFn({ method: "GET" })
-  .middleware([requireOwner])
+  .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<AdminCompanyRow[]> => {
     await assertAdmin(context as any);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -78,7 +78,7 @@ export const adminListCompanies = createServerFn({ method: "GET" })
 
 /** Creates a login plus a branded company profile for a moving company. */
 export const adminCreateCompany = createServerFn({ method: "POST" })
-  .middleware([requireOwner])
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => createSchema.parse(data))
   .handler(async ({ data, context }) => {
     await assertAdmin(context as any);
@@ -123,7 +123,7 @@ const idSchema = z.object({ id: z.string().uuid() });
 
 /** Issues a fresh secret upload link for a company; the old link stops working. */
 export const adminRotateUploadToken = createServerFn({ method: "POST" })
-  .middleware([requireOwner])
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => idSchema.parse(data))
   .handler(async ({ data, context }) => {
     await assertAdmin(context as any);
@@ -140,7 +140,7 @@ const passwordSchema = z.object({ id: z.string().uuid(), password: z.string().mi
 
 /** Sets a new password for a company login. */
 export const adminSetPassword = createServerFn({ method: "POST" })
-  .middleware([requireOwner])
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => passwordSchema.parse(data))
   .handler(async ({ data, context }) => {
     await assertAdmin(context as any);
@@ -160,7 +160,6 @@ const tokenSchema = z.object({
  * of other companies.
  */
 export const getCompanyByUploadToken = createServerFn({ method: "POST" })
-  .middleware([requireOwner])
   .inputValidator((data: unknown) => tokenSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

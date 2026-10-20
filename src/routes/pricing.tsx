@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { Check, UserRound, Building2, LockKeyhole } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +13,9 @@ import {
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
-import { PURCHASES_ENABLED, PURCHASES_PAUSED_MESSAGE } from "@/lib/purchases";
+import { PURCHASES_ENABLED } from "@/lib/purchases";
+import { px } from "@/lib/pricing-i18n";
+import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/lib/i18n";
 import { approxPrice, formatApproxInline } from "@/lib/currency";
 import { cn } from "@/lib/utils";
@@ -45,33 +48,36 @@ function Pricing() {
   const { t, lang } = useI18n();
   const [checkout, setCheckout] = useState<{ priceId: string; name: string } | null>(null);
 
+  const { session } = useAuth();
+  const navigate = useNavigate();
+
+  /** Purchases are credited to an account, so the buyer must be signed in first. */
+  function startCheckout(priceId: string, name: string) {
+    if (!PURCHASES_ENABLED) return;
+    if (!session) {
+      toast(px(lang, "loginFirst"));
+      void navigate({ to: "/auth" });
+      return;
+    }
+    setCheckout({ priceId, name });
+  }
+
   const plans = [
     {
       name: "Business",
       priceNok: 1490 as number | null,
       priceLabel: null as string | null,
-      desc: lang === "no" ? "300 beregninger per måned" : "300 estimates per month",
-      features:
-        lang === "no"
-          ? ["Alle basisfunksjoner", "Egen logo og farger", "Pris per m³ og tilbud", "PDF-rapport"]
-          : ["All core features", "Your logo and colours", "Rate per m³ and quotes", "PDF report"],
+      desc: px(lang, "bizDesc"),
+      features: [px(lang, "fCore"), px(lang, "fBrand"), px(lang, "fRate"), px(lang, "fEmbed")],
       featured: true,
-      priceId: "volumcalc_business_monthly_nok",
+      priceId: "volumcalc_business_monthly_nok" as string | null,
     },
     {
       name: "Enterprise",
       priceNok: null,
-      priceLabel: lang === "no" ? "Kontakt oss" : "Talk to us",
-      desc: lang === "no" ? "Ubegrenset volum" : "Unlimited volume",
-      features:
-        lang === "no"
-          ? ["Alt i Business", "Flere avdelinger", "API og integrasjoner", "Egen kundekontakt"]
-          : [
-              "Everything in Business",
-              "Multiple branches",
-              "API and integrations",
-              "Dedicated contact",
-            ],
+      priceLabel: px(lang, "talk"),
+      desc: px(lang, "entDesc"),
+      features: [px(lang, "fAll"), px(lang, "fBranches"), px(lang, "fApi"), px(lang, "fContact")],
       featured: false,
       priceId: null,
     },
@@ -79,24 +85,18 @@ function Pricing() {
 
   const privatePlans = [
     {
-      name: lang === "no" ? "Én beregning" : "Single estimate",
+      name: px(lang, "single"),
       priceNok: 129,
-      desc: lang === "no" ? "For én flytting" : "For one move",
-      features:
-        lang === "no"
-          ? ["Sjekkliste med 120+ gjenstander", "Romvis oversikt", "PDF-rapport"]
-          : ["Checklist with 120+ items", "Room-by-room overview", "PDF report"],
-      priceId: "volumcalc_single_estimate_nok",
+      desc: px(lang, "oneMove"),
+      features: [px(lang, "fChecklist"), px(lang, "fPdfLink"), px(lang, "fSaved")],
+      priceId: "volumcalc_single_estimate_nok" as string | null,
     },
     {
-      name: lang === "no" ? "3 beregninger" : "3 estimates",
+      name: px(lang, "three"),
       priceNok: 299,
-      desc: lang === "no" ? `Spar ${formatApproxInline(88, lang)}` : `Save ${formatApproxInline(88, lang)}`,
-      features:
-        lang === "no"
-          ? ["3 komplette beregninger", "Sjekkliste med 120+ gjenstander", "PDF-rapporter"]
-          : ["3 complete estimates", "Checklist with 120+ items", "PDF reports"],
-      priceId: "volumcalc_three_estimates_nok",
+      desc: px(lang, "save", { x: formatApproxInline(88, lang) }),
+      features: [px(lang, "fThree"), px(lang, "fChecklist"), px(lang, "fPdfLink")],
+      priceId: "volumcalc_three_estimates_nok" as string | null,
     },
   ];
 
@@ -153,19 +153,11 @@ function Pricing() {
                           plan.priceId === "volumcalc_single_estimate_nok" ? "default" : "outline"
                         }
                         disabled={!PURCHASES_ENABLED}
-                        onClick={() =>
-                          PURCHASES_ENABLED &&
-                          setCheckout({ priceId: plan.priceId, name: plan.name })
-                        }
+                        onClick={() => startCheckout(plan.priceId!, plan.name)}
                       >
                         <LockKeyhole className="size-4" />
-                        {t("payment.buy")}
+                        {PURCHASES_ENABLED ? t("payment.buy") : px(lang, "comingSoon")}
                       </Button>
-                      {!PURCHASES_ENABLED && (
-                        <p className="mt-2 text-xs text-muted-foreground">
-                          {PURCHASES_PAUSED_MESSAGE[lang]}
-                        </p>
-                      )}
                     </>
                   ) : (
                     <Button asChild className="mt-8" variant="outline">
@@ -230,19 +222,11 @@ function Pricing() {
                         className="mt-8"
                         variant="default"
                         disabled={!PURCHASES_ENABLED}
-                        onClick={() =>
-                          PURCHASES_ENABLED &&
-                          setCheckout({ priceId: plan.priceId, name: plan.name })
-                        }
+                        onClick={() => startCheckout(plan.priceId!, plan.name)}
                       >
                         <LockKeyhole className="size-4" />
-                        {t("payment.subscribe")}
+                        {PURCHASES_ENABLED ? t("payment.subscribe") : px(lang, "comingSoon")}
                       </Button>
-                      {!PURCHASES_ENABLED && (
-                        <p className="mt-2 text-xs text-muted-foreground">
-                          {PURCHASES_PAUSED_MESSAGE[lang]}
-                        </p>
-                      )}
                     </>
                   ) : (
                     <Button asChild className="mt-8" variant="outline">

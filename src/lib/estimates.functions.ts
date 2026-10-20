@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireOwner } from "@/lib/owner-middleware";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
@@ -143,7 +143,6 @@ const sharedSchema = z.object({
  * the share token for the estimate it just created.
  */
 export const createEstimate = createServerFn({ method: "POST" })
-  .middleware([requireOwner])
   .inputValidator((data: unknown) => createSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -169,29 +168,25 @@ export const createEstimate = createServerFn({ method: "POST" })
       companyId = company?.id ?? null;
     }
 
-    // A company_token submission is billed against the COMPANY's own plan
-    // (companies.id === auth.users.id, so it shares the exact same
-    // user_roles/user_credits rows) — never against the anonymous visitor
-    // filling out that company's public form, who has no VolumCalc account
-    // of their own to check or top up. Exhausting the company's plan is a
-    // hard block with a neutral message; the company discovers this in
-    // their own dashboard, not via an automated alert. A caller submitting
-    // under their own account is gated the same way, against their own
-    // identity — server-verified, never client-supplied, so neither path
-    // can be spoofed by passing a different company_id.
-    if (context.isOwner) {
-      // Owner is never limited by credits or plan quotas.
-    } else if (data.company_token) {
+    // Saving an estimate (and therefore the PDF and the share link) is a paid
+    // feature. A company_token submission is billed against the COMPANY's own
+    // plan (companies.id === auth.users.id, so it shares the user_roles /
+    // user_credits rows) — the anonymous visitor filling in that company's
+    // public form has no account to check or top up. Everyone else must be
+    // signed in with an entitlement. Identity is always server-verified, never
+    // client-supplied, so neither path can be spoofed.
+    if (data.company_token) {
       if (companyId) {
         const allowed = await consumePlanEntitlement(supabaseAdmin, companyId);
         if (!allowed) throw new Error("COMPANY_QUOTA_EXCEEDED");
       }
     } else {
       const userId = await resolveVerifiedUserId();
-      if (userId) {
-        const allowed = await consumePlanEntitlement(supabaseAdmin, userId);
-        if (!allowed) throw new Error("NO_CREDITS");
-      }
+      if (!userId) throw new Error("AUTH_REQUIRED");
+      const allowed = await consumePlanEntitlement(supabaseAdmin, userId);
+      if (!allowed) throw new Error("NO_CREDITS");
+      // Without a company token an estimate can only belong to the caller's own company.
+      if (companyId !== userId) companyId = null;
     }
 
     const from = data.from ?? { elevator: false };
@@ -363,7 +358,6 @@ export const createEstimate = createServerFn({ method: "POST" })
  * customer's data.
  */
 export const getSharedEstimate = createServerFn({ method: "POST" })
-  .middleware([requireOwner])
   .inputValidator((data: unknown) => sharedSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -418,7 +412,6 @@ const quoteSchema = z.object({
  * The token is validated server-side before anything is written.
  */
 export const requestQuote = createServerFn({ method: "POST" })
-  .middleware([requireOwner])
   .inputValidator((data: unknown) => quoteSchema.parse(data))
   .handler(async ({ data }) => {
     if (!data.phone && !data.email) throw new Error("A phone number or email is required");
@@ -477,7 +470,6 @@ const updateSharedItemSchema = z.object({
  * touch another estimate's items.
  */
 export const updateSharedEstimateItem = createServerFn({ method: "POST" })
-  .middleware([requireOwner])
   .inputValidator((data: unknown) => updateSharedItemSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -573,7 +565,6 @@ const addItemsSchema = z.object({
  * total. Same share-token check as the other report edits.
  */
 export const addEstimateItems = createServerFn({ method: "POST" })
-  .middleware([requireOwner])
   .inputValidator((data: unknown) => addItemsSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -637,7 +628,7 @@ export const addEstimateItems = createServerFn({ method: "POST" })
  * estimate can never be claimed by guessing ids.
  */
 export const claimEstimate = createServerFn({ method: "POST" })
-  .middleware([requireOwner])
+  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => sharedSchema.parse(data))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
