@@ -4,7 +4,7 @@ import type { Lang } from "@/lib/i18n";
  * Single switch for all paid checkouts (frontend + server).
  * Set to true to re-enable Stripe purchases and subscriptions.
  */
-export const PURCHASES_ENABLED = false;
+export const PURCHASES_ENABLED = true;
 
 export const PURCHASES_PAUSED_MESSAGE: Record<Lang, string> = {
   en: "Paid plans are paused for a short while as we set up in Poland. Everything free works as normal.",
