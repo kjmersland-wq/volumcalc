@@ -61,7 +61,7 @@ const content: Record<"no" | "en", LegalContent> = {
         heading: "Reklamasjon og klage",
         body: [
           "Fungerer ikke tjenesten som avtalt, kontakt oss på kjell@volumcalc.com. Vi retter feilen eller refunderer kjøpet.",
-          "Et volumestimat som avviker fra faktisk volum er ikke i seg selv en mangel; estimatet er veiledende og bygger på bildene som er lastet opp.",
+          "Et volumestimat som avviker fra faktisk volum er ikke i seg selv en mangel; estimatet er veiledende og bygger på gjenstandene og opplysningene du har oppgitt.",
           "Du kan klage til Forbrukertilsynet eller bruke EUs klageportal (ec.europa.eu/odr) dersom vi ikke blir enige.",
         ],
       },
@@ -104,7 +104,7 @@ const content: Record<"no" | "en", LegalContent> = {
         heading: "Complaints",
         body: [
           "If the service does not work as agreed, contact kjell@volumcalc.com. We will fix the problem or refund your purchase.",
-          "An estimate differing from the actual volume is not in itself a defect; the estimate is indicative and based on the photos uploaded.",
+          "An estimate differing from the actual volume is not in itself a defect; the estimate is indicative and based on the items and details you entered.",
           "You may complain to the Norwegian Consumer Authority or use the EU ODR platform (ec.europa.eu/odr) if we cannot agree.",
         ],
       },

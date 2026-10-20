@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Camera, ClipboardList, Boxes, ArrowRight } from "lucide-react";
+import { Check, ListChecks, ClipboardList, Boxes, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -15,13 +15,13 @@ export const Route = createFileRoute("/moving-inventory-list")({
       {
         name: "description",
         content:
-          "A practical moving inventory list: what to write down in every room, how to estimate cubic metres, common mistakes, and how to build the list automatically from photos.",
+          "A practical moving inventory list: what to write down in every room, how to estimate cubic metres, common mistakes, and how to build the list with a checklist calculator.",
       },
       { property: "og:title", content: "Moving inventory list: room-by-room guide — VolumCalc" },
       {
         property: "og:description",
         content:
-          "Room-by-room checklists, volume tips and a faster way to turn photos into a complete moving inventory.",
+          "Room-by-room checklists, volume tips and a faster way to turn your items into a complete moving inventory.",
       },
       { property: "og:type", content: "article" },
       { property: "og:url", content: CANONICAL },
@@ -112,8 +112,8 @@ const rooms: Room[] = [
       en: ["Shoe rack and hooks", "Outdoor clothing", "Vacuum cleaner, cleaning kit", "Seasonal boxes and tools"],
     },
     tip: {
-      no: "Boden undervurderes nesten alltid. Ta ett oversiktsbilde med døren åpen.",
-      en: "Storage rooms are almost always underestimated. Take one overview photo with the door open.",
+      no: "Boden undervurderes nesten alltid. Åpne døren og gå gjennom hylle for hylle.",
+      en: "Storage rooms are almost always underestimated. Open the door and go through it shelf by shelf.",
     },
   },
   {
@@ -136,12 +136,12 @@ function MovingInventoryList() {
   const steps = no
     ? [
         { icon: ClipboardList, t: "Gå rom for rom", d: "Lag én liste per rom i stedet for én lang liste. Det gjør det lett å kontrollere på flyttedagen." },
-        { icon: Camera, t: "Fotografer det store", d: "Ett oversiktsbilde per rom + 1–2 nærbilder av de største møblene er nok." },
+        { icon: ListChecks, t: "Start med de store tingene", d: "Sofa, senger, skap og hvitevarer utgjør mesteparten av volumet – ta dem først." },
         { icon: Boxes, t: "Regn om til kubikk", d: "Summer møbelvolum og antall kasser, og legg til 25 % stuefaktor for luft i bilen." },
       ]
     : [
         { icon: ClipboardList, t: "Work room by room", d: "Keep one list per room instead of one long list. It is far easier to check on moving day." },
-        { icon: Camera, t: "Photograph the big things", d: "One overview photo per room plus 1–2 close-ups of the largest furniture is enough." },
+        { icon: ListChecks, t: "Start with the big things", d: "Sofas, beds, wardrobes and appliances make up most of the volume — list them first." },
         { icon: Boxes, t: "Convert to cubic metres", d: "Add up furniture volume and boxes, then add a 25% stowage factor for air in the truck." },
       ];
 
@@ -195,7 +195,7 @@ function MovingInventoryList() {
             </p>
             <Button asChild size="lg" className="mt-8">
               <Link to="/upload">
-                {no ? "Lag listen fra bilder" : "Build the list from photos"}
+                {no ? "Lag listen med sjekklisten" : "Build the list with the checklist"}
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
@@ -279,8 +279,8 @@ function MovingInventoryList() {
           <h2 className="text-2xl font-bold">{no ? "Slik hjelper VolumCalc" : "How VolumCalc helps"}</h2>
           <p className="mt-3 text-muted-foreground">
             {no
-              ? "I stedet for å skrive listen for hånd laster du opp 1–3 bilder per rom. VolumCalc gjenkjenner møblene, sorterer dem automatisk i rom, beregner volum i m³ og legger til stuefaktor. Du kan endre navn på rom, flytte gjenstander, markere hva som ikke skal være med – og dele resultatet som lenke eller PDF med flyttebyrået."
-              : "Instead of writing the list by hand you upload 1–3 photos per room. VolumCalc recognises the furniture, sorts it into rooms automatically, calculates the volume in m³ and adds the stowage factor. You can rename rooms, move items, mark what stays behind — and share the result as a link or PDF with your movers."}
+              ? "I stedet for å skrive listen for hånd velger du gjenstander fra sjekklisten, rom for rom. VolumCalc beregner volum i m³, legger til stuefaktor og foreslår bil. Du kan legge til egne gjenstander med mål, markere hva som ikke skal være med – og dele resultatet som lenke eller PDF med flyttebyrået."
+              : "Instead of writing the list by hand you pick items from the checklist, room by room. VolumCalc calculates the volume in m³, adds the stowage factor and suggests a vehicle. You can add your own items with dimensions, mark what stays behind — and share the result as a link or PDF with your movers."}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg">

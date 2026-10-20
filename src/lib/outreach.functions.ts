@@ -88,7 +88,7 @@ function composeMail(lang: MailLang, facts: Facts, input: MailInput): { subject:
       time: input.time
         ? `Tidsbruk: vi har regnet ut ca. ${fmt(input.time.total)} med ${input.time.crew} personer (typisk ${fmt(input.time.low)}–${fmt(input.time.high)}), medregnet pakking, bæring, sikring i bilen og lossing. Kjøretid kommer i tillegg.`
         : null,
-      report: "Hele rapporten med alle gjenstander, mål og bilder ligger her:",
+      report: "Hele rapporten med alle gjenstander og mål ligger her:",
       ask: "Kan dere sende meg et pristilbud, og si litt om når dere har ledig tid? Har dere spørsmål, er det bare å svare på denne e-posten, så tar jeg kontakt raskt.",
       thanks: "Tusen takk for hjelpen!",
       regards: "Vennlig hilsen",
@@ -106,7 +106,7 @@ function composeMail(lang: MailLang, facts: Facts, input: MailInput): { subject:
       time: input.time
         ? `Time needed: we estimate about ${fmt(input.time.total)} with ${input.time.crew} people (typically ${fmt(input.time.low)}–${fmt(input.time.high)}), including packing, carrying, securing the load and unloading. Driving time is extra.`
         : null,
-      report: "The full report with every item, measurements and photos is here:",
+      report: "The full report with every item and measurement is here:",
       ask: "Could you send me a price quote, and let me know when you might have a free slot? If anything is unclear, just reply to this email and I'll get back to you quickly.",
       thanks: "Thank you so much for your help!",
       regards: "Kind regards",

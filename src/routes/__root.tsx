@@ -106,11 +106,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; init
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { title: "VolumCalc — Brilliant moving volume estimates from your own photos" },
+        { title: "VolumCalc — Clear moving volume in minutes, room by room" },
         {
           name: "description",
           content:
-            "Room-by-room cubic metre estimates from your own photos and a stress-free checklist flow.",
+            "Pick items from the checklist, get an accurate m³ estimate, a recommended vehicle and a shareable report. Perfect for households and moving companies.",
         },
         { name: "author", content: "VolumCalc" },
         {
@@ -119,12 +119,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient; init
         },
         {
           property: "og:title",
-          content: "VolumCalc — Brilliant moving volume estimates from your own photos",
+          content: "VolumCalc — Clear moving volume in minutes, room by room",
         },
         {
           property: "og:description",
           content:
-            "Room-by-room cubic metre estimates from your own photos and a stress-free checklist flow.",
+            "Pick items from the checklist, get an accurate m³ estimate, a recommended vehicle and a shareable report. Perfect for households and moving companies.",
         },
         { property: "og:type", content: "website" },
         { property: "og:image", content: socialImage },

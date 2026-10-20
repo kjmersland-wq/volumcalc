@@ -5,8 +5,8 @@ import { languagePageHead } from "@/lib/language-page-meta";
 export const Route = createFileRoute("/de")({
   staticData: { sitemap: true },
   head: () => languagePageHead({
-    title: "VolumCalc — Volumenschätzung aus Raumfotos",
-    description: "Verwandeln Sie Raumfotos in eine übersichtliche, raumweise Kubikmeterschätzung für Umzüge und Angebote.",
+    title: "VolumCalc — Umzugsvolumen Raum für Raum (m³)",
+    description: "Wählen Sie Gegenstände aus der Checkliste und erhalten Sie das Umzugsvolumen in m³, das empfohlene Fahrzeug und einen teilbaren Bericht. Für Privatpersonen und Umzugsfirmen.",
     path: "/de",
   }),
   component: () => <LanguageLanding lang="de" />,

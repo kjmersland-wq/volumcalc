@@ -23,26 +23,26 @@ const content: Record<
   no: {
     title: "Hjelp og ofte stilte spørsmål",
     intro:
-      "Alt du trenger for å komme i gang med VolumCalc – fra fotografering til ferdig rapport, pakking, lagring og deling.",
+      "Alt du trenger for å komme i gang med VolumCalc – fra sjekkliste til ferdig rapport, pakking, lagring og deling.",
     ctaTitle: "Fant du ikke svaret?",
     ctaText: "Send oss noen ord, så svarer vi vanligvis innen én virkedag.",
     cta: "Start en gratis beregning",
     contact: "Kontakt oss",
     groups: [
       {
-        heading: "Fotografering",
+        heading: "Sjekklisten",
         items: [
           {
-            q: "Hvor mange bilder bør jeg ta?",
-            a: "Ta 1–3 bilder per rom: ett oversiktsbilde av hele rommet, pluss 1–2 nærbilder av de største møblene. Du trenger ikke fotografere hver minste gjenstand. Maks 20 bilder per beregning.",
+            q: "Hvordan velger jeg gjenstander?",
+            a: "Velg et rom og trykk + på det som skal flyttes. Sjekklisten har over 120 vanlige gjenstander med standardmål, og du kan søke i alle rom. Totalen oppdateres underveis.",
           },
           {
-            q: "Hva gir best resultat?",
-            a: "Godt lys, ryddige flater og bilder tatt fra døråpningen slik at hele rommet kommer med. Ta bildene i liggende format hvis du kan.",
+            q: "Hva om gjenstanden min ikke står på listen?",
+            a: "Legg til en egen gjenstand med navn, lengde, bredde og høyde i cm og antall. Vekt og notater er valgfritt. Volumet regnes ut som lengde × bredde × høyde × antall og tas med i totalen, rapporten og PDF-en.",
           },
           {
-            q: "Må jeg fotografere skap og skuffer innvendig?",
-            a: "Nei. Innholdet i skap og skuffer regnes normalt inn i flyttekasser. Skriv heller antall kasser som merknad i rapporten.",
+            q: "Hva betyr Flytter, Kanskje og Flytter ikke?",
+            a: "Hver gjenstand kan settes til Flytter, Kanskje eller Flytter ikke. Flytter ikke regnes ikke med i volumet. Kanskje er med i totalen, men utheves i rapporten og PDF-en, slik at du eller flyttefirmaet kan ta stilling til dem.",
           },
         ],
       },
@@ -50,16 +50,16 @@ const content: Record<
         heading: "Rom og redigering",
         items: [
           {
-            q: "Hvordan sorteres bildene i rom?",
-            a: "AI-en grupperer gjenstandene automatisk i rom som stue, kjøkken, soverom, bad, gang, kontor, garasje og annet.",
+            q: "Kan jeg legge til egne rom?",
+            a: "Ja. Skriv inn navn på et nytt rom i kalkulatoren, eller sett opp romlisten din under innstillinger hvis du er flyttefirma.",
           },
           {
             q: "Kan jeg endre navn på rom og flytte ting?",
             a: "Ja. I rapporten kan du gi rom nytt navn, flytte en gjenstand til et annet rom, endre antall og mål, legge til merknader og merke ting som skjøre, tunge, til demontering eller som ikke skal være med.",
           },
           {
-            q: "Hva om AI-en bommer på noe?",
-            a: "Hver gjenstand har en sikkerhetsgrad i prosent. Gå gjennom det som har lav sikkerhet og juster målene – totalvolumet oppdateres med én gang.",
+            q: "Hva om noe mangler eller er feil?",
+            a: "Juster antall og mål direkte i rapporten, eller legg til gjenstander du glemte. Totalvolumet oppdateres med én gang.",
           },
         ],
       },
@@ -72,7 +72,7 @@ const content: Record<
           },
           {
             q: "Hvilken bil trenger jeg?",
-            a: "Rapporten foreslår bilstørrelse ut fra anbefalt volum. Du kan også regne på det selv i flyttebil-kalkulatoren vår.",
+            a: "Rapporten og PDF-en viser anbefalt bil automatisk, basert på anbefalt volum (netto pluss 25 % buffer). Du kan også regne på det selv i flyttebil-kalkulatoren vår.",
           },
         ],
       },
@@ -98,7 +98,7 @@ const content: Record<
         items: [
           {
             q: "Kan jeg lagre rapporten på flere språk?",
-            a: "Ja. Velg rapportspråk norsk, engelsk eller polsk. Alt du har redigert selv beholdes – det er kun de faste tekstene som byttes. Deretter kan du dele lenken eller lagre PDF på det språket.",
+            a: "Ja. Velg PDF-språk blant de 12 språkene på nettsiden, både når du lager en ny rapport og når du laster ned en eksisterende. Alt du har skrevet selv beholdes – det er kun faste overskrifter og etiketter som byttes.",
           },
           {
             q: "Hvordan deler jeg rapporten?",
@@ -113,6 +113,10 @@ const content: Record<
       {
         heading: "For flyttebyråer",
         items: [
+          {
+            q: "Hvordan får vi forespørsler fra kunder?",
+            a: "Kopier kundelenken eller embed-koden fra dashbordet og legg den på nettsiden din. Når en kunde sender inn, får dere en e-post med volum, gjenstander, adresser med etasje, heis, bæreavstand og mobilnummer, ønsket dato og kontaktinfo. Forespørselen havner også i dashbordet med status Ny, Sett, Tilbud sendt, Akseptert eller Arkivert.",
+          },
           {
             q: "Kan vi bruke vår egen logo og firmadetaljer?",
             a: "Ja. Under firmaprofil legger du inn logo, merkefarge, firmanavn, organisasjonsnummer, adresse, telefon, e-post og nettside. Det vises øverst i rapporten, i PDF-en og i headeren når dere er innlogget.",
@@ -131,8 +135,8 @@ const content: Record<
             a: "Privatpersoner kan prøve gratis, og kjøpe én beregning eller en pakke med tre. Flyttebyråer har eget abonnement. Se prissiden for gjeldende priser.",
           },
           {
-            q: "Hva skjer med bildene mine?",
-            a: "Bildene ligger i et lukket lager og er ikke offentlige. De brukes ikke til å trene AI-modeller, og slettes senest 12 måneder etter siste aktivitet. Du kan be om sletting når som helst på kjell@volumcalc.com.",
+            q: "Hva skjer med dataene mine?",
+            a: "Beregningene ligger privat og er ikke offentlige. De slettes senest 12 måneder etter siste aktivitet. Du kan be om sletting når som helst på kjell@volumcalc.com.",
           },
         ],
       },
@@ -141,26 +145,26 @@ const content: Record<
   en: {
     title: "Help and frequently asked questions",
     intro:
-      "Everything you need to get started with VolumCalc — from a few quick photos and a calm checklist to a polished report, packing, storage and sharing.",
+      "Everything you need to get started with VolumCalc — from a calm checklist to a polished report, packing, storage and sharing.",
     ctaTitle: "Didn't find your answer?",
     ctaText: "Send us a few words and we usually reply within one business day.",
     cta: "Start a free estimate",
     contact: "Contact us",
     groups: [
       {
-        heading: "Photographing your room",
+        heading: "The checklist",
         items: [
           {
-            q: "How many photos should I take per room?",
-            a: "Take 1–3 photos per room: one overview shot of the whole room, plus 1–2 close-ups of the largest furniture. You don't need to photograph every last item. Maximum 20 photos per estimate.",
+            q: "How do I pick items?",
+            a: "Choose a room and tap + on whatever is moving. The checklist has 120+ common items with standard dimensions, and you can search across all rooms. Totals update as you go.",
           },
           {
-            q: "What gives the best result?",
-            a: "Good lighting, tidy surfaces, and photos taken from the doorway so the whole room is in view. Shoot in landscape if you can.",
+            q: "What if my item is not on the list?",
+            a: "Add a custom item with a name, length, width and height in cm and a quantity. Weight and notes are optional. Volume is calculated as length × width × height × quantity and included in the totals, the report and the PDF.",
           },
           {
-            q: "Do I need to photograph inside cupboards and drawers?",
-            a: "No. Cupboard and drawer contents are normally counted as moving boxes — just note the number of boxes in the report instead.",
+            q: "What do Moving, Maybe and Not moving mean?",
+            a: "Every item can be set to Moving, Maybe or Not moving. Not moving is left out of the volume. Maybe is included in the total but highlighted in the report and PDF, so you or the moving company can decide on it.",
           },
         ],
       },
@@ -168,8 +172,8 @@ const content: Record<
         heading: "Rooms and editing",
         items: [
           {
-            q: "How are photos sorted into rooms?",
-            a: "The AI automatically groups items into rooms like living room, kitchen, bedroom, bathroom, hallway, office, garage and other.",
+            q: "Can I add my own rooms?",
+            a: "Yes. Type the name of a new room in the calculator, or set up your room list under settings if you are a moving company.",
           },
           {
             q: "Can I rename rooms and move items?",
@@ -190,7 +194,7 @@ const content: Record<
           },
           {
             q: "Which van or truck do I need?",
-            a: "The report suggests a vehicle size from the recommended volume. You can also work it out in our moving van calculator.",
+            a: "The report and the PDF show a recommended vehicle automatically, based on the recommended volume (net plus a 25% buffer). You can also work it out in our moving van calculator.",
           },
         ],
       },
@@ -216,7 +220,7 @@ const content: Record<
         items: [
           {
             q: "Can I save the report in several languages?",
-            a: "Yes. Choose Norwegian, English or Polish as the report language. Everything you edited yourself is kept — only the fixed labels change. Then share the link or save the PDF in that language.",
+            a: "Yes. Choose the PDF language from the 12 languages on the site, both when you create a new report and when you download an existing one. Everything you wrote yourself is kept — only the fixed headings and labels change.",
           },
           {
             q: "How do I share the report?",
@@ -231,6 +235,10 @@ const content: Record<
       {
         heading: "For moving companies",
         items: [
+          {
+            q: "How do we receive requests from customers?",
+            a: "Copy the customer link or the embed code from the dashboard and put it on your website. When a customer submits, you get an email with the volume, items, addresses with floor, lift, carry distance and mobile number, preferred date and contact details. The request also lands in your dashboard with a status of New, Viewed, Quoted, Accepted or Archived.",
+          },
           {
             q: "Can we use our own logo and company details?",
             a: "Yes. In the company profile you add logo, brand colour, company name, registration number, address, phone, email and website. They appear at the top of the report, in the PDF and in the header when you are signed in.",
@@ -249,8 +257,8 @@ const content: Record<
             a: "Private individuals can try it free and buy a single estimate or a pack of three. Moving companies have their own subscription. See the pricing page for current prices.",
           },
           {
-            q: "What happens to my photos?",
-            a: "Your photos are stored privately and are never public. They're not used to train AI models, and are deleted no later than 12 months after the last activity. You can request deletion at any time at kjell@volumcalc.com.",
+            q: "What happens to my data?",
+            a: "Your estimates are stored privately and are never public. They are deleted no later than 12 months after the last activity. You can request deletion at any time at kjell@volumcalc.com.",
           },
         ],
       },
@@ -278,7 +286,7 @@ export const Route = createFileRoute("/hjelp")({
       {
         name: "description",
         content:
-          "Svar på de vanligste spørsmålene om VolumCalc: fotografering, rom, volum, pakking, lagring, deling, PDF, priser og personvern.",
+          "Svar på de vanligste spørsmålene om VolumCalc: sjekkliste, rom, volum, pakking, lagring, deling, PDF, priser og personvern.",
       },
       { property: "og:title", content: "Hjelp og FAQ — VolumCalc" },
       { property: "og:description", content: "Alt du lurer på om volumberegning med VolumCalc." },

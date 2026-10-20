@@ -4,6 +4,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
 import { USER_VERIFIED_SECURITY_LABEL } from "./volume-database";
+import { buildItemTags } from "./item-status";
 
 type EstimateItemUpdate = Database["public"]["Tables"]["estimate_items"]["Update"];
 
@@ -66,7 +67,7 @@ async function consumePlanEntitlement(supabaseAdmin: any, accountId: string): Pr
   const hasCredits = Boolean(credits?.credits && credits.credits > 0);
   if (!hasCredits) return false;
 
-  // One credit per submitted estimate, regardless of room/photo count.
+  // One credit per submitted estimate, regardless of how many items it has.
   await supabaseAdmin
     .from("user_credits")
     .update({ credits: (credits!.credits ?? 0) - 1 })
@@ -85,72 +86,30 @@ const manualItemSchema = z.object({
   height_cm: z.number().nonnegative().max(5000),
   volume_m3: z.number().nonnegative().max(1000),
   security_label: z.literal(USER_VERIFIED_SECURITY_LABEL),
+  status: z.enum(["moving", "maybe", "not_moving"]).default("moving"),
+  custom: z.boolean().default(false),
+  /** Per-unit weight in kg. */
+  weight_kg: z.number().nonnegative().max(10000).nullable().optional(),
+  notes: z.string().trim().max(500).nullable().optional(),
 });
 
-function photoExtensionForMimeType(mimeType: string): string {
-  if (mimeType.includes("png")) return "png";
-  if (mimeType.includes("webp")) return "webp";
-  if (mimeType.includes("heic")) return "heic";
-  if (mimeType.includes("heif")) return "heif";
-  return "jpg";
-}
-
-// Generous for a single phone photo (a few MB is typical; base64 inflates
-// size by ~33% over the raw file).
-const uploadRoomPhotoSchema = z.object({
-  session_id: z.string().uuid(),
-  room: z.string().trim().min(1).max(50),
-  mime_type: z.string().trim().min(1).max(80).default("image/jpeg"),
-  data: z
-    .string()
-    .min(1)
-    .max(10_000_000)
-    .regex(/^[A-Za-z0-9+/]+=*$/, "Invalid photo data"),
-});
-
-/**
- * Uploads one room photo to the existing 'estimate-photos' bucket right
- * after it's picked, keyed under a client-generated session id (no estimate
- * exists yet at this point). Returns a long-lived signed URL that
- * createEstimate later carries into estimates.photo_urls as-is. A short
- * random suffix avoids collisions when several photos for the same room are
- * picked at once.
- */
-export const uploadRoomPhoto = createServerFn({ method: "POST" })
-  .middleware([requireOwner])
-  .inputValidator((data: unknown) => uploadRoomPhotoSchema.parse(data))
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const bytes = Uint8Array.from(atob(data.data), (c) => c.charCodeAt(0));
-    const extension = photoExtensionForMimeType(data.mime_type);
-    const safeRoom = data.room.replace(/[^a-zA-Z0-9-_]+/g, "-").slice(0, 60) || "room";
-    const suffix = Math.random().toString(36).slice(2, 8);
-    const path = `${data.session_id}/${safeRoom}-${Date.now()}-${suffix}.${extension}`;
-
-    const { error: uploadError } = await supabaseAdmin.storage
-      .from("estimate-photos")
-      .upload(path, bytes, { contentType: data.mime_type, upsert: true });
-    if (uploadError) throw new Error("Could not upload the photo");
-
-    const { data: signed } = await supabaseAdmin.storage
-      .from("estimate-photos")
-      .createSignedUrl(path, 60 * 60 * 24 * 365);
-    if (!signed?.signedUrl) throw new Error("Could not create a link for the photo");
-
-    return { url: signed.signedUrl };
-  });
-
-const roomMediaUrlSchema = z.object({
-  room: z.string().trim().min(1).max(50),
-  url: z.string().trim().url().max(2000),
+const siteSchema = z.object({
+  address: z.string().trim().max(240).optional(),
+  floor: z.string().trim().max(20).optional(),
+  elevator: z.boolean().default(false),
+  carry_m: z.number().int().min(0).max(1000).nullable().optional(),
+  mobile: z.string().trim().max(40).optional(),
 });
 
 const createSchema = z.object({
   manual_items: z.array(manualItemSchema).max(300).default([]),
-  room_photo_urls: z.array(roomMediaUrlSchema).max(60).default([]),
   customer_name: z.string().trim().max(120).regex(/^[^\r\n]*$/, "Customer name cannot contain line breaks").optional(),
   customer_phone: z.string().trim().max(40).optional(),
+  customer_email: z.string().trim().email().max(160).optional(),
+  notes: z.string().trim().max(1500).optional(),
+  from: siteSchema.optional(),
+  to: siteSchema.optional(),
+  report_language: z.string().trim().max(5).optional(),
   move_date: z
     .string()
     .trim()
@@ -179,8 +138,8 @@ const sharedSchema = z.object({
 
 /**
  * Creates an estimate on behalf of an (possibly anonymous) visitor.
- * All writes happen server-side so no public write access to the tables or
- * the private photo bucket is required. The caller only gets back the id and
+ * All writes happen server-side so no public write access to the tables is
+ * required. The caller only gets back the id and
  * the share token for the estimate it just created.
  */
 export const createEstimate = createServerFn({ method: "POST" })
@@ -235,14 +194,37 @@ export const createEstimate = createServerFn({ method: "POST" })
       }
     }
 
+    const from = data.from ?? { elevator: false };
+    const to = data.to ?? { elevator: false };
+    // The estimate has no dedicated mobile-number column, so the on-site
+    // mobile numbers lead the access notes the company already sees.
+    const withMobile = (mobile: string | undefined, notes: string | undefined) =>
+      [mobile ? `Mobil på stedet / mobile: ${mobile}` : null, notes || null].filter(Boolean).join("\n") || null;
+    const floorNumber = from.floor && /^-?\d{1,3}$/.test(from.floor) ? Number(from.floor) : null;
+
     const { data: estimate, error: insertError } = await supabaseAdmin
       .from("estimates")
       .insert({
         company_id: companyId,
+        status: "new",
         customer_name: data.customer_name || null,
         customer_phone: data.customer_phone || null,
+        customer_email: data.customer_email || null,
         move_date: data.move_date || null,
-        address: data.address || null,
+        notes: data.notes || null,
+        address: from.address || data.address || null,
+        move_from: from.address || data.address || null,
+        move_to: to.address || null,
+        access_floor: floorNumber,
+        has_elevator: from.elevator,
+        carry_distance_m: from.carry_m ?? null,
+        access_notes: withMobile(from.mobile, undefined),
+        delivery_address: to.address || null,
+        delivery_floor: to.floor || null,
+        delivery_elevator: to.elevator,
+        delivery_carry_distance: to.carry_m != null ? String(to.carry_m) : null,
+        delivery_notes: withMobile(to.mobile, undefined),
+        ...(data.report_language ? { report_language: data.report_language } : {}),
       })
       .select("id,share_token")
       .single();
@@ -278,23 +260,101 @@ export const createEstimate = createServerFn({ method: "POST" })
           confidence: item.confidence,
           photo_url: null,
           room_id: roomIds.get(item.room || "Other") ?? null,
+          is_included: item.status !== "not_moving",
+          tags: buildItemTags({ status: item.status, custom: item.custom, weightKg: item.weight_kg }),
+          notes: item.notes,
         })),
       );
       if (itemsError) throw new Error("Could not save the estimate items");
     }
 
-    // Room photos are already uploaded to 'estimate-photos' by
-    // uploadRoomPhoto right after being captured (so nothing is lost if the
-    // visitor never finishes this form) — their signed URLs just get
-    // attached here.
-    const photoUrls = data.room_photo_urls.map((photo) => photo.url);
+    await supabaseAdmin.from("estimates").update({ total_volume_m3: result.total }).eq("id", estimate.id);
 
-    await supabaseAdmin
-      .from("estimates")
-      .update({ photo_urls: photoUrls, total_volume_m3: result.total })
-      .eq("id", estimate.id);
+    // Company links: email the company the full summary. Delivery problems
+    // never fail the submission — the estimate is saved and shows up in the
+    // company's dashboard either way.
+    let emailed = false;
+    if (companyId) {
+      try {
+        const { data: company } = await supabaseAdmin
+          .from("companies")
+          .select("company_name,contact_email,default_language")
+          .eq("id", companyId)
+          .maybeSingle();
+        let companyEmail = company?.contact_email ?? null;
+        if (!companyEmail) {
+          const { data: owner } = await supabaseAdmin.auth.admin.getUserById(companyId);
+          companyEmail = owner.user?.email ?? null;
+        }
+        if (companyEmail) {
+          const { sendLeadEmail, vehicleLabel } = await import("./lead-email.server");
+          const { recommendedVolume, recommendVehicle } = await import("./volume");
+          const net = result.total;
+          const gross = recommendedVolume(net);
+          const maybe =
+            Math.round(
+              result.items.filter((item) => item.status === "maybe").reduce((sum, item) => sum + item.volume_m3, 0) * 100,
+            ) / 100;
+          const origin = process.env["PUBLIC_SITE_URL"] || "https://www.volumcalc.com";
+          const lang = company?.default_language === "no" ? "no" : "en";
+          await sendLeadEmail({
+            companyName: company?.company_name ?? "VolumCalc",
+            companyEmail,
+            lang,
+            reportUrl: `${origin}/estimate/${estimate.id}?token=${estimate.share_token}`,
+            netVolume: net,
+            recommendedVolume: gross,
+            maybeVolume: maybe,
+            vehicle: vehicleLabel(recommendVehicle(gross), lang),
+            totalKg: result.items
+              .filter((item) => item.status !== "not_moving")
+              .reduce((sum, item) => sum + (item.weight_kg ?? 0) * item.quantity, 0),
+            customer: {
+              name: data.customer_name || null,
+              phone: data.customer_phone || null,
+              email: data.customer_email || null,
+            },
+            moveDate: data.move_date || null,
+            notes: data.notes || null,
+            from: {
+              address: from.address || data.address || null,
+              floor: from.floor || null,
+              elevator: from.elevator,
+              carryM: from.carry_m ?? null,
+              mobile: from.mobile || null,
+              notes: null,
+            },
+            to: {
+              address: to.address || null,
+              floor: to.floor || null,
+              elevator: to.elevator,
+              carryM: to.carry_m ?? null,
+              mobile: to.mobile || null,
+              notes: null,
+            },
+            items: result.items.map((item) => ({
+              room: item.room || "Other",
+              name: item.name_no || item.name,
+              quantity: item.quantity,
+              volume_m3: item.volume_m3,
+              status: item.status,
+              custom: item.custom,
+              dims:
+                item.custom && item.length_cm && item.width_cm && item.height_cm
+                  ? `${item.length_cm}×${item.width_cm}×${item.height_cm} cm`
+                  : null,
+              weight_kg: item.weight_kg,
+              notes: item.notes,
+            })),
+          });
+          emailed = true;
+        }
+      } catch (sendError) {
+        console.error("Lead email delivery failed", sendError);
+      }
+    }
 
-    return { id: estimate.id as string, share_token: estimate.share_token as string };
+    return { id: estimate.id as string, share_token: estimate.share_token as string, emailed };
   });
 
 /**
@@ -498,7 +558,9 @@ const addItemsSchema = z.object({
         width_cm: z.number().min(1).max(5000),
         height_cm: z.number().min(1).max(5000),
         confidence: z.number().min(0).max(1).default(1),
-        photo_url: z.string().trim().url().max(2000).nullable().default(null),
+        custom: z.boolean().default(false),
+        weight_kg: z.number().nonnegative().max(10000).nullable().optional(),
+        notes: z.string().trim().max(500).nullable().optional(),
       }),
     )
     .min(1)
@@ -506,10 +568,9 @@ const addItemsSchema = z.object({
 });
 
 /**
- * Adds new items (typed in, picked from the catalogue or suggested from a new
- * photo) to an existing report, in one room, and refreshes the report total.
- * Same share-token check as the other report edits; photo URLs must point at
- * our own storage so a report can't be made to embed arbitrary images.
+ * Adds new items (typed in, with their own dimensions, or picked from the
+ * catalogue) to an existing report, in one room, and refreshes the report
+ * total. Same share-token check as the other report edits.
  */
 export const addEstimateItems = createServerFn({ method: "POST" })
   .middleware([requireOwner])
@@ -533,13 +594,6 @@ export const addEstimateItems = createServerFn({ method: "POST" })
       if (!room || room.estimate_id !== data.id) throw new Error("Room not found");
     }
 
-    const storageOrigin = process.env["SUPABASE_URL"];
-    for (const item of data.items) {
-      if (item.photo_url && (!storageOrigin || !item.photo_url.startsWith(`${storageOrigin}/storage/`))) {
-        throw new Error("Invalid photo");
-      }
-    }
-
     const { error: insertError } = await supabaseAdmin.from("estimate_items").insert(
       data.items.map((item) => ({
         estimate_id: data.id,
@@ -554,7 +608,9 @@ export const addEstimateItems = createServerFn({ method: "POST" })
         volume_m3:
           Math.round(((item.length_cm * item.width_cm * item.height_cm * item.quantity) / 1_000_000) * 100) / 100,
         confidence: item.confidence,
-        photo_url: item.photo_url,
+        photo_url: null,
+        notes: item.notes ?? null,
+        tags: buildItemTags({ status: "moving", custom: item.custom, weightKg: item.weight_kg }),
       })),
     );
     if (insertError) throw new Error("Could not add the items");

@@ -10,10 +10,10 @@ export const Route = createFileRoute("/personvern")({
       {
         name: "description",
         content:
-          "Slik behandler VolumCalc bilder og personopplysninger etter GDPR — lagringstid, rettigheter og sletting.",
+          "Slik behandler VolumCalc personopplysninger etter GDPR — lagringstid, rettigheter og sletting.",
       },
       { property: "og:title", content: "Personvernerklæring — VolumCalc" },
-      { property: "og:description", content: "Hvordan VolumCalc behandler bilder og personopplysninger." },
+      { property: "og:description", content: "Hvordan VolumCalc behandler personopplysninger." },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -32,7 +32,7 @@ const content: Record<"no" | "en", LegalContent> = {
       {
         heading: "Hvilke opplysninger vi behandler",
         body: [
-          "Bilder du laster opp av rom og møbler, og informasjonen som utledes av dem (gjenstander, mål, volum, romnavn).",
+          "Sjekklisten du fyller ut (valgte rom og gjenstander, egne gjenstander med mål, vekt og notater) og informasjonen som beregnes ut fra den (volum, anbefalt bil, romnavn).",
           "Kontaktopplysninger du selv oppgir: navn, e-post, telefon, adresse, ønsket flyttedato, adresse til nytt bosted og eventuelt lagerhotell.",
           "Kontoopplysninger for flyttebyråer: e-post, firmanavn, organisasjonsnummer, adresse, logo og prisinnstillinger.",
           "Tekniske data som er nødvendige for drift og sikkerhet, som IP-adresse og tidspunkt for forespørsler.",
@@ -48,17 +48,17 @@ const content: Record<"no" | "en", LegalContent> = {
         ],
       },
       {
-        heading: "Bildene dine og AI-analyse",
+        heading: "Beregningene dine",
         body: [
-          "Bildene lagres i et lukket lager og er ikke offentlig tilgjengelige. De hentes kun fram via din egen innlogging eller en hemmelig delingslenke du selv deler.",
-          "Bildene sendes til en AI-leverandør for gjenkjenning av møbler og mål. De brukes ikke til å trene modeller.",
-          "Ikke last opp bilder av dokumenter, skjermer eller andre ting som viser sensitive opplysninger.",
+          "Beregninger lagres privat og er ikke offentlig tilgjengelige. De hentes kun fram via din egen innlogging eller en hemmelig delingslenke du selv deler.",
+          "Volumet beregnes ut fra faste standardmål og det du selv legger inn. Opplysningene dine brukes ikke til å trene modeller.",
+          "Skriv ikke sensitive opplysninger, som helseopplysninger eller betalingskort, i notatfeltene.",
         ],
       },
       {
         heading: "Deling med andre",
         body: [
-          "Databehandlere som leverer infrastruktur, databaselagring, AI-analyse, e-postutsending og betaling. Alle er bundet av databehandleravtaler.",
+          "Databehandlere som leverer infrastruktur, databaselagring, e-postutsending og betaling. Alle er bundet av databehandleravtaler.",
           "Flyttebyrået som eier beregningen din, når du selv sender en tilbudsforespørsel eller deler lenken.",
           "Vi selger aldri opplysninger og bruker dem ikke til reklame fra tredjeparter.",
         ],
@@ -66,7 +66,7 @@ const content: Record<"no" | "en", LegalContent> = {
       {
         heading: "Lagringstid",
         body: [
-          "Beregninger med bilder slettes senest 12 måneder etter siste aktivitet, med mindre du eller flyttebyrået ber om sletting tidligere.",
+          "Beregninger slettes senest 12 måneder etter siste aktivitet, med mindre du eller flyttebyrået ber om sletting tidligere.",
           "Henvendelser via kontaktskjema lagres i inntil 24 måneder.",
           "Kjøpsdokumentasjon lagres så lenge bokføringsloven krever (5 år).",
         ],
@@ -97,7 +97,7 @@ const content: Record<"no" | "en", LegalContent> = {
       {
         heading: "What we process",
         body: [
-          "Photos you upload of rooms and furniture, and the data derived from them (items, dimensions, volume, room names).",
+          "The checklist you fill in (chosen rooms and items, your own items with dimensions, weight and notes) and the information calculated from it (volume, recommended vehicle, room names).",
           "Contact details you provide: name, email, phone, address, preferred moving date, destination address and any storage facility.",
           "Account data for moving companies: email, company name, registration number, address, logo and pricing settings.",
           "Technical data needed to run and secure the service, such as IP address and request timestamps.",
@@ -113,17 +113,17 @@ const content: Record<"no" | "en", LegalContent> = {
         ],
       },
       {
-        heading: "Your photos and AI analysis",
+        heading: "Your estimates",
         body: [
-          "Photos are kept in private storage and are not publicly accessible. They are only retrieved through your own login or a secret share link you choose to send.",
-          "Photos are sent to an AI provider to recognise furniture and dimensions. They are not used to train models.",
-          "Please do not upload photos of documents, screens or anything else showing sensitive information.",
+          "Estimates are kept in private storage and are not publicly accessible. They are only retrieved through your own login or a secret share link you choose to send.",
+          "Volumes are calculated from fixed reference dimensions and what you enter yourself. Your data is not used to train models.",
+          "Please do not enter sensitive information, such as health data or payment card numbers, in the notes fields.",
         ],
       },
       {
         heading: "Sharing",
         body: [
-          "Processors providing infrastructure, database storage, AI analysis, email delivery and payments. All are bound by data processing agreements.",
+          "Processors providing infrastructure, database storage, email delivery and payments. All are bound by data processing agreements.",
           "The moving company that owns your estimate, when you send a quote request or share the link.",
           "We never sell your data and do not use it for third-party advertising.",
         ],
@@ -131,7 +131,7 @@ const content: Record<"no" | "en", LegalContent> = {
       {
         heading: "Retention",
         body: [
-          "Estimates with photos are deleted no later than 12 months after the last activity, unless you or the moving company asks for earlier deletion.",
+          "Estimates are deleted no later than 12 months after the last activity, unless you or the moving company asks for earlier deletion.",
           "Contact form enquiries are kept for up to 24 months.",
           "Purchase records are kept as long as Norwegian accounting law requires (5 years).",
         ],

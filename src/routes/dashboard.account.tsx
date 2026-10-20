@@ -231,7 +231,7 @@ function AccountPage() {
               )}
               {unlimited && (
                 <Badge variant="outline">
-                  <InfinityIcon className="mr-1 size-3" /> Unlimited photos
+                  <InfinityIcon className="mr-1 size-3" /> Unlimited estimates
                 </Badge>
               )}
               <Badge variant="outline">
@@ -400,7 +400,7 @@ function AccountPage() {
                 <FileText className="size-4" /> Report form access
               </h2>
               <p className="text-sm text-muted-foreground">
-                Share this link to let customers photograph their rooms and send you a report.
+                Share this link to let customers pick their items and send you a full estimate.
               </p>
             </div>
             <div className="flex gap-2">

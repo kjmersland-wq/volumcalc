@@ -37,7 +37,7 @@ export function useCompany() {
   });
 }
 
-/** Shared by useUnlimitedPhotos()/useIsUnlimitedPlan() — role, unlimited_until
+/** Shared by useUnlimitedEstimates()/useIsUnlimitedPlan() — role, unlimited_until
  * and credits fetched once; React Query dedupes both queries by key across
  * whichever of the two hooks a component uses. */
 function usePlanEntitlement() {
@@ -73,22 +73,21 @@ function usePlanEntitlement() {
 }
 
 /**
- * True when the signed-in account may use AI photo analysis: admin/unlimited
+ * True when the signed-in account may create estimates: admin/unlimited
  * role, an active unlimited_until window, or a positive credits balance —
- * the same entitlement checked server-side in assertUnlimitedOrAdmin
- * (analyze-photos.functions.ts) and consumePlanEntitlement
+ * the same entitlement checked server-side in consumePlanEntitlement
  * (estimates.functions.ts), so a paying non-admin account actually sees the
  * button the server would let it use.
  */
-export function useUnlimitedPhotos() {
+export function useUnlimitedEstimates() {
   const { hasRole, isUnlimited, hasCredits } = usePlanEntitlement();
   return hasRole || isUnlimited || hasCredits;
 }
 
 /** True only when the account is genuinely unlimited (admin/unlimited role,
- * or an active unlimited_until window) — unlike useUnlimitedPhotos(), a
+ * or an active unlimited_until window) — unlike useUnlimitedEstimates(), a
  * finite credits balance does not count, since this drives the "Unlimited
- * photos" badge on the account page. */
+ * estimates" badge on the account page. */
 export function useIsUnlimitedPlan() {
   const { hasRole, isUnlimited } = usePlanEntitlement();
   return hasRole || isUnlimited;

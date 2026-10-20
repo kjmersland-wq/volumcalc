@@ -1,4 +1,5 @@
 import { USER_VERIFIED_SECURITY_LABEL } from "./volume-database";
+import type { ItemStatus } from "./item-status";
 
 const USER_VERIFIED_CONFIDENCE = 1;
 
@@ -14,6 +15,10 @@ export type DetectedItem = {
   confidence: number;
   photo_index: number;
   room: string;
+  status: ItemStatus;
+  custom: boolean;
+  weight_kg: number | null;
+  notes: string | null;
 };
 
 export type ManualItemInput = {
@@ -27,6 +32,11 @@ export type ManualItemInput = {
   volume_m3: number;
   room: string;
   security_label: string;
+  status?: ItemStatus;
+  custom?: boolean;
+  /** Per-unit weight in kg. */
+  weight_kg?: number | null | undefined;
+  notes?: string | null | undefined;
 };
 
 function normalizeManualItem(item: ManualItemInput): DetectedItem | null {
@@ -55,6 +65,10 @@ function normalizeManualItem(item: ManualItemInput): DetectedItem | null {
       item.security_label === USER_VERIFIED_SECURITY_LABEL ? USER_VERIFIED_CONFIDENCE : 0.7,
     photo_index: 0,
     room: String(item.room || "Other"),
+    status: item.status ?? "moving",
+    custom: Boolean(item.custom),
+    weight_kg: item.weight_kg && item.weight_kg > 0 ? item.weight_kg : null,
+    notes: item.notes ? String(item.notes).slice(0, 500) : null,
   };
 }
 
@@ -63,6 +77,10 @@ export function analyzeManualItems(items: ManualItemInput[]): {
   total: number;
 } {
   const parsed = items.map(normalizeManualItem).filter(Boolean) as DetectedItem[];
-  const total = Math.round(parsed.reduce((sum, item) => sum + item.volume_m3, 0) * 100) / 100;
+  // "Not moving" items are kept on the estimate but never counted.
+  const total =
+    Math.round(
+      parsed.filter((item) => item.status !== "not_moving").reduce((sum, item) => sum + item.volume_m3, 0) * 100,
+    ) / 100;
   return { items: parsed, total };
 }

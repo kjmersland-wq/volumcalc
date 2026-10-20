@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Minus, Plus, Printer, Search, Send, Trash2 } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { Check, Copy, Loader2, Minus, Plus, Printer, Search, Send, Trash2, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,13 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { beregn, DEFAULT_STOWAGE_FACTOR, type CalcChoices, type CalcDatabase } from "@/lib/move-calc";
 import { MOVE_DATABASE, PREDEFINED_ROOMS, type RoomDef } from "@/lib/move-data";
+import { createEstimate } from "@/lib/estimates.functions";
+import { USER_VERIFIED_SECURITY_LABEL } from "@/lib/volume-database";
+import { recommendVehicle } from "@/lib/volume";
+import { dimensionVolumeM3, type ItemStatus } from "@/lib/item-status";
+import { xl } from "@/lib/extra-labels";
+import { ItemStatusToggle } from "@/components/ItemStatusToggle";
+import { LANG_LABELS, SUPPORTED_LANGS, translate, type Lang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/upload")({
   staticData: { sitemap: true },
@@ -28,12 +36,12 @@ export const Route = createFileRoute("/upload")({
       {
         name: "description",
         content:
-          "Velg rom og gjenstander og få anbefalt volum (m³) og vekt (kg) for flyttelasset. Gratis, direkte i nettleseren.",
+          "Velg rom og gjenstander fra sjekklisten og få anbefalt volum (m³), vekt (kg) og bilstørrelse for flyttelasset. Gratis, direkte i nettleseren.",
       },
       { property: "og:title", content: "Flyttekalkulator — VolumCalc" },
       {
         property: "og:description",
-        content: "Rom for rom: regn ut m³ og kg for flyttingen og last ned en ryddig oversikt.",
+        content: "Rom for rom: regn ut m³ og kg for flyttingen, få anbefalt bil og last ned en ryddig oversikt.",
       },
       { property: "og:type", content: "website" },
     ],
@@ -45,27 +53,67 @@ export const Route = createFileRoute("/upload")({
 const STORAGE_KEY = "volumcalc.calc.v2";
 const SUPPORT_EMAIL = "support@volumcalc.com";
 
-type CustomItem = { id: string; navn: string; m3: number; kg: number };
+type CustomItem = {
+  id: string;
+  navn: string;
+  /** Volume per unit in m³. */
+  m3: number;
+  /** Weight per unit in kg (0 = not given). */
+  kg: number;
+  l?: number;
+  w?: number;
+  h?: number;
+  notes?: string;
+};
+type Statuses = Record<string, Exclude<ItemStatus, "moving">>;
 type SavedState = {
   rooms: RoomDef[];
   choices: CalcChoices;
   custom: Record<string, CustomItem[]>;
+  statuses: Statuses;
   factor: number;
+  pdfLang: Lang;
 };
 type Form = {
   navn: string;
   telefon: string;
   epost: string;
   hent: string;
+  hentEtasje: string;
+  hentHeis: boolean;
+  hentBaer: string;
+  hentMobil: string;
   lever: string;
+  leverEtasje: string;
+  leverHeis: boolean;
+  leverBaer: string;
+  leverMobil: string;
   dato: string;
   tid: string;
   notater: string;
 };
-const emptyForm: Form = { navn: "", telefon: "", epost: "", hent: "", lever: "", dato: "", tid: "", notater: "" };
+const emptyForm: Form = {
+  navn: "",
+  telefon: "",
+  epost: "",
+  hent: "",
+  hentEtasje: "",
+  hentHeis: false,
+  hentBaer: "",
+  hentMobil: "",
+  lever: "",
+  leverEtasje: "",
+  leverHeis: false,
+  leverBaer: "",
+  leverMobil: "",
+  dato: "",
+  tid: "",
+  notater: "",
+};
+const emptyCustom = { navn: "", l: "", w: "", h: "", antall: "1", kg: "", notater: "" };
 
-const fmt = (n: number, d = 2) => n.toFixed(d).replace(".", ",");
 const num = (v: string) => Number(v.replace(",", "."));
+const statusKey = (room: string, id: string) => `${room}/${id}`;
 
 function loadSaved(): Partial<SavedState> {
   try {
@@ -76,16 +124,23 @@ function loadSaved(): Partial<SavedState> {
 }
 
 function CalculatorPage() {
+  const search = Route.useSearch();
+  const create = useServerFn(createEstimate);
+
   const [step, setStep] = useState<1 | 2>(1);
   const [rooms, setRooms] = useState<RoomDef[]>(PREDEFINED_ROOMS);
   const [choices, setChoices] = useState<CalcChoices>({});
   const [custom, setCustom] = useState<Record<string, CustomItem[]>>({});
+  const [statuses, setStatuses] = useState<Statuses>({});
   const [factor, setFactor] = useState(DEFAULT_STOWAGE_FACTOR);
+  const [pdfLang, setPdfLang] = useState<Lang>("no");
   const [activeRoom, setActiveRoom] = useState(PREDEFINED_ROOMS[0]!.id);
   const [query, setQuery] = useState("");
   const [form, setForm] = useState<Form>(emptyForm);
   const [showErrors, setShowErrors] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState<{ id: string; token: string; emailed: boolean } | null>(null);
 
   // Restore after mount (SSR renders the empty state, so no hydration mismatch).
   useEffect(() => {
@@ -93,32 +148,67 @@ function CalculatorPage() {
     if (saved.rooms?.length) setRooms(saved.rooms);
     if (saved.choices) setChoices(saved.choices);
     if (saved.custom) setCustom(saved.custom);
+    if (saved.statuses) setStatuses(saved.statuses);
     if (typeof saved.factor === "number" && saved.factor >= 1 && saved.factor <= 3) setFactor(saved.factor);
+    if (saved.pdfLang && (SUPPORTED_LANGS as string[]).includes(saved.pdfLang)) setPdfLang(saved.pdfLang);
     setLoaded(true);
   }, []);
 
   useEffect(() => {
     if (!loaded) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ rooms, choices, custom, factor }));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ rooms, choices, custom, statuses, factor, pdfLang }));
     } catch {
       /* private mode etc. — the calculator still works */
     }
-  }, [loaded, rooms, choices, custom, factor]);
+  }, [loaded, rooms, choices, custom, statuses, factor, pdfLang]);
 
   // Built-in items plus the visitor's own, per room.
   const db: CalcDatabase = useMemo(() => {
     const merged: CalcDatabase = {};
     for (const room of rooms) {
       const own = Object.fromEntries(
-        (custom[room.id] ?? []).map((c) => [c.id, { navn: c.navn, m3: c.m3, kg: c.kg, custom: true }]),
+        (custom[room.id] ?? []).map((c) => [
+          c.id,
+          {
+            navn: c.navn,
+            m3: c.m3,
+            kg: c.kg,
+            custom: true,
+            ...(c.l && c.w && c.h ? { dim: `${c.l} × ${c.w} × ${c.h} cm` } : {}),
+            ...(c.notes ? { notes: c.notes } : {}),
+          },
+        ]),
       );
       merged[room.id] = { ...(MOVE_DATABASE[room.id] ?? {}), ...own };
     }
     return merged;
   }, [rooms, custom]);
 
-  const total = useMemo(() => beregn(choices, db, factor), [choices, db, factor]);
+  const statusOf = (room: string, id: string): ItemStatus => statuses[statusKey(room, id)] ?? "moving";
+
+  // "Not moving" never counts; "maybe" counts but is tracked separately.
+  const { counted, maybeOnly, notMovingOnly } = useMemo(() => {
+    const counted: CalcChoices = {};
+    const maybeOnly: CalcChoices = {};
+    const notMovingOnly: CalcChoices = {};
+    for (const room of Object.keys(choices)) {
+      for (const [id, qty] of Object.entries(choices[room] ?? {})) {
+        if (!(qty > 0)) continue;
+        const status = statuses[statusKey(room, id)] ?? "moving";
+        const target = status === "not_moving" ? notMovingOnly : counted;
+        (target[room] ??= {})[id] = qty;
+        if (status === "maybe") (maybeOnly[room] ??= {})[id] = qty;
+      }
+    }
+    return { counted, maybeOnly, notMovingOnly };
+  }, [choices, statuses]);
+
+  const total = useMemo(() => beregn(counted, db, factor), [counted, db, factor]);
+  const maybeTotal = useMemo(() => beregn(maybeOnly, db, factor), [maybeOnly, db, factor]);
+  const notMovingTotal = useMemo(() => beregn(notMovingOnly, db, factor), [notMovingOnly, db, factor]);
+  const vehicleKey = recommendVehicle(total.anbefaltM3);
+
   const perRoom = useMemo(() => {
     const map: Record<string, { antall: number; m3: number; kg: number }> = {};
     for (const d of total.detaljer) {
@@ -132,15 +222,30 @@ function CalculatorPage() {
 
   const roomName = (id: string) => rooms.find((r) => r.id === id)?.navn ?? id;
 
+  // Number formatting follows the chosen output language (comma except English).
+  const fmt = (n: number, d = 2) => {
+    const text = n.toFixed(d);
+    return pdfLang === "en" ? text : text.replace(".", ",");
+  };
+  const L = (key: Parameters<typeof xl>[1], vars?: Record<string, string | number>) => xl(pdfLang, key, vars);
+  const ui = (key: Parameters<typeof xl>[1]) => xl("no", key);
+
   function setQty(room: string, id: string, qty: number) {
     const next = Math.max(0, Math.min(999, Math.floor(qty) || 0));
     setChoices((prev) => ({ ...prev, [room]: { ...(prev[room] ?? {}), [id]: next } }));
   }
   const qtyOf = (room: string, id: string) => choices[room]?.[id] ?? 0;
 
+  function setStatus(room: string, id: string, status: ItemStatus) {
+    setStatuses((prev) => {
+      const { [statusKey(room, id)]: _old, ...rest } = prev;
+      return status === "moving" ? rest : { ...rest, [statusKey(room, id)]: status };
+    });
+  }
+
   const trimmed = query.trim().toLowerCase();
   const visibleItems = useMemo(() => {
-    const rows: { room: string; id: string; navn: string; m3: number; kg: number; custom?: boolean }[] = [];
+    const rows: { room: string; id: string; navn: string; m3: number; kg: number; custom?: boolean; dim?: string; notes?: string }[] = [];
     const roomIds = trimmed ? rooms.map((r) => r.id) : [activeRoom];
     for (const room of roomIds) {
       for (const [id, item] of Object.entries(db[room] ?? {})) {
@@ -152,7 +257,14 @@ function CalculatorPage() {
 
   // Add-your-own forms
   const [newRoom, setNewRoom] = useState("");
-  const [ci, setCi] = useState({ navn: "", m3: "", kg: "" });
+  const [ci, setCi] = useState(emptyCustom);
+  const ciPreview = (() => {
+    const l = num(ci.l);
+    const w = num(ci.w);
+    const h = num(ci.h);
+    const q = Math.floor(num(ci.antall));
+    return l > 0 && w > 0 && h > 0 && q >= 1 ? dimensionVolumeM3(l, w, h, q) : 0;
+  })();
 
   function addRoom() {
     const name = newRoom.trim().replace(/\s+/g, " ").slice(0, 40);
@@ -182,29 +294,46 @@ function CalculatorPage() {
 
   function addCustomItem() {
     const navn = ci.navn.trim().slice(0, 60);
-    const m3v = num(ci.m3);
-    const kgv = num(ci.kg || "0");
-    if (!navn || !(m3v > 0) || m3v > 100 || !(kgv >= 0) || kgv > 10000) {
-      toast.error("Skriv inn navn og et gyldig volum (m³). Vekt (kg) er valgfritt.");
+    const l = num(ci.l);
+    const w = num(ci.w);
+    const h = num(ci.h);
+    const antall = Math.floor(num(ci.antall));
+    const kgv = ci.kg.trim() ? num(ci.kg) : 0;
+    const dims = [l, w, h];
+    if (!navn || dims.some((d) => !(d > 0) || d > 5000) || !(antall >= 1) || antall > 999 || !(kgv >= 0) || kgv > 10000) {
+      toast.error("Skriv inn navn, lengde, bredde, høyde (cm) og antall. Vekt og notater er valgfritt.");
       return;
     }
     const id = `egen_${Date.now().toString(36)}`;
-    setCustom((prev) => ({ ...prev, [activeRoom]: [...(prev[activeRoom] ?? []), { id, navn, m3: m3v, kg: kgv }] }));
-    setQty(activeRoom, id, 1);
-    setCi({ navn: "", m3: "", kg: "" });
+    const item: CustomItem = {
+      id,
+      navn,
+      m3: dimensionVolumeM3(l, w, h),
+      kg: kgv,
+      l,
+      w,
+      h,
+      ...(ci.notater.trim() ? { notes: ci.notater.trim().slice(0, 300) } : {}),
+    };
+    setCustom((prev) => ({ ...prev, [activeRoom]: [...(prev[activeRoom] ?? []), item] }));
+    setQty(activeRoom, id, antall);
+    setCi(emptyCustom);
   }
 
   function removeCustomItem(room: string, id: string) {
     setCustom((prev) => ({ ...prev, [room]: (prev[room] ?? []).filter((c) => c.id !== id) }));
     setQty(room, id, 0);
+    setStatus(room, id, "moving");
   }
 
   function resetAll() {
     if (!window.confirm("Nullstille alle valg?")) return;
     setChoices({});
     setCustom({});
+    setStatuses({});
     setRooms(PREDEFINED_ROOMS);
     setActiveRoom(PREDEFINED_ROOMS[0]!.id);
+    setSent(null);
   }
 
   // ---- step 2 ----
@@ -217,52 +346,137 @@ function CalculatorPage() {
     lever: !form.lever.trim(),
   };
   const hasErrors = Object.values(errors).some(Boolean);
-  const setField = (k: keyof Form, v: string) => setForm((prev) => ({ ...prev, [k]: v }));
+  const setField = <K extends keyof Form>(k: K, v: Form[K]) => setForm((prev) => ({ ...prev, [k]: v }));
+
+  const siteLine = (adresse: string, etasje: string, heis: boolean, baer: string, mobil: string) =>
+    [
+      adresse || "—",
+      `${L("floor")}: ${etasje || "—"}`,
+      heis ? L("elevator") : L("noElevator"),
+      `${L("carry")}: ${baer ? `${baer} m` : "—"}`,
+      `${L("mobile")}: ${mobil || "—"}`,
+    ].join(" · ");
 
   function summaryText() {
-    const lines = [
-      "FLYTTEKALKULATOR — VOLUMCALC",
-      `Netto: ${fmt(total.nettoM3)} m³ | Anbefalt (×${fmt(factor)}): ${fmt(total.anbefaltM3)} m³ | Vekt: ${total.totalKg} kg`,
-      "",
-      `Navn: ${form.navn}`,
-      `Telefon: ${form.telefon}`,
-      `E-post: ${form.epost}`,
-      `Henteadresse: ${form.hent}`,
-      `Leveringsadresse: ${form.lever}`,
-      `Ønsket tidspunkt: ${[form.dato, form.tid].filter(Boolean).join(" kl. ") || "—"}`,
-      `Notater: ${form.notater || "—"}`,
-      "",
-      ...rooms
-        .filter((r) => perRoom[r.id])
-        .flatMap((r) => [
-          `${r.navn} (${fmt(perRoom[r.id]!.m3)} m³, ${Math.round(perRoom[r.id]!.kg)} kg)`,
-          ...total.detaljer.filter((d) => d.rom === r.id).map((d) => `  ${d.antall} × ${d.navn}`),
-        ]),
+    const when = [form.dato, form.tid].filter(Boolean).join(" kl. ") || "—";
+    const row = (r: RoomDef) => [
+      `${r.navn} (${fmt(perRoom[r.id]!.m3)} m³, ${Math.round(perRoom[r.id]!.kg)} kg)`,
+      ...total.detaljer
+        .filter((d) => d.rom === r.id)
+        .map((d) => `  ${d.antall} × ${d.navn}${statusOf(d.rom, d.id) === "maybe" ? ` (${L("maybe")})` : ""}`),
     ];
-    return lines.join("\n");
+    return [
+      "FLYTTEKALKULATOR — VOLUMCALC",
+      `${L("net")}: ${fmt(total.nettoM3)} m³ | ${L("recommended")} (×${fmt(factor)}): ${fmt(total.anbefaltM3)} m³ | ${L("weight")}: ${total.totalKg} kg`,
+      `${L("vehicle")}: ${translate(vehicleKey, pdfLang)}`,
+      "",
+      `${L("name")}: ${form.navn}`,
+      `${L("phone")}: ${form.telefon}`,
+      `${L("email")}: ${form.epost}`,
+      `${L("pickup")}: ${siteLine(form.hent, form.hentEtasje, form.hentHeis, form.hentBaer, form.hentMobil)}`,
+      `${L("delivery")}: ${siteLine(form.lever, form.leverEtasje, form.leverHeis, form.leverBaer, form.leverMobil)}`,
+      `${L("wishedDate")}: ${when}`,
+      `${L("notes")}: ${form.notater || "—"}`,
+      "",
+      ...rooms.filter((r) => perRoom[r.id]).flatMap(row),
+    ].join("\n");
   }
 
-  function submit() {
-    setShowErrors(true);
-    if (hasErrors) {
-      toast.error("Fyll ut alle feltene som er merket som påkrevd.");
-      return;
-    }
-    // No backend in this flow: hand the summary to the visitor's mail app.
+  function mailtoFallback() {
     const subject = encodeURIComponent(`Flytteforespørsel fra ${form.navn.trim()}`);
     const body = encodeURIComponent(summaryText());
     window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
   }
 
+  async function submit() {
+    setShowErrors(true);
+    if (hasErrors) {
+      toast.error("Fyll ut alle feltene som er merket som påkrevd.");
+      return;
+    }
+    const all = beregn(choices, db, factor);
+    const manual_items = all.detaljer.map((d) => {
+      const own = (custom[d.rom] ?? []).find((c) => c.id === d.id);
+      return {
+        room: roomName(d.rom).slice(0, 50),
+        name: d.navn.slice(0, 120),
+        name_no: d.navn.slice(0, 120),
+        category: (own ? "custom" : d.rom).slice(0, 80),
+        quantity: d.antall,
+        length_cm: own?.l ?? 0,
+        width_cm: own?.w ?? 0,
+        height_cm: own?.h ?? 0,
+        volume_m3: d.m3 / d.antall,
+        security_label: USER_VERIFIED_SECURITY_LABEL,
+        status: statusOf(d.rom, d.id),
+        custom: Boolean(own),
+        weight_kg: d.kg > 0 ? d.kg / d.antall : null,
+        notes: own?.notes ?? null,
+      };
+    });
+    const carry = (v: string) => (v.trim() && num(v) >= 0 ? Math.round(num(v)) : null);
+    const noteParts = [form.tid ? `Ønsket klokkeslett: ${form.tid}` : "", form.notater.trim()].filter(Boolean);
+
+    setSending(true);
+    try {
+      const result = await create({
+        data: {
+          manual_items,
+          customer_name: form.navn.trim(),
+          customer_phone: form.telefon.trim(),
+          customer_email: form.epost.trim(),
+          ...(form.dato ? { move_date: form.dato } : {}),
+          ...(noteParts.length ? { notes: noteParts.join("\n") } : {}),
+          from: {
+            address: form.hent.trim(),
+            floor: form.hentEtasje.trim(),
+            elevator: form.hentHeis,
+            carry_m: carry(form.hentBaer),
+            mobile: form.hentMobil.trim(),
+          },
+          to: {
+            address: form.lever.trim(),
+            floor: form.leverEtasje.trim(),
+            elevator: form.leverHeis,
+            carry_m: carry(form.leverBaer),
+            mobile: form.leverMobil.trim(),
+          },
+          report_language: pdfLang,
+          ...(search.k ? { company_token: search.k } : {}),
+          ...(search.c ? { company_id: search.c } : {}),
+        },
+      });
+      setSent({ id: result.id, token: result.share_token, emailed: result.emailed });
+    } catch (error) {
+      console.error("Could not submit the estimate", error);
+      const message = error instanceof Error ? error.message : "";
+      if (message.includes("COMPANY_QUOTA_EXCEEDED")) {
+        toast.error("Flyttefirmaet kan ikke ta imot nye forespørsler akkurat nå. Prøv igjen senere.");
+      } else {
+        // The server could not take it (offline, site closed …): hand the
+        // summary to the visitor's mail app so nothing is lost.
+        toast.error("Kunne ikke sende inn direkte. Åpner e-postprogrammet med oppsummeringen i stedet.");
+        mailtoFallback();
+      }
+    } finally {
+      setSending(false);
+    }
+  }
+
+  const reportUrl = sent
+    ? `${typeof window === "undefined" ? "" : window.location.origin}/estimate/${sent.id}?token=${sent.token}`
+    : "";
+
   function downloadPdf() {
     const previous = document.title;
-    document.title = `Flyttekalkulator ${form.dato || new Date().toISOString().slice(0, 10)}`;
+    document.title = `Flyttekalkulator ${form.dato || new Date().toISOString().slice(0, 10)} (${pdfLang.toUpperCase()})`;
     window.addEventListener("afterprint", () => (document.title = previous), { once: true });
     window.print();
   }
 
-  const chosenCount = total.detaljer.reduce((s, d) => s + d.antall, 0);
-  const today = new Date().toLocaleDateString("nb-NO");
+  const chosenCount = total.detaljer.reduce((s, d) => s + d.antall, 0) + notMovingTotal.detaljer.reduce((s, d) => s + d.antall, 0);
+  const today = new Date().toLocaleDateString(pdfLang === "no" ? "nb-NO" : pdfLang === "en" ? "en-GB" : pdfLang);
+  const bufferPercent = Math.round((factor - 1) * 100);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -273,8 +487,8 @@ function CalculatorPage() {
         <div className="print:hidden">
           <h1 className="text-2xl font-bold sm:text-3xl">Flyttekalkulator</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Velg rom og gjenstander, så regner vi ut volum og vekt. Tallene er et estimat — faktisk volum og vekt
-            kan variere. Alt beregnes i nettleseren din.
+            Velg rom og gjenstander fra sjekklisten, så regner vi ut volum, vekt og anbefalt bil. Tallene er et
+            estimat — faktisk volum og vekt kan variere. Alt beregnes i nettleseren din.
           </p>
           <ol className="mt-5 flex gap-2 text-sm font-medium">
             {["Rom og gjenstander", "Resultat og flytteinfo"].map((label, i) => (
@@ -360,48 +574,71 @@ function CalculatorPage() {
                   )}
                   {visibleItems.map((item) => {
                     const qty = qtyOf(item.room, item.id);
+                    const status = statusOf(item.room, item.id);
                     return (
-                      <li key={`${item.room}/${item.id}`} className="flex items-center justify-between gap-3 px-4 py-2.5">
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">{item.navn}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {trimmed ? `${roomName(item.room)} · ` : ""}
-                            {fmt(item.m3)} m³ · {item.kg} kg
-                          </p>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-1.5">
-                          {item.custom && (
+                      <li
+                        key={`${item.room}/${item.id}`}
+                        className={`px-4 py-2.5 ${status === "maybe" ? "bg-warning/10" : status === "not_moving" ? "opacity-60" : ""}`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">
+                              {item.navn}
+                              {item.custom && (
+                                <span className="ml-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase text-accent-foreground">
+                                  {ui("custom")}
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {trimmed ? `${roomName(item.room)} · ` : ""}
+                              {item.dim ? `${item.dim} · ` : ""}
+                              {fmt(item.m3)} m³{item.kg > 0 ? ` · ${item.kg} kg` : ""}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-1.5">
+                            {item.custom && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                aria-label={`Slett ${item.navn}`}
+                                onClick={() => removeCustomItem(item.room, item.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
                             <Button
                               type="button"
-                              variant="ghost"
+                              variant="outline"
                               size="icon"
-                              aria-label={`Slett ${item.navn}`}
-                              onClick={() => removeCustomItem(item.room, item.id)}
+                              aria-label={`Færre ${item.navn}`}
+                              disabled={qty === 0}
+                              onClick={() => setQty(item.room, item.id, qty - 1)}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Minus className="h-4 w-4" />
                             </Button>
-                          )}
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            aria-label={`Færre ${item.navn}`}
-                            disabled={qty === 0}
-                            onClick={() => setQty(item.room, item.id, qty - 1)}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <span className="w-8 text-center text-sm font-semibold tabular-nums">{qty}</span>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            aria-label={`Flere ${item.navn}`}
-                            onClick={() => setQty(item.room, item.id, qty + 1)}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
+                            <span className="w-8 text-center text-sm font-semibold tabular-nums">{qty}</span>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              aria-label={`Flere ${item.navn}`}
+                              onClick={() => setQty(item.room, item.id, qty + 1)}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
+                        {qty > 0 && (
+                          <ItemStatusToggle
+                            className="mt-2"
+                            value={status}
+                            onChange={(next) => setStatus(item.room, item.id, next)}
+                            label={item.navn}
+                          />
+                        )}
+                        {item.notes && <p className="mt-1 text-xs text-muted-foreground">{item.notes}</p>}
                       </li>
                     );
                   })}
@@ -419,37 +656,61 @@ function CalculatorPage() {
                     />
                   </div>
                   <form
-                    className="grid grid-cols-2 gap-2 sm:grid-cols-[1fr_90px_90px_auto]"
+                    className="space-y-2 rounded-xl border border-dashed border-border p-3"
                     onSubmit={(e) => {
                       e.preventDefault();
                       addCustomItem();
                     }}
                   >
+                    <p className="text-sm font-medium">Egen gjenstand i {roomName(activeRoom).toLowerCase()}</p>
                     <Input
-                      className="col-span-2 sm:col-span-1"
                       value={ci.navn}
                       onChange={(e) => setCi({ ...ci, navn: e.target.value })}
-                      placeholder={`Egen gjenstand i ${roomName(activeRoom).toLowerCase()}`}
+                      placeholder="Navn, f.eks. «Gammel kommode»"
                       maxLength={60}
                       aria-label="Navn på egen gjenstand"
                     />
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                      {(
+                        [
+                          ["l", "Lengde (cm)"],
+                          ["w", "Bredde (cm)"],
+                          ["h", "Høyde (cm)"],
+                          ["antall", "Antall"],
+                          ["kg", "Vekt (kg)"],
+                        ] as const
+                      ).map(([key, label]) => (
+                        <div key={key} className="space-y-1">
+                          <Label htmlFor={`ci-${key}`} className="text-xs">
+                            {label}
+                            {key === "kg" && <span className="text-muted-foreground"> (valgfritt)</span>}
+                          </Label>
+                          <Input
+                            id={`ci-${key}`}
+                            value={ci[key]}
+                            onChange={(e) => setCi({ ...ci, [key]: e.target.value })}
+                            inputMode="decimal"
+                          />
+                        </div>
+                      ))}
+                    </div>
                     <Input
-                      value={ci.m3}
-                      onChange={(e) => setCi({ ...ci, m3: e.target.value })}
-                      placeholder="m³"
-                      inputMode="decimal"
-                      aria-label="Volum i kubikkmeter"
+                      value={ci.notater}
+                      onChange={(e) => setCi({ ...ci, notater: e.target.value })}
+                      placeholder="Notater (valgfritt), f.eks. «skrus fra hverandre»"
+                      maxLength={300}
+                      aria-label="Notater til egen gjenstand"
                     />
-                    <Input
-                      value={ci.kg}
-                      onChange={(e) => setCi({ ...ci, kg: e.target.value })}
-                      placeholder="kg"
-                      inputMode="decimal"
-                      aria-label="Vekt i kilo"
-                    />
-                    <Button type="submit" variant="outline" className="col-span-2 sm:col-span-1">
-                      Legg til
-                    </Button>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-xs text-muted-foreground">
+                        {ciPreview > 0
+                          ? `Volum: ${fmt(ciPreview)} m³ (lengde × bredde × høyde × antall)`
+                          : "Volum regnes ut av lengde × bredde × høyde × antall."}
+                      </p>
+                      <Button type="submit" variant="outline">
+                        <Plus className="mr-1 h-4 w-4" /> Legg til
+                      </Button>
+                    </div>
                   </form>
                 </div>
               </div>
@@ -460,7 +721,11 @@ function CalculatorPage() {
                 <p className="font-semibold">
                   Netto {fmt(total.nettoM3)} m³ · Anbefalt {fmt(total.anbefaltM3)} m³ · {total.totalKg} kg
                 </p>
-                <p className="text-xs text-muted-foreground">{chosenCount} gjenstander valgt</p>
+                <p className="text-xs text-muted-foreground">
+                  {chosenCount} gjenstander valgt
+                  {total.detaljer.length > 0 && <> · {translate(vehicleKey, "no")}</>}
+                  {maybeTotal.nettoM3 > 0 && <> · hvorav {fmt(maybeTotal.nettoM3)} m³ «kanskje»</>}
+                </p>
               </div>
               <div className="flex gap-2">
                 {chosenCount > 0 && (
@@ -478,21 +743,61 @@ function CalculatorPage() {
 
         {step === 2 && (
           <section className="mt-6 space-y-6">
-            <div className="print:hidden">
-              <Totals total={total} factor={factor} setFactor={setFactor} />
+            <div className="space-y-3 print:hidden">
+              <Totals total={total} factor={factor} setFactor={setFactor} vehicle={translate(vehicleKey, "no")} />
+              <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-border bg-card p-4">
+                <div className="space-y-1">
+                  <Label htmlFor="pdf-lang" className="text-xs">
+                    {ui("pdfLang")}
+                  </Label>
+                  <select
+                    id="pdf-lang"
+                    value={pdfLang}
+                    onChange={(e) => setPdfLang(e.target.value as Lang)}
+                    className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                  >
+                    {SUPPORTED_LANGS.map((code) => (
+                      <option key={code} value={code}>
+                        {LANG_LABELS[code]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <p className="max-w-md text-xs text-muted-foreground">
+                  Språket gjelder faste overskrifter og etiketter i oversikten og PDF-en. Navn, notater og adresser
+                  du har skrevet inn endres ikke.
+                </p>
+              </div>
             </div>
 
             {/* Printable report (also the on-screen summary) */}
             <article className="rounded-2xl border border-border bg-card p-5 print:border-0 print:p-0">
               <header className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="text-lg font-semibold">Flyttekalkulator — oversikt</h2>
-                <span className="text-sm text-muted-foreground">Dato: {today}</span>
+                <h2 className="text-lg font-semibold">{L("reportTitle")}</h2>
+                <span className="text-sm text-muted-foreground">
+                  {L("date")}: {today}
+                </span>
               </header>
               <dl className="mb-5 grid grid-cols-3 gap-3 text-center">
-                <Stat label="Netto" value={`${fmt(total.nettoM3)} m³`} />
-                <Stat label={`Anbefalt (×${fmt(factor)})`} value={`${fmt(total.anbefaltM3)} m³`} />
-                <Stat label="Total vekt" value={`${total.totalKg} kg`} />
+                <Stat label={L("net")} value={`${fmt(total.nettoM3)} m³`} />
+                <Stat label={`${L("recommended")} (×${fmt(factor)})`} value={`${fmt(total.anbefaltM3)} m³`} />
+                <Stat label={L("weight")} value={`${total.totalKg} kg`} />
               </dl>
+
+              <div className="mb-5 flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 print:border-current">
+                <Truck className="mt-0.5 size-5 shrink-0 text-primary" />
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{L("vehicle")}</p>
+                  <p className="text-base font-semibold">{translate(vehicleKey, pdfLang)}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{L("buffer", { p: bufferPercent })}</p>
+                  {maybeTotal.nettoM3 > 0 && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {L("maybeVolume")}: {fmt(maybeTotal.nettoM3)} m³
+                    </p>
+                  )}
+                </div>
+              </div>
+
               <div className="space-y-4">
                 {rooms
                   .filter((r) => perRoom[r.id])
@@ -507,116 +812,239 @@ function CalculatorPage() {
                       <ul className="mt-1 text-sm">
                         {total.detaljer
                           .filter((d) => d.rom === r.id)
-                          .map((d) => (
-                            <li key={d.id} className="flex justify-between py-0.5">
-                              <span>
-                                {d.antall} × {d.navn}
-                              </span>
-                              <span className="text-muted-foreground">
-                                {fmt(d.m3)} m³ · {Math.round(d.kg)} kg
-                              </span>
-                            </li>
-                          ))}
+                          .map((d) => {
+                            const status = statusOf(d.rom, d.id);
+                            const own = db[d.rom]?.[d.id];
+                            return (
+                              <li
+                                key={d.id}
+                                className={`flex justify-between gap-3 py-0.5 ${
+                                  status === "maybe" ? "-mx-1 rounded bg-warning/20 px-1 print:border print:border-current" : ""
+                                }`}
+                              >
+                                <span>
+                                  {d.antall} × {d.navn}
+                                  {own?.custom && (
+                                    <span className="text-muted-foreground">
+                                      {" "}
+                                      ({L("custom")}
+                                      {own.dim ? `, ${own.dim}` : ""})
+                                    </span>
+                                  )}
+                                  {status === "maybe" && <strong className="ml-1 text-xs uppercase">{L("maybe")}</strong>}
+                                  {own?.notes && <span className="block text-xs text-muted-foreground">{own.notes}</span>}
+                                </span>
+                                <span className="shrink-0 text-muted-foreground">
+                                  {fmt(d.m3)} m³ · {Math.round(d.kg)} kg
+                                </span>
+                              </li>
+                            );
+                          })}
                       </ul>
                     </div>
                   ))}
               </div>
+
+              {maybeTotal.detaljer.length > 0 && (
+                <div className="mt-5 break-inside-avoid rounded-xl border border-warning/50 bg-warning/10 p-3 text-sm print:border-current">
+                  <h3 className="font-semibold">
+                    {L("maybeSection")} — {fmt(maybeTotal.nettoM3)} m³
+                  </h3>
+                  <p className="text-xs text-muted-foreground">{L("maybeNote")}</p>
+                  <ul className="mt-1">
+                    {maybeTotal.detaljer.map((d) => (
+                      <li key={`${d.rom}/${d.id}`}>
+                        {d.antall} × {d.navn} <span className="text-muted-foreground">({roomName(d.rom)})</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {notMovingTotal.detaljer.length > 0 && (
+                <div className="mt-4 break-inside-avoid text-sm text-muted-foreground">
+                  <h3 className="font-semibold">{L("notMovingSection")}</h3>
+                  <ul className="mt-1">
+                    {notMovingTotal.detaljer.map((d) => (
+                      <li key={`${d.rom}/${d.id}`}>
+                        {d.antall} × {d.navn} ({roomName(d.rom)})
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               <div className="mt-5 hidden border-t border-border pt-4 text-sm print:block">
-                <h3 className="mb-1 font-semibold">Kontaktinfo</h3>
+                <h3 className="mb-1 font-semibold">{L("contact")}</h3>
                 <p>
                   {form.navn || "—"} · {form.telefon || "—"} · {form.epost || "—"}
                 </p>
-                <p>Henting: {form.hent || "—"}</p>
-                <p>Levering: {form.lever || "—"}</p>
-                <p>Ønsket tidspunkt: {[form.dato, form.tid].filter(Boolean).join(" kl. ") || "—"}</p>
-                {form.notater && <p className="whitespace-pre-wrap">Notater: {form.notater}</p>}
-                <p className="mt-3 text-xs text-muted-foreground">
-                  Estimat fra VolumCalc — faktisk volum og vekt kan variere.
+                <p>
+                  {L("pickup")}: {siteLine(form.hent, form.hentEtasje, form.hentHeis, form.hentBaer, form.hentMobil)}
                 </p>
+                <p>
+                  {L("delivery")}: {siteLine(form.lever, form.leverEtasje, form.leverHeis, form.leverBaer, form.leverMobil)}
+                </p>
+                <p>
+                  {L("wishedDate")}: {[form.dato, form.tid].filter(Boolean).join(" · ") || "—"}
+                </p>
+                {form.notater && (
+                  <p className="whitespace-pre-wrap">
+                    {L("notes")}: {form.notater}
+                  </p>
+                )}
+                <p className="mt-3 text-xs text-muted-foreground">{L("disclaimer")}</p>
               </div>
             </article>
 
-            <form
-              className="space-y-6 rounded-2xl border border-border bg-card p-5 print:hidden"
-              onSubmit={(e) => {
-                e.preventDefault();
-                submit();
-              }}
-              noValidate
-            >
-              <h2 className="text-lg font-semibold">Flytteinfo</h2>
-              <fieldset className="space-y-3">
-                <legend className="mb-1 text-sm font-semibold text-muted-foreground">1. Kontaktinfo</legend>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <Field label="Navn" required error={showErrors && errors.navn}>
-                    <Input value={form.navn} onChange={(e) => setField("navn", e.target.value)} autoComplete="name" />
-                  </Field>
-                  <Field label="Telefon" required error={showErrors && errors.telefon}>
-                    <Input
-                      value={form.telefon}
-                      onChange={(e) => setField("telefon", e.target.value)}
-                      inputMode="tel"
-                      autoComplete="tel"
-                    />
-                  </Field>
-                  <Field label="E-post" required error={showErrors && errors.epost}>
-                    <Input
-                      type="email"
-                      value={form.epost}
-                      onChange={(e) => setField("epost", e.target.value)}
-                      autoComplete="email"
-                    />
-                  </Field>
+            {sent ? (
+              <div className="space-y-4 rounded-2xl border border-success/40 bg-success/5 p-5 print:hidden">
+                <h2 className="flex items-center gap-2 text-lg font-semibold">
+                  <Check className="size-5 text-success" /> Forespørselen er sendt inn
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {search.k || search.c
+                    ? sent.emailed
+                      ? "Flyttefirmaet har fått en e-post med volum, gjenstander, adresser og kontaktinfo."
+                      : "Flyttefirmaet finner forespørselen i sitt dashboard med volum, gjenstander, adresser og kontaktinfo."
+                    : "Rapporten er lagret. Del lenken under med flyttefirmaet, eller last ned PDF."}
+                </p>
+                <div className="flex gap-2">
+                  <Input readOnly value={reportUrl} className="text-xs" aria-label="Lenke til rapporten" />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    aria-label="Kopier lenke"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(reportUrl);
+                      toast.success("Lenken er kopiert");
+                    }}
+                  >
+                    <Copy className="size-4" />
+                  </Button>
                 </div>
-              </fieldset>
-              <fieldset className="space-y-3">
-                <legend className="mb-1 text-sm font-semibold text-muted-foreground">2. Henteadresse</legend>
-                <Field label="Adresse" required error={showErrors && errors.hent}>
-                  <Input value={form.hent} onChange={(e) => setField("hent", e.target.value)} autoComplete="street-address" />
-                </Field>
-              </fieldset>
-              <fieldset className="space-y-3">
-                <legend className="mb-1 text-sm font-semibold text-muted-foreground">3. Leveringsadresse</legend>
-                <Field label="Adresse" required error={showErrors && errors.lever}>
-                  <Input value={form.lever} onChange={(e) => setField("lever", e.target.value)} />
-                </Field>
-              </fieldset>
-              <fieldset className="space-y-3">
-                <legend className="mb-1 text-sm font-semibold text-muted-foreground">4. Ønsket tidspunkt og notater</legend>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <Field label="Dato">
-                    <Input type="date" value={form.dato} onChange={(e) => setField("dato", e.target.value)} />
-                  </Field>
-                  <Field label="Klokkeslett">
-                    <Input type="time" value={form.tid} onChange={(e) => setField("tid", e.target.value)} />
-                  </Field>
+                <div className="flex flex-wrap gap-2">
+                  <Button asChild>
+                    <Link to="/estimate/$id" params={{ id: sent.id }} search={{ token: sent.token }}>
+                      Åpne rapporten
+                    </Link>
+                  </Button>
+                  <Button type="button" variant="outline" onClick={downloadPdf}>
+                    <Printer className="mr-2 h-4 w-4" /> Last ned PDF
+                  </Button>
+                  {!search.k && !search.c && (
+                    <Button type="button" variant="outline" onClick={mailtoFallback}>
+                      <Send className="mr-2 h-4 w-4" /> Send på e-post
+                    </Button>
+                  )}
                 </div>
-                <Field label="Notater / ekstra info">
-                  <Textarea
-                    rows={4}
-                    maxLength={1500}
-                    value={form.notater}
-                    onChange={(e) => setField("notater", e.target.value)}
-                    placeholder="F.eks. etasje, heis, tung gjenstand, parkering …"
-                  />
-                </Field>
-              </fieldset>
-              <div className="flex flex-wrap gap-2">
-                <Button type="button" variant="outline" onClick={() => setStep(1)}>
-                  Tilbake
-                </Button>
-                <Button type="button" variant="outline" onClick={downloadPdf}>
-                  <Printer className="mr-2 h-4 w-4" /> Last ned PDF
-                </Button>
-                <Button type="submit" className="flex-1 sm:flex-none">
-                  <Send className="mr-2 h-4 w-4" /> Send inn
-                </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                «Send inn» åpner e-postprogrammet ditt med oppsummeringen til {SUPPORT_EMAIL}. «Last ned PDF» åpner
-                utskriftsdialogen — velg «Lagre som PDF».
-              </p>
-            </form>
+            ) : (
+              <form
+                className="space-y-6 rounded-2xl border border-border bg-card p-5 print:hidden"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void submit();
+                }}
+                noValidate
+              >
+                <h2 className="text-lg font-semibold">Flytteinfo</h2>
+                <fieldset className="space-y-3">
+                  <legend className="mb-1 text-sm font-semibold text-muted-foreground">1. Kontaktinfo</legend>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <Field label="Navn" required error={showErrors && errors.navn}>
+                      <Input value={form.navn} onChange={(e) => setField("navn", e.target.value)} autoComplete="name" />
+                    </Field>
+                    <Field label="Telefon" required error={showErrors && errors.telefon}>
+                      <Input
+                        value={form.telefon}
+                        onChange={(e) => setField("telefon", e.target.value)}
+                        inputMode="tel"
+                        autoComplete="tel"
+                      />
+                    </Field>
+                    <Field label="E-post" required error={showErrors && errors.epost}>
+                      <Input
+                        type="email"
+                        value={form.epost}
+                        onChange={(e) => setField("epost", e.target.value)}
+                        autoComplete="email"
+                      />
+                    </Field>
+                  </div>
+                </fieldset>
+
+                <SiteFields
+                  title="2. Henteadresse (der dere flytter fra)"
+                  required={showErrors && errors.hent}
+                  address={form.hent}
+                  floor={form.hentEtasje}
+                  elevator={form.hentHeis}
+                  carry={form.hentBaer}
+                  mobile={form.hentMobil}
+                  onAddress={(v) => setField("hent", v)}
+                  onFloor={(v) => setField("hentEtasje", v)}
+                  onElevator={(v) => setField("hentHeis", v)}
+                  onCarry={(v) => setField("hentBaer", v)}
+                  onMobile={(v) => setField("hentMobil", v)}
+                  autoComplete="street-address"
+                />
+                <SiteFields
+                  title="3. Leveringsadresse (dit dere flytter til)"
+                  required={showErrors && errors.lever}
+                  address={form.lever}
+                  floor={form.leverEtasje}
+                  elevator={form.leverHeis}
+                  carry={form.leverBaer}
+                  mobile={form.leverMobil}
+                  onAddress={(v) => setField("lever", v)}
+                  onFloor={(v) => setField("leverEtasje", v)}
+                  onElevator={(v) => setField("leverHeis", v)}
+                  onCarry={(v) => setField("leverBaer", v)}
+                  onMobile={(v) => setField("leverMobil", v)}
+                />
+
+                <fieldset className="space-y-3">
+                  <legend className="mb-1 text-sm font-semibold text-muted-foreground">4. Ønsket dato og notater</legend>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Field label="Ønsket flyttedato">
+                      <Input type="date" value={form.dato} onChange={(e) => setField("dato", e.target.value)} />
+                    </Field>
+                    <Field label="Klokkeslett">
+                      <Input type="time" value={form.tid} onChange={(e) => setField("tid", e.target.value)} />
+                    </Field>
+                  </div>
+                  <Field label="Notater / ekstra info (valgfritt)">
+                    <Textarea
+                      rows={4}
+                      maxLength={1500}
+                      value={form.notater}
+                      onChange={(e) => setField("notater", e.target.value)}
+                      placeholder="F.eks. tung gjenstand, parkering, piano, åpningstider …"
+                    />
+                  </Field>
+                </fieldset>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" variant="outline" onClick={() => setStep(1)}>
+                    Tilbake
+                  </Button>
+                  <Button type="button" variant="outline" onClick={downloadPdf}>
+                    <Printer className="mr-2 h-4 w-4" /> Last ned PDF
+                  </Button>
+                  <Button type="submit" className="flex-1 sm:flex-none" disabled={sending}>
+                    {sending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                    {search.k || search.c ? "Send til flyttefirmaet" : "Lagre og del rapport"}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {search.k || search.c
+                    ? "Flyttefirmaet får en e-post med alt du har fylt ut: volum, gjenstander, adresser, mobilnummer og kontaktinfo. "
+                    : "Rapporten lagres med en privat lenke du kan dele med flyttefirmaet. "}
+                  «Last ned PDF» åpner utskriftsdialogen — velg «Lagre som PDF».
+                </p>
+              </form>
+            )}
           </section>
         )}
       </main>
@@ -627,22 +1055,78 @@ function CalculatorPage() {
   );
 }
 
+function SiteFields(props: {
+  title: string;
+  required: boolean;
+  address: string;
+  floor: string;
+  elevator: boolean;
+  carry: string;
+  mobile: string;
+  autoComplete?: string;
+  onAddress: (v: string) => void;
+  onFloor: (v: string) => void;
+  onElevator: (v: boolean) => void;
+  onCarry: (v: string) => void;
+  onMobile: (v: string) => void;
+}) {
+  const id = props.title.slice(0, 1);
+  return (
+    <fieldset className="space-y-3">
+      <legend className="mb-1 text-sm font-semibold text-muted-foreground">{props.title}</legend>
+      <Field label="Adresse" required error={props.required}>
+        <Input
+          value={props.address}
+          onChange={(e) => props.onAddress(e.target.value)}
+          {...(props.autoComplete ? { autoComplete: props.autoComplete } : {})}
+        />
+      </Field>
+      <div className="grid gap-3 sm:grid-cols-4">
+        <Field label="Etasje">
+          <Input value={props.floor} onChange={(e) => props.onFloor(e.target.value)} inputMode="numeric" maxLength={20} />
+        </Field>
+        <Field label="Bæreavstand (m)">
+          <Input value={props.carry} onChange={(e) => props.onCarry(e.target.value)} inputMode="numeric" />
+        </Field>
+        <Field label="Mobil på stedet">
+          <Input value={props.mobile} onChange={(e) => props.onMobile(e.target.value)} inputMode="tel" maxLength={40} />
+        </Field>
+        <div className="flex items-end pb-2">
+          <label htmlFor={`heis-${id}`} className="flex cursor-pointer items-center gap-2 text-sm">
+            <input
+              id={`heis-${id}`}
+              type="checkbox"
+              checked={props.elevator}
+              onChange={(e) => props.onElevator(e.target.checked)}
+              className="size-4 rounded border-input accent-primary"
+            />
+            Det er heis
+          </label>
+        </div>
+      </div>
+    </fieldset>
+  );
+}
+
 function Totals({
   total,
   factor,
   setFactor,
+  vehicle,
 }: {
   total: ReturnType<typeof beregn>;
   factor: number;
   setFactor: (n: number) => void;
+  vehicle: string;
 }) {
+  const fmtN = (n: number) => n.toFixed(2).replace(".", ",");
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 rounded-2xl border border-border bg-muted/40 p-4">
       <div>
         <p className="text-xs uppercase tracking-wide text-muted-foreground">Totalt ca.</p>
-        <p className="text-2xl font-bold">{fmt(total.anbefaltM3)} m³</p>
+        <p className="text-2xl font-bold">{fmtN(total.anbefaltM3)} m³</p>
         <p className="text-sm text-muted-foreground">
-          {total.totalKg} kg · netto {fmt(total.nettoM3)} m³
+          {total.totalKg} kg · netto {fmtN(total.nettoM3)} m³ · anbefalt bil: {vehicle}
         </p>
       </div>
       <div className="w-40">
@@ -652,7 +1136,7 @@ function Totals({
         <Input
           id="stuefaktor"
           inputMode="decimal"
-          defaultValue={fmt(factor)}
+          defaultValue={fmtN(factor)}
           key={factor}
           onBlur={(e) => {
             const v = num(e.target.value);

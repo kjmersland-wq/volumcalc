@@ -5,8 +5,8 @@ import { languagePageHead } from "@/lib/language-page-meta";
 export const Route = createFileRoute("/fi")({
   staticData: { sitemap: true },
   head: () => languagePageHead({
-    title: "VolumCalc — tilavuusarvio huonekuvista",
-    description: "Muunna huonekuvat selkeäksi, huonekohtaiseksi kuutiometriarvioksi muuttoa ja tarjouksia varten.",
+    title: "VolumCalc — muuttotilavuus huone huoneelta (m³)",
+    description: "Valitse esineet tarkistuslistalta ja saat selkeän muuttotilavuuden m³, suositellun auton ja jaettavan raportin. Sopii yksityishenkilöille ja muuttofirmoille.",
     path: "/fi",
   }),
   component: () => <LanguageLanding lang="fi" />,

@@ -52,7 +52,11 @@ import {
   updateSharedEstimateItem,
 } from "@/lib/estimates.functions";
 import { m3, money, shortDate } from "@/lib/format";
-import { recommendVehicle, recommendedVolume, storageUnitM2 } from "@/lib/volume";
+import { recommendVehicle, recommendedVolume, storageUnitM2, STOWAGE_FACTOR } from "@/lib/volume";
+import { ItemStatusToggle, STATUS_STYLE, statusLabel } from "@/components/ItemStatusToggle";
+import { isCustomItem, isHiddenTag, itemStatus, itemWeightKg, statusPatch } from "@/lib/item-status";
+import { xl } from "@/lib/extra-labels";
+import { normalizeStatus } from "@/lib/estimate-status";
 
 export const Route = createFileRoute("/estimate/$id")({
   staticData: { sitemap: false },
@@ -66,7 +70,7 @@ export const Route = createFileRoute("/estimate/$id")({
       {
         name: "description",
         content:
-          "Itemised cubic metre estimate and inventory review generated from photos and a checklist.",
+          "Itemised cubic metre estimate with recommended vehicle, built from a room-by-room checklist.",
       },
       { property: "og:title", content: "Estimate report — VolumCalc" },
       {
@@ -269,6 +273,25 @@ function EstimatePage() {
     | null
     | undefined;
 
+  // The owning company opening a new estimate marks it as viewed.
+  const ownerId = session?.user.id;
+  const estimateCompanyId = (estimate as { company_id?: string | null } | null | undefined)?.company_id;
+  const estimateStatus = estimate?.status;
+  useEffect(() => {
+    if (!ownerId || !estimateCompanyId || estimateCompanyId !== ownerId) return;
+    if (normalizeStatus(estimateStatus) !== "new") return;
+    void supabase
+      .from("estimates")
+      .update({ status: "viewed" })
+      .eq("id", id)
+      .then(({ error }) => {
+        if (!error) {
+          queryClient.invalidateQueries({ queryKey: ["estimate", id] });
+          queryClient.invalidateQueries({ queryKey: ["estimates"] });
+        }
+      });
+  }, [ownerId, estimateCompanyId, estimateStatus, id, queryClient]);
+
   useEffect(() => {
     if (!estimate) return;
     setAccess(
@@ -399,7 +422,7 @@ function EstimatePage() {
     mutationFn: async () => {
       const { error } = await supabase
         .from("estimates")
-        .update({ status: "approved", company_id: session?.user.id ?? null })
+        .update({ status: "accepted", company_id: session?.user.id ?? null })
         .eq("id", id);
       if (error) throw error;
     },
@@ -504,6 +527,10 @@ function EstimatePage() {
   const netVolume =
     Math.round(included.reduce((sum, i) => sum + Number(i.volume_m3), 0) * 100) / 100;
   const gross = recommendedVolume(netVolume);
+  const maybeItems = included.filter((item) => itemStatus(item) === "maybe");
+  const maybeVolume =
+    Math.round(maybeItems.reduce((sum, i) => sum + Number(i.volume_m3), 0) * 100) / 100;
+  const bufferPercent = Math.round((STOWAGE_FACTOR - 1) * 100);
 
   // Pickup uses the "Access & conditions" fields; delivery uses the delivery
   // fields. Both update live as they are edited.
@@ -579,7 +606,7 @@ function EstimatePage() {
     rt("res.title");
 
   const statusKey =
-    estimate.status === "approved"
+    normalizeStatus(estimate.status) === "accepted"
       ? "rep.status.processed"
       : items.length
         ? "rep.status.ready"
@@ -626,7 +653,7 @@ function EstimatePage() {
 
   function exportCsv() {
     const rows = [
-      ["Room", "Item", "Qty", "L cm", "W cm", "H cm", "m3", "Included", "Tags", "Notes"],
+      ["Room", "Item", "Qty", "L cm", "W cm", "H cm", "m3", "Status", "Tags", "Notes"],
       ...groups.flatMap((group) =>
         group.items.map((item) => [
           roomDisplayName(group.name, reportLang),
@@ -636,8 +663,8 @@ function EstimatePage() {
           Math.round(item.width_cm),
           Math.round(item.height_cm),
           item.volume_m3,
-          item.is_included === false ? "no" : "yes",
-          (item.tags ?? []).join("|"),
+          itemStatus(item),
+          (item.tags ?? []).filter((tag) => !isHiddenTag(tag)).join("|"),
           (item.notes ?? "").replace(/[\n;]/g, " "),
         ]),
       ),
@@ -791,7 +818,7 @@ function EstimatePage() {
               {!businessView && shareToken && (
                 <QuoteRequestDialog id={String(estimate.id)} token={shareToken} />
               )}
-              {canEdit && estimate.status !== "approved" && (
+              {canEdit && normalizeStatus(estimate.status) !== "accepted" && (
                 <Button size="sm" onClick={() => approve.mutate()}>
                   <Check className="size-4" />
                   {rt("dash.approve")}
@@ -873,7 +900,18 @@ function EstimatePage() {
                 <Truck className="size-6 text-primary" />
                 {m3(gross, reportLang)}
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">{rt(recommendVehicle(gross))}</p>
+              <p className="mt-2 flex items-center gap-2 text-sm font-semibold">
+                <Truck className="size-4 text-primary" />
+                {xl(reportLang, "vehicle")}: {rt(recommendVehicle(gross))}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {xl(reportLang, "buffer", { p: bufferPercent })}
+              </p>
+              {maybeVolume > 0 && (
+                <p className="mt-1 text-xs font-medium text-warning-foreground print:text-foreground">
+                  {xl(reportLang, "maybeVolume")}: {m3(maybeVolume, reportLang)}
+                </p>
+              )}
               {!businessView && (
                 <p className="mt-1 text-xs text-muted-foreground">
                   {rt("rep.storage")} {storageUnitM2(gross)} m²
@@ -1035,21 +1073,18 @@ function EstimatePage() {
                   {group.items.map((item) => (
                     <li
                       key={item.id}
-                      className={item.is_included === false ? "px-5 py-4 opacity-60" : "px-5 py-4"}
+                      className={
+                        itemStatus(item) === "not_moving"
+                          ? "px-5 py-4 opacity-60"
+                          : itemStatus(item) === "maybe"
+                            ? "bg-warning/10 px-5 py-4 print:border-l-4 print:border-current"
+                            : "px-5 py-4"
+                      }
                     >
                       <div className="flex items-start gap-4">
-                        {item.photo_url ? (
-                          <img
-                            src={item.photo_url}
-                            alt=""
-                            loading="lazy"
-                            className="size-16 shrink-0 rounded-lg border border-border object-cover"
-                          />
-                        ) : (
-                          <div className="flex size-16 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                            <Boxes className="size-5" />
-                          </div>
-                        )}
+                        <div className="flex size-16 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                          <Boxes className="size-5" />
+                        </div>
 
                         <div className="min-w-0 flex-1">
                           {canEdit ? (
@@ -1078,9 +1113,29 @@ function EstimatePage() {
                             </p>
                           )}
 
+                          {(isCustomItem(item) || itemStatus(item) !== "moving") && (
+                            <div className="mt-1 flex flex-wrap gap-1.5">
+                              {isCustomItem(item) && (
+                                <Badge variant="secondary" className="print:border print:border-current">
+                                  {xl(reportLang, "custom")}
+                                </Badge>
+                              )}
+                              {itemStatus(item) !== "moving" && (
+                                <Badge
+                                  variant="secondary"
+                                  className={`${STATUS_STYLE[itemStatus(item)]} print:border print:border-current`}
+                                >
+                                  {statusLabel(itemStatus(item), reportLang)}
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+
                           <p className="mt-1 text-xs text-muted-foreground">
                             {Math.round(item.length_cm)} × {Math.round(item.width_cm)} ×{" "}
                             {Math.round(item.height_cm)} cm · {m3(item.volume_m3, reportLang)}
+                            {itemWeightKg(item) !== null &&
+                              ` · ${Math.round(itemWeightKg(item)! * item.quantity)} kg`}
                             {shareTime && moveTime.perItem[item.id] !== undefined && (
                               <span
                                 title={`${rt("mtime.perItem")} (${crew} ${rt("mtime.persons")})`}
@@ -1277,28 +1332,16 @@ function EstimatePage() {
                             {Math.round(item.confidence * 100)}% {rt("res.confidence")}
                           </Badge>
                           {canEdit ? (
-                            <div className="no-print flex items-center gap-2">
-                              <Switch
-                                id={`inc-${item.id}`}
-                                checked={item.is_included !== false}
-                                onCheckedChange={(value) =>
-                                  patchItem.mutate({ item, patch: { is_included: value } })
-                                }
-                              />
-                              <Label
-                                htmlFor={`inc-${item.id}`}
-                                className="text-xs text-muted-foreground"
-                              >
-                                {item.is_included === false
-                                  ? rt("rep.excluded")
-                                  : rt("rep.included")}
-                              </Label>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">
-                              {item.is_included === false ? rt("rep.excluded") : rt("rep.included")}
-                            </span>
-                          )}
+                            <ItemStatusToggle
+                              className="no-print"
+                              lang={reportLang}
+                              label={itemDisplayName(item, reportLang)}
+                              value={itemStatus(item)}
+                              onChange={(next) =>
+                                patchItem.mutate({ item, patch: statusPatch(item, next) })
+                              }
+                            />
+                          ) : null}
                         </div>
                       </div>
                     </li>
@@ -1685,23 +1728,6 @@ function EstimatePage() {
                 >
                   {rt("dash.saveItem")}
                 </Button>
-              </div>
-            </section>
-          )}
-
-          {estimate.photo_urls && estimate.photo_urls.length > 0 && (
-            <section className="mt-8">
-              <h2 className="font-semibold">{rt("res.photos")}</h2>
-              <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
-                {estimate.photo_urls.map((url: string) => (
-                  <img
-                    key={url}
-                    src={url}
-                    alt=""
-                    loading="lazy"
-                    className="aspect-square w-full rounded-xl border border-border object-cover"
-                  />
-                ))}
               </div>
             </section>
           )}

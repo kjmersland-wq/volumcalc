@@ -32,8 +32,8 @@ const content: Record<"no" | "en", LegalContent> = {
       {
         heading: "Formål og omfang",
         body: [
-          "Vi behandler personopplysninger kun for å levere VolumCalc: volumberegning fra bilder, rapporter, deling, tilbudsforespørsler og support.",
-          "Typer opplysninger: navn, e-post, telefon, adresser, flyttedato, bilder av bolig og innbo, samt notater kunden selv legger inn.",
+          "Vi behandler personopplysninger kun for å levere VolumCalc: volumberegning fra sjekkliste, rapporter, deling, tilbudsforespørsler og support.",
+          "Typer opplysninger: navn, e-post, telefon, adresser (inkl. etasje, heis, bæreavstand og mobilnummer på stedet), flyttedato, gjenstandslister, samt notater kunden selv legger inn.",
           "Registrerte: flyttebyråets kunder og byråets egne ansatte med tilgang til løsningen.",
         ],
       },
@@ -42,14 +42,14 @@ const content: Record<"no" | "en", LegalContent> = {
         body: [
           "Vi behandler opplysningene kun etter dokumenterte instrukser fra deg som kunde, og ikke til egne formål.",
           "Alle med tilgang er underlagt taushetsplikt.",
-          "Vi gjennomfører egnede tekniske og organisatoriske tiltak: kryptering, tilgangsstyring per konto, radnivå-sikkerhet i databasen, private bildelager og logging.",
+          "Vi gjennomfører egnede tekniske og organisatoriske tiltak: kryptering, tilgangsstyring per konto, radnivå-sikkerhet i databasen, privat lagring og logging.",
           "Vi bistår deg med innsyn, retting og sletting, og med varsling ved brudd på personopplysningssikkerheten uten ugrunnet opphold.",
         ],
       },
       {
         heading: "Underdatabehandlere",
         body: [
-          "Vi bruker underdatabehandlere for skydrift og database, AI-analyse av bilder, e-postutsending og betaling.",
+          "Vi bruker underdatabehandlere for skydrift og database, e-postutsending og betaling.",
           "Alle er bundet av tilsvarende plikter. Vi varsler ved planlagte endringer slik at du kan protestere.",
         ],
       },
@@ -78,8 +78,8 @@ const content: Record<"no" | "en", LegalContent> = {
       {
         heading: "Purpose and scope",
         body: [
-          "We process personal data solely to deliver VolumCalc: volume estimation from photos, reports, sharing, quote requests and support.",
-          "Categories of data: name, email, phone, addresses, moving date, photos of homes and belongings, and notes entered by users.",
+          "We process personal data solely to deliver VolumCalc: volume estimation from the checklist, reports, sharing, quote requests and support.",
+          "Categories of data: name, email, phone, addresses (including floor, lift, carry distance and on-site mobile number), moving date, item lists, and notes entered by users.",
           "Data subjects: the moving company's customers and its own staff with access to the service.",
         ],
       },
@@ -88,14 +88,14 @@ const content: Record<"no" | "en", LegalContent> = {
         body: [
           "We process data only on your documented instructions and never for our own purposes.",
           "Everyone with access is bound by confidentiality.",
-          "We apply appropriate technical and organisational measures: encryption, per-account access control, row level security in the database, private photo storage and logging.",
+          "We apply appropriate technical and organisational measures: encryption, per-account access control, row level security in the database, private storage and logging.",
           "We assist you with access, rectification and erasure requests, and notify you of personal data breaches without undue delay.",
         ],
       },
       {
         heading: "Sub-processors",
         body: [
-          "We use sub-processors for cloud hosting and database, AI image analysis, email delivery and payments.",
+          "We use sub-processors for cloud hosting and database, email delivery and payments.",
           "All are bound by equivalent obligations. We notify you of planned changes so you can object.",
         ],
       },

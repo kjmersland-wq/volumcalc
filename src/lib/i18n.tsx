@@ -51,8 +51,8 @@ export const dict: Dict = {
     en: "Usually within one business day",
   },
   "contact.aside": {
-    no: "Er du flyttebyrå og vil teste VolumCalc med egne bilder? Nevn det i meldingen, så setter vi opp en gratis prøvekonto.",
-    en: "Running a moving company and want to try VolumCalc with your own photos and checklist flow? Just mention it, and we'll set you up with a free trial account.",
+    no: "Er du flyttebyrå og vil teste VolumCalc med dine egne kunder? Nevn det i meldingen, så setter vi opp en gratis prøvekonto.",
+    en: "Running a moving company and want to try VolumCalc with your own customers? Just mention it, and we'll set you up with a free trial account.",
   },
   "contact.homeTitle": { no: "Har du spørsmål?", en: "Got a question?" },
   "contact.homeSub": {
@@ -67,55 +67,76 @@ export const dict: Dict = {
   "nav.tryFree": { no: "Prøv gratis", en: "Try for free" },
 
   "hero.badge": {
-    no: "Raske volumberegninger fra bilder",
-    en: "Instant volume estimates from your own photos",
+    no: "Volumkalkulator med sjekkliste",
+    en: "Checklist-based volume calculator",
   },
   "hero.title1": {
-    no: "Så fint! Vi fikser flyttevolumet ditt",
-    en: "Brilliant! Let’s sort your moving volume in a jiffy —",
+    no: "Klar flyttevolum på minutter",
+    en: "Clear moving volume in minutes",
   },
-  "hero.title2": { no: "med noen rolige bilder av rommet", en: "from a few relaxed photos of the room." },
+  "hero.title2": {
+    no: "– rom for rom",
+    en: "– room by room",
+  },
   "hero.sub": {
-    no: "VolumCalc hjelper deg med å ta noen rolige bilder rundt i rommene, og gjør dem om til en tydelig, rominndelt volumberegning. Perfekt når du vil planlegge flyttingen i fred og ro.",
-    en: "VolumCalc helps you turn a quick wander through your rooms into a beautifully clear, room-by-room volume estimate. Perfectly sorted for your moving plans.",
+    no: "Velg gjenstander fra sjekklisten, få nøyaktig m³-estimat og delbar rapport. Perfekt for privatpersoner og flyttefirmaer.",
+    en: "Pick items from the checklist, get an accurate m³ estimate and a shareable report. Perfect for households and moving companies.",
   },
   "hero.cta": { no: "Start en gratis beregning", en: "Start a free estimate" },
   "hero.cta2": { no: "For flyttebyråer", en: "For moving companies" },
   "hero.stat1": { no: "raskere enn befaring", en: "faster than a survey" },
-  "hero.stat2": { no: "gjenstander gjenkjent", en: "standard items available" },
+  "hero.stat2": {
+    no: "gjenstander i sjekklisten",
+    en: "items in the checklist",
+  },
   "hero.stat3": { no: "færre tvister", en: "fewer disputes" },
   "hero.imageAlt": {
     no: "Stue med møbler og flytteesker klare til å bli målt opp",
     en: "Living room with furniture and moving boxes ready to be measured",
   },
 
-  "how.title": { no: "Fra bilder til tilbud i tre steg", en: "From photos to quote in three simple steps" },
-  "how.1t": { no: "Ta bilder av rommet i ditt tempo", en: "Snap a few photos, at your own pace" },
+  "how.title": {
+    no: "Fra sjekkliste til rapport i tre steg",
+    en: "From checklist to report in three steps",
+  },
+  "how.1t": {
+    no: "Velg rom og gjenstander",
+    en: "Choose rooms and items",
+  },
   "how.1d": {
-    no: "Åpne lenken på mobilen og ta noen rolige bilder av rommet. Du har god tid, og trenger verken app eller innlogging.",
-    en: "Open the link on your phone and take a few relaxed photos around the room. Take all the time you need — no app, no login required.",
+    no: "Gå gjennom rommene og kryss av det som skal flyttes, eller legg til egne gjenstander med mål. Ingen app og ingen innlogging.",
+    en: "Go through the rooms and tick off what you are moving, or add your own items with dimensions. No app and no login needed.",
   },
-  "how.2t": { no: "Rolig sjekkliste etterpå", en: "Stress-free checklist" },
+  "how.2t": {
+    no: "Se volum og anbefalt bil",
+    en: "See volume and recommended vehicle",
+  },
   "how.2d": {
-    no: "Når du er ferdig med bildene, krysser du av gjenstandene i en tilpasset sjekkliste i fred og ro. Enkelt og trygt, hver gang.",
-    en: "Once you’ve taken your photos, simply tick off your items from a tailored checklist in total peace and quiet. Spot on every time.",
+    no: "Få nettovolum, anbefalt volum med 25 % pakkebuffer og forslag til bilstørrelse, oppdatert underveis.",
+    en: "Get net volume, recommended volume with a 25 % packing buffer and a suggested vehicle size, updated as you go.",
   },
-  "how.3t": { no: "Du sender tilbud", en: "You send the quote" },
+  "how.3t": {
+    no: "Del rapporten eller send til flyttefirma",
+    en: "Share the report or send it to a moving company",
+  },
   "how.3d": {
-    no: "Gå gjennom listen, juster ved behov og generer pris basert på din m³-pris.",
-    en: "Review the list, adjust if needed and generate a price from your rate per m³.",
+    no: "Last ned PDF på ditt språk, del en privat lenke eller send forespørselen rett til et flyttefirma med adresser og kontaktinfo.",
+    en: "Download a PDF in your language, share a private link, or send the request straight to a moving company with addresses and contact details.",
   },
 
   "feat.title": { no: "Bygget for flyttebransjen", en: "Built for the moving industry" },
   "feat.1t": { no: "Nøyaktige kubikkmål", en: "Accurate cubic volume" },
   "feat.1d": {
-    no: "Realistiske standardmål per møbeltype, finjustert etter det AI-en ser på bildene dine.",
-    en: "Realistic reference dimensions per furniture type in a structured, room-by-room checklist.",
+    no: "Realistiske standardmål for over 120 gjenstander i en oversiktlig sjekkliste, rom for rom.",
+    en: "Realistic reference dimensions for 120+ items in a clear, room-by-room checklist.",
   },
-  "feat.2t": { no: "Sikkerhetsgrad", en: "User-verified list" },
+  "feat.2t": {
+    no: "Netto og anbefalt volum",
+    en: "Net and recommended volume",
+  },
   "feat.2d": {
-    no: "Se hvilke gjenstander som bør dobbeltsjekkes før du sender tilbudet.",
-    en: "100% reliable checklists. Your customers verify their own items down to a tee, giving you a completely accurate, dispute-free basis for your transport quotes.",
+    no: "Se nettovolum og anbefalt volum med 25 % buffer, så du bestiller riktig bil første gang.",
+    en: "See net volume and the recommended volume with a 25 % buffer, so you book the right vehicle the first time.",
   },
   "feat.3t": { no: "Delbar rapport", en: "Shareable report" },
   "feat.3d": {
@@ -124,127 +145,21 @@ export const dict: Dict = {
   },
   "feat.4t": { no: "Din merkevare", en: "Your brand" },
   "feat.4d": {
-    no: "Logo, farger, valuta og pris per m³ settes i innstillingene.",
-    en: "Logo, colours, currency and price per m³ are set in your settings.",
+    no: "Logo, farger, valuta og pris per m³ settes i innstillingene. Rapporter på 12 språk.",
+    en: "Logo, colours, currency and price per m³ are set in your settings. Reports in 12 languages.",
   },
 
   "cta.title": { no: "Klar for å kutte befaringene?", en: "Ready to cut the site visits?" },
   "cta.sub": {
-    no: "Opprett konto og del din første opplastingslenke i dag.",
-    en: "Create an account and share your first upload link today.",
+    no: "Opprett konto og del din første kundelenke i dag.",
+    en: "Create an account and share your first customer link today.",
   },
 
-  "upload.title": {
-    no: "Så gøy at du er i gang! La oss ta bilder av flyttelasset ditt sammen",
-    en: "Lovely — let’s photograph your inventory together",
-  },
-  "upload.sub": {
-    no: "Her tar vi det helt uten stress. Du tar bilder av hvert rom i eget tempo, og så klikker du enkelt av gjenstandene dine i fred og ro etterpå.",
-    en: "No rush at all — just photograph each room at your own pace, then tick through your items calmly afterwards.",
-  },
-  "upload.guideTitle": { no: "Slik gjør vi det sammen", en: "How it works" },
-  "upload.guide": {
-    no: "Velg rommet du står i nå, og ta noen rolige bilder med mobilen. Romlisten kan du endre på Min side før du starter, slik at navnene passer hjemmet ditt.",
-    en: "Choose the room you’re in and take a few relaxed photos on your phone. Afterwards, you can go through the checklist in peace and quiet.",
-  },
-  "upload.selectRoom": { no: "Velg rom", en: "Select room" },
-  "upload.roomHint": {
-    no: "Legg til, endre navn eller fjern rom her – de vises også når du tar bilder.",
-    en: "Add, rename or remove rooms here — they also show while you're taking photos.",
-  },
-  "upload.addRoom": { no: "Legg til rom", en: "Add room" },
-  "upload.addRoomPh": { no: "F.eks. Loft, Bod, Kjellerstue", en: "E.g. Attic, Storage, Basement" },
-  "upload.roomAdded": { no: "Rommet er lagt til", en: "Room added" },
-  "upload.roomExists": { no: "Rommet finnes allerede", en: "That room already exists" },
-  "upload.roomRemoved": { no: "Rommet er fjernet", en: "Room removed" },
-  "upload.roomLast": { no: "Du må ha minst ett rom.", en: "You need at least one room." },
-  "upload.editRooms": { no: "Rediger rom", en: "Edit rooms" },
-  "upload.doneEditing": { no: "Ferdig", en: "Done" },
-  "upload.resetRooms": { no: "Tilbakestill romliste", en: "Reset room list" },
-  "upload.renameRoom": { no: "Endre navn", en: "Rename" },
-  "upload.removeRoom": { no: "Fjern rom", en: "Remove room" },
-  "upload.savedToRoom": { no: "Lagret til", en: "Saved to" },
-  "upload.takePhoto": { no: "Ta bilde / velg bilder", en: "Take photo / choose photos" },
-  "upload.removePhoto": { no: "Fjern bilde", en: "Remove photo" },
-  "upload.photoTooLarge": {
-    no: "Bildet var for stort og ble ikke lagret.",
-    en: "That photo was too large and wasn't saved.",
-  },
-  "upload.photoSaveFailed": {
-    no: "Kunne ikke lagre bildet akkurat nå. Prøv å legge det til på nytt.",
-    en: "Couldn't save that photo right now. Try adding it again.",
-  },
-  "upload.analyzePhotos": { no: "Analyser bilder (AI-forslag)", en: "Analyze photos (AI suggestion)" },
-  "upload.analyzing": { no: "Analyserer …", en: "Analyzing …" },
-  "upload.analyzeSuggested": {
-    no: "Forslag lagt inn i sjekklisten — juster gjerne før du sender inn.",
-    en: "Suggestions added to the checklist — feel free to adjust before submitting.",
-  },
-  "upload.analyzeNoneFound": {
-    no: "Fant ingen nye gjenstander å foreslå i bildene.",
-    en: "Didn't find any new items to suggest in the photos.",
-  },
-  "upload.analyzeFailed": {
-    no: "Kunne ikke analysere bildene akkurat nå.",
-    en: "Couldn't analyze the photos right now.",
-  },
-  "upload.analyzeTemporary": {
-    no: "AI-tjenesten er midlertidig utilgjengelig. Prøv igjen om litt, eller legg til manuelt.",
-    en: "The AI service is temporarily unavailable. Try again shortly, or add items by hand.",
-  },
-  "upload.analyzeNoCredits": {
-    no: "AI-analyse er midlertidig utilgjengelig (tjenestens kreditt er brukt opp). Legg til manuelt.",
-    en: "AI analysis is unavailable (the service has run out of credits). Add items by hand.",
-  },
-  "upload.analyzeImages": {
-    no: "Bildene kunne ikke leses av AI-tjenesten (for store eller utilgjengelige). Prøv mindre bilder, eller legg til manuelt.",
-    en: "The AI service couldn't read the photos (too large or not accessible). Try smaller photos, or add items by hand.",
-  },
-  "upload.analyzeAccess": {
-    no: "AI-analyse er ikke tilgjengelig på denne kontoen.",
-    en: "AI analysis isn't available on this account.",
-  },
-  "upload.roomSpecificItems": { no: "Vanlig for dette rommet", en: "Common for this room" },
-  "upload.crossRoomItems": { no: "Andre vanlige gjenstander", en: "Other common items" },
 
-  "upload.roomTemplate": {
-    no: "Sjekkliste",
-    en: "Checklist",
-  },
-  "upload.details": { no: "Kontaktinformasjon (valgfritt)", en: "Contact details (optional)" },
-  "upload.name": { no: "Navn", en: "Name" },
-  "upload.phone": { no: "Telefon", en: "Phone" },
-  "upload.date": { no: "Flyttedato", en: "Move date" },
-  "upload.address": { no: "Adresse", en: "Address" },
-  "upload.securityLabel": { no: "Sikkerhet", en: "Security" },
-  "upload.submit": {
-    no: "La oss starte registreringen",
-    en: "Let’s get your registration started",
-  },
-  "upload.netVolumeLabel": { no: "Nettovolum", en: "Net volume" },
-  "upload.grossVolumeLabel": {
-    no: "Bilbehov (+25 % stuefaktor)",
-    en: "Vehicle requirement (+25% stowage factor)",
-  },
-  "upload.saving": { no: "Lagrer beregningen …", en: "Saving your estimate …" },
   "upload.failed": {
     no: "Noe gikk galt. Prøv igjen.",
     en: "Something went wrong. Please try again.",
   },
-  "upload.noCredits": {
-    no: "Du har ingen gjenstående beregninger på kontoen din.",
-    en: "You have no remaining estimates left on your account.",
-  },
-  "upload.seePricing": { no: "Se priser", en: "See pricing" },
-  "upload.companyQuotaExceededPrefix": {
-    no: "Dette skjemaet kan ikke ta imot flere innsendelser akkurat nå. Ta kontakt med",
-    en: "This form can't accept any more submissions right now. Please contact",
-  },
-  "upload.companyQuotaExceededSuffix": {
-    no: "direkte for et tilbud.",
-    en: "directly for a quote.",
-  },
-  "upload.companyQuotaExceededFallbackName": { no: "bedriften", en: "the company" },
 
   "res.title": { no: "Volumberegning", en: "Volume estimate" },
   "res.total": { no: "Totalt volum", en: "Total volume" },
@@ -257,7 +172,6 @@ export const dict: Dict = {
   "res.pdf": { no: "Last ned PDF", en: "Download PDF" },
   "res.share": { no: "Kopier delingslenke", en: "Copy share link" },
   "res.copied": { no: "Lenke kopiert", en: "Link copied" },
-  "res.photos": { no: "Bilder", en: "Photos" },
   "res.room": { no: "Rom", en: "Room" },
   "res.renameRoom": { no: "Gi rommet nytt navn", en: "Rename room" },
   "res.moveRoom": { no: "Flytt til rom", en: "Move to room" },
@@ -266,8 +180,8 @@ export const dict: Dict = {
   "res.notFound": { no: "Fant ikke beregningen.", en: "Estimate not found." },
   "res.estimated": { no: "Estimert pris", en: "Estimated price" },
   "res.disclaimer": {
-    no: "Estimatet er basert på bildene og er veiledende frem til flyttebyrået har godkjent det.",
-    en: "This estimate is based on your photos and a user-verified checklist, and is indicative until the moving company approves it.",
+    no: "Estimatet er basert på en sjekkliste som er verifisert av brukeren, og er veiledende frem til flyttebyrået har godkjent det.",
+    en: "This estimate is based on a user-verified checklist and is indicative until the moving company approves it.",
   },
   "share.title": { no: "Del beregningen", en: "Share this estimate" },
   "share.sub": {
@@ -312,7 +226,10 @@ export const dict: Dict = {
   },
   "dash.cancel": { no: "Avbryt", en: "Cancel" },
   "dash.deleteFailed": { no: "Kunne ikke slette beregningen.", en: "Could not delete the estimate." },
-  "dash.link": { no: "Kopier opplastingslenke", en: "Copy upload link" },
+  "dash.link": {
+    no: "Kopier kundelenke",
+    en: "Copy customer link",
+  },
   "dash.settings": { no: "Innstillinger", en: "Settings" },
   "dash.signout": { no: "Logg ut", en: "Sign out" },
   "rep.claimHelp": {
@@ -337,8 +254,8 @@ export const dict: Dict = {
   "set.saved": { no: "Innstillinger lagret", en: "Settings saved" },
   "set.rooms": { no: "Mine rom", en: "My rooms" },
   "set.roomsHelp": {
-    no: "Skriv ett rom per linje. Disse vises i romvalget når bildene tas.",
-    en: "Write one room per line. These appear in the room selector while photos are being taken.",
+    no: "Skriv ett rom per linje. Disse vises i romvalget i kalkulatoren.",
+    en: "Write one room per line. These appear in the room selector in the calculator.",
   },
 
   "price.title": {
@@ -466,14 +383,6 @@ export const dict: Dict = {
     en: "Enter your name and a phone number or email.",
   },
 
-  "upload.limit": {
-    no: "Sjekklisten er klar, rom for rom, når du er klar.",
-    en: "Your checklist is ready to fill in room by room.",
-  },
-  "upload.unlimited": {
-    no: "Kontoen din støtter ubegrenset antall registreringer.",
-    en: "Your account supports unlimited registrations.",
-  },
 
   "admin.nav": { no: "Admin", en: "Admin" },
   "admin.title": { no: "Transportfirma-kontoer", en: "Moving company accounts" },
@@ -510,10 +419,6 @@ export const dict: Dict = {
   "admin.passwordSet": { no: "Passordet er oppdatert.", en: "The password was updated." },
   "admin.demoLink": { no: "Åpne demo-side", en: "Open demo page" },
 
-  "upload.forCompany": {
-    no: "Du sender registreringen til",
-    en: "You are sending this registration to",
-  },
 
   "demo.badge": { no: "Demo", en: "Demo" },
   "demo.title": {
@@ -671,13 +576,11 @@ export const dict: Dict = {
   },
 
   "add.title": { no: "Legg til gjenstander", en: "Add items" },
-  "add.sub": { no: "Glemte du noe? Ta et nytt bilde eller legg det til selv. Volum, bilstørrelse og tidsbruk oppdateres med en gang.", en: "Forgot something? Take a new photo or add it yourself. Volume, vehicle size and time update right away." },
+  "add.sub": {
+    no: "Glemte du noe? Legg det til selv, gjerne med egne mål. Volum, bilstørrelse og tidsbruk oppdateres med en gang.",
+    en: "Forgot something? Add it yourself, with its own dimensions if needed. Volume, vehicle size and time update right away.",
+  },
   "add.room": { no: "Rom", en: "Room" },
-  "add.photo": { no: "Ta bilde / velg bilder", en: "Take / choose photos" },
-  "add.analyze": { no: "La AI foreslå gjenstander", en: "Let AI suggest items" },
-  "add.analyzing": { no: "Ser på bildene …", en: "Looking at the photos …" },
-  "add.analyzeFailed": { no: "Kunne ikke analysere bildene. Du kan legge til manuelt under.", en: "Couldn't analyse the photos. You can add items by hand below." },
-  "add.noneFound": { no: "Fant ingen gjenstander i bildene. Legg til manuelt under.", en: "No items found in the photos. Add them by hand below." },
   "add.suggestions": { no: "Forslag – huk av det som stemmer, og rett antall", en: "Suggestions: tick what is right and adjust the number" },
   "add.addSelected": { no: "Legg til valgte", en: "Add selected" },
   "add.manual": { no: "Eller legg til selv", en: "Or add one yourself" },
@@ -689,8 +592,6 @@ export const dict: Dict = {
   "add.added": { no: "Lagt til i rapporten", en: "Added to the report" },
   "add.failed": { no: "Kunne ikke legge til. Prøv igjen.", en: "Couldn't add it. Please try again." },
   "add.needFields": { no: "Fyll inn navn, antall og alle tre mål.", en: "Fill in name, quantity and all three measurements." },
-  "add.photoFailed": { no: "Bildet kunne ikke lastes opp. Prøv igjen.", en: "The photo couldn't be uploaded. Please try again." },
-  "add.removePhoto": { no: "Fjern bilde", en: "Remove photo" },
 
   "mov.title": { no: "Hent pristilbud fra flyttefirma", en: "Get quotes from moving companies" },
   "mov.sub": {
@@ -718,25 +619,65 @@ export const dict: Dict = {
   "mtime.show": { no: "Vis tidsestimat", en: "Show time estimate" },
   "trust.title": { no: "Hvem står bak VolumCalc", en: "Who is behind VolumCalc" },
   "trust.about": { no: "VolumCalc er utviklet og drevet av KM TECH LABS i Kristiansand, Norge. Vi bygger enkle verktøy som gjør flytting tryggere og mer forutsigbar – for privatpersoner og flyttebyråer.", en: "VolumCalc is built and run by KM TECH LABS in Kristiansand, Norway. We make simple tools that make moving safer and more predictable — for households and moving companies." },
-  "trust.p1t": { no: "Bildene dine er private", en: "Your photos stay private" },
-  "trust.p1d": { no: "Bilder lagres privat og er bare tilgjengelige via din egen innlogging eller en hemmelig lenke du selv deler.", en: "Photos are stored privately and are only reachable through your own login or a secret link you choose to share." },
-  "trust.p2t": { no: "AI kun til gjenkjenning", en: "AI only for recognition" },
-  "trust.p2d": { no: "AI brukes bare til å gjenkjenne gjenstander i bildene – aldri til reklame eller til å dele dem videre.", en: "AI is used only to recognise items in your photos — never for advertising or to share them further." },
+  "trust.p1t": {
+    no: "Dataene dine er private",
+    en: "Your data stays private",
+  },
+  "trust.p1d": {
+    no: "Beregninger lagres privat og er bare tilgjengelige via din egen innlogging eller en hemmelig lenke du selv deler.",
+    en: "Estimates are stored privately and are only reachable through your own login or a secret link you choose to share.",
+  },
+  "trust.p2t": {
+    no: "Gjennomsiktige beregninger",
+    en: "Transparent calculations",
+  },
+  "trust.p2d": {
+    no: "Volumet bygger på faste standardmål per gjenstand og det du selv legger inn – ingen gjetting og ingenting skjult.",
+    en: "Volumes come from fixed reference dimensions per item and what you enter yourself — no guesswork, nothing hidden.",
+  },
   "trust.p3t": { no: "Data slettes", en: "Data is deleted" },
-  "trust.p3d": { no: "Beregninger med bilder slettes senest 12 måneder etter siste aktivitet – eller tidligere hvis du ber om det.", en: "Estimates with photos are deleted at the latest 12 months after last activity — or sooner if you ask." },
+  "trust.p3d": {
+    no: "Beregninger slettes senest 12 måneder etter siste aktivitet – eller tidligere hvis du ber om det.",
+    en: "Estimates are deleted at the latest 12 months after the last activity — or sooner if you ask.",
+  },
   "agency.title": { no: "For flyttebyråer", en: "For moving companies" },
   "agency.sub": { no: "Gi kundene et profesjonelt estimat med din egen profil – og spar tid på befaring.", en: "Give customers a professional estimate under your own brand — and save time on site visits." },
   "agency.b1": { no: "Egen logo, farger og firmadetaljer øverst i rapporten og PDF-en", en: "Your logo, colours and company details at the top of the report and PDF" },
   "agency.b2": { no: "Dashboard med alle beregninger, godkjenning og pris per m³", en: "Dashboard with all estimates, approval and your price per m³" },
   "agency.b3": { no: "Del rapporten med kunden via hemmelig lenke eller PDF – på kundens eget språk", en: "Share the report with the customer by secret link or PDF — in the customer's own language" },
   "agency.cta": { no: "Se løsningen for byråer", en: "See the agency solution" },
-  "photo.title": { no: "Slik tar du best bilder", en: "How to take the best photos" },
-  "photo.1t": { no: "1–3 bilder per rom", en: "1–3 photos per room" },
-  "photo.1d": { no: "Ta ett oversiktsbilde fra døra og gjerne ett fra hver side.", en: "Take one overview photo from the door, and ideally one from each side." },
-  "photo.2t": { no: "God belysning", en: "Good lighting" },
-  "photo.2d": { no: "Skru på lyset og unngå motlys fra vinduer.", en: "Turn the lights on and avoid backlight from windows." },
-  "photo.3t": { no: "Få med det meste", en: "Capture most of it" },
-  "photo.3d": { no: "Ta med møbler, skap og esker – åpne dører så innholdet synes.", en: "Include furniture, cupboards and boxes — open doors so the contents show." },
+  "dash.st.new": { no: "Ny", en: "New" },
+  "dash.st.viewed": { no: "Sett", en: "Viewed" },
+  "dash.st.quoted": { no: "Tilbud sendt", en: "Quoted" },
+  "dash.st.accepted": { no: "Akseptert", en: "Accepted" },
+  "dash.st.archived": { no: "Arkivert", en: "Archived" },
+  "dash.search": { no: "Søk på kunde, adresse eller e-post", en: "Search customer, address or email" },
+  "dash.fStatus": { no: "Status", en: "Status" },
+  "dash.fActive": { no: "Aktive (uten arkiv)", en: "Active (no archive)" },
+  "dash.fAll": { no: "Alle", en: "All" },
+  "dash.fDate": { no: "Dato", en: "Date" },
+  "dash.dAny": { no: "Når som helst", en: "Any time" },
+  "dash.d7": { no: "Siste 7 dager", en: "Last 7 days" },
+  "dash.d30": { no: "Siste 30 dager", en: "Last 30 days" },
+  "dash.d90": { no: "Siste 90 dager", en: "Last 90 days" },
+  "dash.fVolume": { no: "Volum", en: "Volume" },
+  "dash.vAny": { no: "Alle størrelser", en: "Any size" },
+  "dash.vS": { no: "Under 10 m³", en: "Under 10 m³" },
+  "dash.vM": { no: "10–25 m³", en: "10–25 m³" },
+  "dash.vL": { no: "25–50 m³", en: "25–50 m³" },
+  "dash.vXL": { no: "Over 50 m³", en: "Over 50 m³" },
+  "dash.noMatch": { no: "Ingen estimater passer til filtrene.", en: "No estimates match your filters." },
+  "dash.changeStatus": { no: "Endre status", en: "Change status" },
+  "dash.statNewWeek": { no: "Nye denne uken", en: "New this week" },
+  "dash.statAvg": { no: "Snitt volum", en: "Average volume" },
+  "dash.statOpen": { no: "Venter på tilbud", en: "Awaiting quote" },
+  "dash.statAccepted": { no: "Akseptert", en: "Accepted" },
+  "dash.statMonth": { no: "Volum siste 30 dager", en: "Volume, last 30 days" },
+  "dash.customerLink": { no: "Kundelenke", en: "Customer link" },
+  "dash.copyLink": { no: "Kopier kundelenke", en: "Copy customer link" },
+  "dash.copyEmbed": { no: "Kopier embed-kode", en: "Copy embed code" },
+  "dash.copied": { no: "Kopiert", en: "Copied" },
+  "dash.linkHelp": { no: "Del lenken med kundene dine, eller lim embed-koden inn på nettsiden din. Forespørsler havner her og sendes deg på e-post.", en: "Share the link with your customers, or paste the embed code into your website. Requests land here and are emailed to you." },
 };
 
 export const LANG_LABELS: Record<Lang, string> = {

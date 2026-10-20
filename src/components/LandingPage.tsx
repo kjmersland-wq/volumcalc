@@ -1,4 +1,4 @@
-import { Camera, Sparkles, FileText, ShieldCheck, Palette, ArrowRight, Check, Lock, ScanSearch, Trash2 } from "lucide-react";
+import { ListChecks, Truck, Boxes, FileText, Scale, Palette, ArrowRight, Check, Lock, ScanSearch, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -12,14 +12,14 @@ export function LandingPage() {
   const { t } = useI18n();
 
   const steps = [
-    { icon: Camera, title: t("how.1t"), body: t("how.1d") },
-    { icon: Sparkles, title: t("how.2t"), body: t("how.2d") },
+    { icon: ListChecks, title: t("how.1t"), body: t("how.1d") },
+    { icon: Truck, title: t("how.2t"), body: t("how.2d") },
     { icon: FileText, title: t("how.3t"), body: t("how.3d") },
   ];
 
   const features = [
-    { icon: Sparkles, title: t("feat.1t"), body: t("feat.1d") },
-    { icon: ShieldCheck, title: t("feat.2t"), body: t("feat.2d") },
+    { icon: Boxes, title: t("feat.1t"), body: t("feat.1d") },
+    { icon: Scale, title: t("feat.2t"), body: t("feat.2d") },
     { icon: FileText, title: t("feat.3t"), body: t("feat.3d") },
     { icon: Palette, title: t("feat.4t"), body: t("feat.4d") },
   ];
@@ -33,7 +33,7 @@ export function LandingPage() {
           <div className="mx-auto grid min-h-[calc(100vh-8rem)] max-w-6xl items-center gap-12 px-4 py-14 md:py-20 lg:grid-cols-2">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-card/80 px-3 py-1 text-xs font-medium text-primary shadow-sm">
-                <Sparkles className="size-3.5 text-primary" />
+                <ListChecks className="size-3.5 text-primary" />
                 {t("hero.badge")}
               </span>
               <h1 className="mt-5 text-4xl font-extrabold leading-[1.08] sm:text-5xl lg:text-6xl">

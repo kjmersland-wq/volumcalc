@@ -499,7 +499,7 @@ export const CROSS_ROOM_ITEMS: VolumeDatabaseItem[] = [
 ];
 
 /** This room's own catalog plus the shared cross-room items — the full set
- * offered to the checklist UI and to AI photo analysis for a given room. */
+ * offered to the checklist UI for a given room. */
 export function catalogForRoom(room: VolumeRoom): VolumeDatabaseItem[] {
   return [...VOLUME_DATABASE[room], ...CROSS_ROOM_ITEMS];
 }

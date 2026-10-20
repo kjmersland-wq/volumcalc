@@ -31,7 +31,7 @@ export const Route = createFileRoute("/pricing")({
       {
         property: "og:description",
         content:
-          "Simple monthly plans for photo-based cubic volume estimates and checklist workflows.",
+          "Simple monthly plans for checklist-based cubic volume estimates and shareable reports.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -84,8 +84,8 @@ function Pricing() {
       desc: lang === "no" ? "For én flytting" : "For one move",
       features:
         lang === "no"
-          ? ["Bilder + sjekkliste", "Romvis sortering", "PDF-rapport"]
-          : ["Photos + checklist", "Room grouping", "PDF report"],
+          ? ["Sjekkliste med 120+ gjenstander", "Romvis oversikt", "PDF-rapport"]
+          : ["Checklist with 120+ items", "Room-by-room overview", "PDF report"],
       priceId: "volumcalc_single_estimate_nok",
     },
     {
@@ -94,8 +94,8 @@ function Pricing() {
       desc: lang === "no" ? `Spar ${formatApproxInline(88, lang)}` : `Save ${formatApproxInline(88, lang)}`,
       features:
         lang === "no"
-          ? ["3 komplette beregninger", "Bilder + sjekkliste", "PDF-rapporter"]
-          : ["3 complete estimates", "Photos + checklist", "PDF reports"],
+          ? ["3 komplette beregninger", "Sjekkliste med 120+ gjenstander", "PDF-rapporter"]
+          : ["3 complete estimates", "Checklist with 120+ items", "PDF reports"],
       priceId: "volumcalc_three_estimates_nok",
     },
   ];

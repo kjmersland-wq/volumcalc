@@ -31,22 +31,22 @@ const content: Record<"no" | "en", LegalContent> = {
       {
         heading: "Tjenesten",
         body: [
-          "VolumCalc beregner et estimert volum i kubikkmeter basert på bilder du laster opp, og lager en rapport du kan redigere, dele og laste ned.",
+          "VolumCalc beregner et estimert volum i kubikkmeter basert på sjekklisten du fyller ut, og lager en rapport du kan redigere, dele og laste ned.",
           "Du kan bruke tjenesten som privatperson eller på vegne av et firma. Bruker du den på vegne av et firma, bekrefter du at du har fullmakt til det.",
         ],
       },
       {
         heading: "Estimatet er veiledende",
         body: [
-          "Resultatet er et AI-generert estimat basert på bildene og oppgitte opplysninger. Det er ikke en bindende pris eller en garanti for faktisk volum.",
+          "Resultatet er et estimat basert på standardmål og opplysningene du har oppgitt. Det er ikke en bindende pris eller en garanti for faktisk volum.",
           "Endelig pris og volum avtales alltid mellom deg og flyttebyrået. VolumCalc er ikke part i den avtalen og er ikke ansvarlig for flyttebyråets utførelse.",
-          "Du er selv ansvarlig for at bildene og opplysningene du gir er dekkende for det som skal flyttes.",
+          "Du er selv ansvarlig for at gjenstandene og opplysningene du oppgir er dekkende for det som skal flyttes.",
         ],
       },
       {
         heading: "Din bruk",
         body: [
-          "Du skal ikke laste opp innhold du ikke har rett til å bruke, ulovlig innhold eller bilder som viser sensitive personopplysninger.",
+          "Du skal ikke legge inn innhold du ikke har rett til å bruke, ulovlig innhold eller sensitive personopplysninger i fritekstfeltene.",
           "Du skal ikke forsøke å omgå sikkerhet, hente ut andres data, overbelaste tjenesten eller bruke den til automatisk masseinnhenting.",
           "Vi kan stenge kontoer som bryter vilkårene.",
         ],
@@ -91,22 +91,22 @@ const content: Record<"no" | "en", LegalContent> = {
       {
         heading: "The service",
         body: [
-          "VolumCalc estimates volume in cubic metres from the photos you upload and produces a report you can edit, share and download.",
+          "VolumCalc estimates volume in cubic metres from the checklist you fill in and produces a report you can edit, share and download.",
           "You may use the service privately or on behalf of a company. If you use it for a company, you confirm that you are authorised to do so.",
         ],
       },
       {
         heading: "The estimate is indicative",
         body: [
-          "The result is an AI-generated estimate based on your photos and information. It is not a binding price or a guarantee of actual volume.",
+          "The result is an estimate based on reference dimensions and the information you provide. It is not a binding price or a guarantee of actual volume.",
           "Final price and volume are always agreed between you and the moving company. VolumCalc is not a party to that agreement and is not responsible for the mover's performance.",
-          "You are responsible for making sure your photos and details cover everything that is to be moved.",
+          "You are responsible for making sure the items and details you enter cover everything that is to be moved.",
         ],
       },
       {
         heading: "Your use",
         body: [
-          "Do not upload content you have no right to use, unlawful content, or photos showing sensitive personal data.",
+          "Do not enter content you have no right to use, unlawful content, or sensitive personal data in the free-text fields.",
           "Do not attempt to bypass security, access other people's data, overload the service or use it for automated bulk scraping.",
           "We may suspend accounts that breach these terms.",
         ],

@@ -32,7 +32,7 @@ const content: Record<"no" | "en", LegalContent> = {
       {
         heading: "Hva vi gjør",
         body: [
-          "Vi gjør vanlige mobilbilder om til en ryddig, rominndelt volumberegning i kubikkmeter — på sekunder, uten befaring.",
+          "Vi gjør en enkel sjekkliste om til en ryddig, rominndelt volumberegning i kubikkmeter — på minutter, uten befaring.",
           "Privatpersoner får et realistisk bilde av hva flyttingen omfatter før de ber om tilbud. Flyttebyråer får et ferdig underlag som kan redigeres, godkjennes, deles og prises.",
         ],
       },
@@ -61,7 +61,7 @@ const content: Record<"no" | "en", LegalContent> = {
       {
         heading: "What we do",
         body: [
-          "We turn ordinary phone photos into a clear, room-by-room volume estimate in cubic metres — in seconds, without a site visit.",
+          "We turn a simple checklist into a clear, room-by-room volume estimate in cubic metres — in minutes, without a site visit.",
           "Private individuals get a realistic picture of their move before asking for quotes. Moving companies get a ready-made basis they can edit, approve, share and price.",
         ],
       },

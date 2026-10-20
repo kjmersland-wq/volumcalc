@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Camera, Check, Info, TriangleAlert } from "lucide-react";
+import { ArrowRight, ListChecks, Check, Info, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -314,13 +314,13 @@ export function VanCalculator({ lang }: { lang: VanLang }) {
           <div className="mt-6 rounded-2xl border border-border bg-secondary/40 p-6 text-center sm:p-8">
             <p className="mx-auto max-w-2xl text-base">
               {no
-                ? "Er du usikker på om alt får plass? Slipp å gjette – knips et par kjappe bilder av rommene dine, så regner VolumCalc ut nøyaktig kubikkmål for deg på to minutter."
-                : "Not sure if your stuff will actually fit? Skip the guesswork — snap a few quick photos of your rooms, and let VolumCalc calculate the exact volume in under two minutes."}
+                ? "Er du usikker på om alt får plass? Slipp å gjette – velg gjenstandene fra sjekklisten, så regner VolumCalc ut kubikkmål og anbefalt bil for deg på noen minutter."
+                : "Not sure if your stuff will actually fit? Skip the guesswork — pick your items from the checklist, and let VolumCalc calculate the volume and recommended vehicle in minutes."}
             </p>
             <Button asChild size="lg" className="mt-5">
               <Link to="/upload">
-                <Camera className="size-4" />
-                {no ? "Beregn med bilder (gratis)" : "Calculate with photos (free)"}
+                <ListChecks className="size-4" />
+                {no ? "Beregn med sjekkliste (gratis)" : "Calculate with the checklist (free)"}
                 <ArrowRight className="size-4" />
               </Link>
             </Button>

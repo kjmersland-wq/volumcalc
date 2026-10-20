@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LanguageLanding } from "@/components/LanguageLanding";
 import { languagePageHead } from "@/lib/language-page-meta";
 
-const TITLE = "VolumCalc — obliczanie kubatury ze zdjęć (m³)";
+const TITLE = "VolumCalc — objętość przeprowadzki pokój po pokoju (m³)";
 const DESC =
-  "Prześlij zdjęcia pomieszczeń i otrzymaj wyliczenie objętości w metrach sześciennych, pokój po pokoju.";
+  "Wybierz przedmioty z listy kontrolnej i uzyskaj objętość przeprowadzki w m³, zalecany pojazd oraz raport do udostępnienia. Dla osób prywatnych i firm przeprowadzkowych.";
 
 export const Route = createFileRoute("/pl")({
   staticData: { sitemap: true },

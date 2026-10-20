@@ -164,7 +164,15 @@ const ROWS: Record<string, Row[]> = {
   ],
 };
 
-export type CalcItem = { navn: string; m3: number; kg: number; custom?: boolean };
+export type CalcItem = {
+  navn: string;
+  m3: number;
+  kg: number;
+  custom?: boolean;
+  /** Custom items: "L × B × H cm" as entered. */
+  dim?: string;
+  notes?: string;
+};
 export type CalcDatabase = Record<string, Record<string, CalcItem>>;
 
 export const MOVE_DATABASE: CalcDatabase = Object.fromEntries(

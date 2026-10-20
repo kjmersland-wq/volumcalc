@@ -21,20 +21,20 @@ export const Route = createFileRoute("/")({
   staticData: { sitemap: true },
   head: () => ({
     meta: [
-      { title: "VolumCalc — Brilliant moving volume estimates from your own photos" },
+      { title: "VolumCalc — Clear moving volume in minutes, room by room" },
       {
         name: "description",
         content:
-          "Turn a quick wander through your rooms into a clear, room-by-room cubic metre estimate for a calmer move.",
+          "Pick items from the checklist, get an accurate m³ estimate, a recommended vehicle and a shareable report. Perfect for households and moving companies.",
       },
       {
         property: "og:title",
-        content: "VolumCalc — Brilliant moving volume estimates from your own photos",
+        content: "VolumCalc — Clear moving volume in minutes, room by room",
       },
       {
         property: "og:description",
         content:
-          "A warm, straightforward photo-and-checklist flow for beautifully clear moving volume estimates.",
+          "Pick items from the checklist and get an accurate m³ estimate and a shareable report.",
       },
       { property: "og:type", content: "website" },
       { property: "og:image", content: "https://www.volumcalc.com/og-volumcalc-en.jpg" },

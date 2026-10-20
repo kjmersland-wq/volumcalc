@@ -5,8 +5,8 @@ import { languagePageHead } from "@/lib/language-page-meta";
 export const Route = createFileRoute("/fr")({
   staticData: { sitemap: true },
   head: () => languagePageHead({
-    title: "VolumCalc — estimation du volume à partir de photos",
-    description: "Transformez des photos de pièces en estimation claire du volume par pièce pour vos déménagements et devis.",
+    title: "VolumCalc — volume de déménagement pièce par pièce (m³)",
+    description: "Choisissez les objets dans la liste et obtenez le volume en m³, le véhicule recommandé et un rapport partageable. Pour les particuliers et les déménageurs.",
     path: "/fr",
   }),
   component: () => <LanguageLanding lang="fr" />,

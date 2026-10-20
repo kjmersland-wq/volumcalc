@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LanguageLanding } from "@/components/LanguageLanding";
 import { languagePageHead } from "@/lib/language-page-meta";
 
-const TITLE = "VolumCalc — volymberäkning från foton (m³)";
+const TITLE = "VolumCalc — flyttvolym rum för rum (m³)";
 const DESC =
-  "Ladda upp foton av rummen och få en rumsvis volymberäkning i kubikmeter för flyttofferter och bilval.";
+  "Välj föremål från checklistan och få tydlig flyttvolym i m³, rekommenderad bil och en delbar rapport. Perfekt för privatpersoner och flyttfirmor.";
 
 export const Route = createFileRoute("/se")({
   staticData: { sitemap: true },
