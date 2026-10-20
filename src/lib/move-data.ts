@@ -187,6 +187,11 @@ const ROWS: Record<string, Row[]> = {
     ["stovsuger", "Støvsuger", 0.08, 7],
     ["strykebrett", "Strykebrett", 0.1, 4],
     ["koffert", "Koffert", 0.15, 10],
+    ["bod_metallhylle", "Metallhylle / lagerreol", 0.5, 18],
+    ["bod_plastkasse", "Plastkasse med lokk", 0.08, 8],
+    ["bod_verktoykasse", "Verktøykasse", 0.04, 12],
+    ["bod_hageredskap", "Hageredskap (bunt)", 0.15, 8],
+    ["bod_dekk", "Dekksett (4 stk.)", 0.9, 60],
   ],
   utendors: [
     ["hagebord", "Hagebord", 0.6, 20],
