@@ -1,9 +1,7 @@
 import type { Lang } from "@/lib/i18n";
 
-// Display-only currency conversion for the /pricing page. The actual Stripe
-// charge always happens in NOK, regardless of the visitor's language — this
-// module never touches checkout, it only decides what number and currency
-// label to show someone browsing in a given language.
+// Display-only currency conversion for the /pricing page. This module only
+// decides what number and currency label to show in a given language.
 
 export type DisplayCurrency = "NOK" | "SEK" | "DKK" | "PLN" | "EUR";
 
