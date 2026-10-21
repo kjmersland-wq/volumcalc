@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { verifyWebhook, EventName, type PaddleEnv } from '@/lib/paddle.server';
-import type { supabaseAdmin } from '@/integrations/supabase/client.server';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
 
 // Credits granted per human-readable price ID (one-time purchases).
 const PRICE_CREDITS: Record<string, number> = {
@@ -10,7 +11,7 @@ const PRICE_CREDITS: Record<string, number> = {
 
 // Deferred so env var availability is not assumed at module load time, and so
 // the admin client never enters the browser bundle.
-let _admin: ReturnType<typeof supabaseAdmin> | null = null;
+let _admin: SupabaseClient<Database> | null = null;
 async function getSupabase() {
   if (!_admin) {
     const mod = await import('@/integrations/supabase/client.server');
