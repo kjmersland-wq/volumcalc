@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Pricing displays provider-independent plans with disabled purchase controls when no payment integration exists; this prevents dead checkout links while preserving plan information.
+- Retain historical payment records and existing user credits when removing a payment integration; these are account data, not active provider connections.

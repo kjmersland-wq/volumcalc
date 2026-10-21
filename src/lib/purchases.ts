@@ -1,7 +1,7 @@
 /**
- * Single switch for all paid checkouts (frontend + server). When false the
- * pricing page shows "Coming soon" instead of buttons that cannot work.
+ * Paid purchases are unavailable while no payment provider is connected.
+ * Existing account credits and access are unchanged.
  */
-export const PURCHASES_ENABLED = true;
+export const PURCHASES_ENABLED = false;
 
 export const PURCHASES_UNAVAILABLE_MESSAGE = "Payments are not available yet.";

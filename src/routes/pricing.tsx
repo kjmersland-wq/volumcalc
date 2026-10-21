@@ -1,21 +1,9 @@
-import { useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, UserRound, Building2, LockKeyhole } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
-import { PURCHASES_ENABLED } from "@/lib/purchases";
 import { px } from "@/lib/pricing-i18n";
-import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/lib/i18n";
 import { approxPrice, formatApproxInline } from "@/lib/currency";
 import { cn } from "@/lib/utils";
@@ -46,22 +34,6 @@ export const Route = createFileRoute("/pricing")({
 
 function Pricing() {
   const { t, lang } = useI18n();
-  const [checkout, setCheckout] = useState<{ priceId: string; name: string } | null>(null);
-
-  const { session } = useAuth();
-  const navigate = useNavigate();
-
-  /** Purchases are credited to an account, so the buyer must be signed in first. */
-  function startCheckout(priceId: string, name: string) {
-    if (!PURCHASES_ENABLED) return;
-    if (!session) {
-      toast(px(lang, "loginFirst"));
-      void navigate({ to: "/auth" });
-      return;
-    }
-    setCheckout({ priceId, name });
-  }
-
   const plans = [
     {
       name: "Business",
@@ -70,7 +42,7 @@ function Pricing() {
       desc: px(lang, "bizDesc"),
       features: [px(lang, "fCore"), px(lang, "fBrand"), px(lang, "fRate"), px(lang, "fEmbed")],
       featured: true,
-      priceId: "volumcalc_business_monthly_nok" as string | null,
+      paid: true,
     },
     {
       name: "Enterprise",
@@ -79,7 +51,7 @@ function Pricing() {
       desc: px(lang, "entDesc"),
       features: [px(lang, "fAll"), px(lang, "fBranches"), px(lang, "fApi"), px(lang, "fContact")],
       featured: false,
-      priceId: null,
+      paid: false,
     },
   ];
 
@@ -89,14 +61,14 @@ function Pricing() {
       priceNok: 129,
       desc: px(lang, "oneMove"),
       features: [px(lang, "fChecklist"), px(lang, "fPdfLink"), px(lang, "fSaved")],
-      priceId: "volumcalc_single_estimate_nok" as string | null,
+      featured: true,
     },
     {
       name: px(lang, "three"),
       priceNok: 299,
       desc: px(lang, "save", { x: formatApproxInline(88, lang) }),
       features: [px(lang, "fThree"), px(lang, "fChecklist"), px(lang, "fPdfLink")],
-      priceId: "volumcalc_three_estimates_nok" as string | null,
+      featured: false,
     },
   ];
 
@@ -124,7 +96,7 @@ function Pricing() {
                   key={plan.name}
                   className={cn(
                     "card-soft flex flex-col p-7",
-                    plan.priceId === "volumcalc_single_estimate_nok" &&
+                    plan.featured &&
                       "border-primary shadow-[var(--shadow-lift)]",
                   )}
                 >
@@ -145,25 +117,10 @@ function Pricing() {
                       </li>
                     ))}
                   </ul>
-                  {plan.priceId ? (
-                    <>
-                      <Button
-                        className="mt-8"
-                        variant={
-                          plan.priceId === "volumcalc_single_estimate_nok" ? "default" : "outline"
-                        }
-                        disabled={!PURCHASES_ENABLED}
-                        onClick={() => startCheckout(plan.priceId!, plan.name)}
-                      >
-                        <LockKeyhole className="size-4" />
-                        {PURCHASES_ENABLED ? t("payment.buy") : px(lang, "comingSoon")}
-                      </Button>
-                    </>
-                  ) : (
-                    <Button asChild className="mt-8" variant="outline">
-                      <Link to="/upload">{t("price.cta")}</Link>
-                    </Button>
-                  )}
+                  <Button className="mt-8" variant={plan.featured ? "default" : "outline"} disabled>
+                    <LockKeyhole className="size-4" />
+                    {px(lang, "comingSoon")}
+                  </Button>
                 </div>
               );
             })}
@@ -216,16 +173,15 @@ function Pricing() {
                       </li>
                     ))}
                   </ul>
-                  {plan.priceId ? (
+                  {plan.paid ? (
                     <>
                       <Button
                         className="mt-8"
                         variant="default"
-                        disabled={!PURCHASES_ENABLED}
-                        onClick={() => startCheckout(plan.priceId!, plan.name)}
+                        disabled
                       >
                         <LockKeyhole className="size-4" />
-                        {PURCHASES_ENABLED ? t("payment.subscribe") : px(lang, "comingSoon")}
+                        {px(lang, "comingSoon")}
                       </Button>
                     </>
                   ) : (
@@ -240,19 +196,6 @@ function Pricing() {
         </section>
       </main>
       <SiteFooter />
-      <Dialog open={Boolean(checkout)} onOpenChange={(open) => !open && setCheckout(null)}>
-        <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto p-0">
-          <DialogHeader className="border-b border-border px-6 py-5 pr-12">
-            <DialogTitle>{checkout?.name}</DialogTitle>
-            <DialogDescription>{t("payment.secure")}</DialogDescription>
-          </DialogHeader>
-          <div className="min-h-[560px] px-2 pb-5 sm:px-5">
-            {checkout && (
-              <StripeEmbeddedCheckout key={checkout.priceId} priceId={checkout.priceId} />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
