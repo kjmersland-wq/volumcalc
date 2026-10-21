@@ -7,6 +7,6 @@
 
 # Built-in payments
 
-- [ ] Correct test catalog amounts to match the existing plans (129 NOK, 299 NOK, 1490 NOK/month); pending payment price-change approval.
+- [ ] Set catalog prices to EUR matching the pricing page (11 EUR, 25 EUR, 130 EUR/month) in test and live.
 - [ ] Verify checkout after catalog correction.
 - [x] Add KM TECH LABS IP ownership and Paddle Merchant-of-Record disclosure to Norwegian and English terms; both checked in the signed-in preview, build OK.
