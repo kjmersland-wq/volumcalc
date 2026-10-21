@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, UserRound, Building2, LockKeyhole } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Check, UserRound, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -7,6 +7,9 @@ import { px } from "@/lib/pricing-i18n";
 import { useI18n } from "@/lib/i18n";
 import { approxPrice, formatApproxInline } from "@/lib/currency";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/pricing")({
   staticData: { sitemap: true },
@@ -34,6 +37,30 @@ export const Route = createFileRoute("/pricing")({
 
 function Pricing() {
   const { t, lang } = useI18n();
+  const { user } = useAuth();
+  const { openCheckout, loading } = usePaddleCheckout();
+  const navigate = useNavigate();
+
+  const buy = async (priceId: string) => {
+    if (!user) {
+      toast(px(lang, "loginFirst"));
+      navigate({ to: "/auth" });
+      return;
+    }
+    try {
+      await openCheckout({
+        priceId,
+        quantity: 1,
+        customerEmail: user.email ?? undefined,
+        customData: { userId: user.id },
+        successUrl: `${window.location.origin}/dashboard?checkout=success`,
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Checkout could not be opened. Please try again.");
+    }
+  };
+
   const plans = [
     {
       name: "Business",
@@ -59,6 +86,7 @@ function Pricing() {
     {
       name: px(lang, "single"),
       priceNok: 129,
+      priceId: "single_estimate_nok",
       desc: px(lang, "oneMove"),
       features: [px(lang, "fChecklist"), px(lang, "fPdfLink"), px(lang, "fSaved")],
       featured: true,
@@ -66,6 +94,7 @@ function Pricing() {
     {
       name: px(lang, "three"),
       priceNok: 299,
+      priceId: "three_pack_nok",
       desc: px(lang, "save", { x: formatApproxInline(88, lang) }),
       features: [px(lang, "fThree"), px(lang, "fChecklist"), px(lang, "fPdfLink")],
       featured: false,
@@ -117,9 +146,13 @@ function Pricing() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="mt-8" variant={plan.featured ? "default" : "outline"} disabled>
-                    <LockKeyhole className="size-4" />
-                    {px(lang, "comingSoon")}
+                  <Button
+                    className="mt-8"
+                    variant={plan.featured ? "default" : "outline"}
+                    disabled={loading}
+                    onClick={() => buy(plan.priceId)}
+                  >
+                    {px(lang, "buy")}
                   </Button>
                 </div>
               );
@@ -178,10 +211,10 @@ function Pricing() {
                       <Button
                         className="mt-8"
                         variant="default"
-                        disabled
+                        disabled={loading}
+                        onClick={() => buy("business_monthly_nok")}
                       >
-                        <LockKeyhole className="size-4" />
-                        {px(lang, "comingSoon")}
+                        {px(lang, "subscribe")}
                       </Button>
                     </>
                   ) : (
