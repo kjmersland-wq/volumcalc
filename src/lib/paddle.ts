@@ -1,4 +1,4 @@
-import { resolvePaddlePrice } from "@/utils/payments.functions";
+import { PADDLE_PRICE_IDS, type PlanKey } from "@/lib/paddle-prices";
 
 const clientToken = import.meta.env["VITE_PAYMENTS_CLIENT_TOKEN"];
 
@@ -40,7 +40,11 @@ export async function initializePaddle() {
   });
 }
 
-export async function getPaddlePriceId(priceId: string): Promise<string> {
-  const environment = getPaddleEnvironment();
-  return resolvePaddlePrice({ data: { priceId, environment } });
+export function getPaddlePriceId(plan: PlanKey): string {
+  if (getPaddleEnvironment() === "sandbox") {
+    throw new Error("Paddle price IDs are configured for live only");
+  }
+  const id = PADDLE_PRICE_IDS[plan];
+  if (!id) throw new Error(`Unknown plan: ${plan}`);
+  return id;
 }

@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { px } from "@/lib/pricing-i18n";
 import { useI18n } from "@/lib/i18n";
-import { approxPrice, formatApproxInline } from "@/lib/currency";
+import type { PlanKey } from "@/lib/paddle-prices";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
@@ -41,7 +41,7 @@ function Pricing() {
   const { openCheckout, loading } = usePaddleCheckout();
   const navigate = useNavigate();
 
-  const buy = async (priceId: string) => {
+  const buy = async (plan: PlanKey) => {
     if (!user) {
       toast(px(lang, "loginFirst"));
       navigate({ to: "/auth" });
@@ -49,7 +49,7 @@ function Pricing() {
     }
     try {
       await openCheckout({
-        priceId,
+        plan,
         quantity: 1,
         ...(user.email ? { customerEmail: user.email } : {}),
         customData: { userId: user.id },
@@ -64,7 +64,7 @@ function Pricing() {
   const plans = [
     {
       name: "Business",
-      priceNok: 1490 as number | null,
+      priceEur: 130 as number | null,
       priceLabel: null as string | null,
       desc: px(lang, "bizDesc"),
       features: [px(lang, "fCore"), px(lang, "fBrand"), px(lang, "fRate"), px(lang, "fEmbed")],
@@ -73,7 +73,7 @@ function Pricing() {
     },
     {
       name: "Enterprise",
-      priceNok: null,
+      priceEur: null,
       priceLabel: px(lang, "talk"),
       desc: px(lang, "entDesc"),
       features: [px(lang, "fAll"), px(lang, "fBranches"), px(lang, "fApi"), px(lang, "fContact")],
@@ -85,17 +85,17 @@ function Pricing() {
   const privatePlans = [
     {
       name: px(lang, "single"),
-      priceNok: 129,
-      priceId: "single_estimate_nok",
+      priceEur: 11,
+      plan: "single" as PlanKey,
       desc: px(lang, "oneMove"),
       features: [px(lang, "fChecklist"), px(lang, "fPdfLink"), px(lang, "fSaved")],
       featured: true,
     },
     {
       name: px(lang, "three"),
-      priceNok: 299,
-      priceId: "three_pack_nok",
-      desc: px(lang, "save", { x: formatApproxInline(88, lang) }),
+      priceEur: 25,
+      plan: "three_pack" as PlanKey,
+      desc: px(lang, "save", { x: `€${3 * 11 - 25}` }),
       features: [px(lang, "fThree"), px(lang, "fChecklist"), px(lang, "fPdfLink")],
       featured: false,
     },
@@ -119,7 +119,6 @@ function Pricing() {
           </div>
           <div className="mt-7 grid gap-6 md:grid-cols-3">
             {privatePlans.map((plan) => {
-              const price = approxPrice(plan.priceNok, lang);
               return (
                 <div
                   key={plan.name}
@@ -131,11 +130,7 @@ function Pricing() {
                 >
                   <h3 className="text-lg font-semibold">{plan.name}</h3>
                   <p className="mt-4 text-3xl font-bold">
-                    {price.prefix}
-                    {price.amount}{" "}
-                    <span className="text-base font-medium text-muted-foreground">
-                      {price.currency}
-                    </span>
+                    €{plan.priceEur}
                   </p>
                   <p className="mt-1 text-sm text-muted-foreground">{plan.desc}</p>
                   <ul className="mt-6 flex-1 space-y-2.5 text-sm">
@@ -150,7 +145,7 @@ function Pricing() {
                     className="mt-8"
                     variant={plan.featured ? "default" : "outline"}
                     disabled={loading}
-                    onClick={() => buy(plan.priceId)}
+                    onClick={() => buy(plan.plan)}
                   >
                     {px(lang, "buy")}
                   </Button>
@@ -167,8 +162,7 @@ function Pricing() {
           </div>
           <div className="mt-7 grid gap-6 md:grid-cols-2">
             {plans.map((plan) => {
-              const price = plan.priceNok !== null ? approxPrice(plan.priceNok, lang) : null;
-              return (
+                            return (
                 <div
                   key={plan.name}
                   className={cn(
@@ -183,13 +177,10 @@ function Pricing() {
                   )}
                   <h3 className="text-lg font-semibold">{plan.name}</h3>
                   <p className="mt-4 text-3xl font-bold">
-                    {price ? (
+                    {plan.priceEur !== null ? (
                       <>
-                        {price.prefix}
-                        {price.amount}
+                        €{plan.priceEur}
                         <span className="text-base font-medium text-muted-foreground">
-                          {" "}
-                          {price.currency}
                           {t("price.month")}
                         </span>
                       </>
@@ -212,7 +203,7 @@ function Pricing() {
                         className="mt-8"
                         variant="default"
                         disabled={loading}
-                        onClick={() => buy("business_monthly_nok")}
+                        onClick={() => buy("business")}
                       >
                         {px(lang, "subscribe")}
                       </Button>

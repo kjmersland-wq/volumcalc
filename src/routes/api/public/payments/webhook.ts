@@ -1,13 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { verifyWebhook, EventName, type PaddleEnv } from '@/lib/paddle.server';
+import { PRICE_CREDITS } from '@/lib/paddle-prices';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
-// Credits granted per human-readable price ID (one-time purchases).
-const PRICE_CREDITS: Record<string, number> = {
-  single_estimate_nok: 1,
-  three_pack_nok: 3,
-};
 
 // Deferred so env var availability is not assumed at module load time, and so
 // the admin client never enters the browser bundle.
@@ -59,14 +55,12 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
   }
 
   const item = items[0];
-  const priceId = item.price.importMeta?.externalId;
-  const productId = item.product.importMeta?.externalId;
+  const priceId = item.price?.id;
+  const productId = item.product?.id;
   if (!priceId || !productId) {
-    // Product/price was not created via create_product / create_price, so we
-    // have no human-readable ID to map tiers off.
-    console.warn('Skipping subscription: missing importMeta.externalId', {
-      rawPriceId: item.price.id,
-      rawProductId: item.product.id,
+    console.warn('Skipping subscription: missing price/product id', {
+      rawPriceId: item.price?.id,
+      rawProductId: item.product?.id,
     });
     return;
   }
@@ -134,10 +128,10 @@ async function handleTransactionCompleted(eventId: string, data: any, env: Paddl
   let credits = 0;
   let lookupKey: string | null = null;
   for (const item of items) {
-    const externalId = item.price?.importMeta?.externalId;
-    if (externalId && PRICE_CREDITS[externalId]) {
-      credits += PRICE_CREDITS[externalId];
-      lookupKey = externalId;
+    const paddlePriceId = item.price?.id;
+    if (paddlePriceId && PRICE_CREDITS[paddlePriceId]) {
+      credits += PRICE_CREDITS[paddlePriceId];
+      lookupKey = paddlePriceId;
     }
   }
 

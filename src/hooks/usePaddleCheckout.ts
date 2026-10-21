@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { initializePaddle, getPaddlePriceId } from "@/lib/paddle";
+import type { PlanKey } from "@/lib/paddle-prices";
 
 export function usePaddleCheckout() {
   const [loading, setLoading] = useState(false);
 
   const openCheckout = async (options: {
-    priceId: string;
+    plan: PlanKey;
     quantity: number;
     customerEmail?: string;
     customData?: Record<string, string>;
@@ -14,7 +15,7 @@ export function usePaddleCheckout() {
     setLoading(true);
     try {
       await initializePaddle();
-      const paddlePriceId = await getPaddlePriceId(options.priceId);
+      const paddlePriceId = getPaddlePriceId(options.plan);
 
       window.Paddle.Checkout.open({
         items: [{ priceId: paddlePriceId, quantity: options.quantity }],
