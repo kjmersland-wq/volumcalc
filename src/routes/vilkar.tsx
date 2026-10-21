@@ -26,7 +26,7 @@ const content: Record<"no" | "en", LegalContent> = {
     title: "Vilkår for bruk",
     intro:
       "Disse vilkårene gjelder mellom deg som bruker og KM TECH LABS (org.nr. 934 044 029), som leverer VolumCalc på volumcalc.com.",
-    updated: "Sist oppdatert 20. september 2026",
+    updated: "Sist oppdatert 21. oktober 2026",
     sections: [
       {
         heading: "Tjenesten",
@@ -52,6 +52,13 @@ const content: Record<"no" | "en", LegalContent> = {
         ],
       },
       {
+        heading: "Immaterielle rettigheter",
+        body: [
+          "KM TECH LABS beholder eierskapet til VolumCalc og alle immaterielle rettigheter til tjenestens programvare, dokumentasjon, design og merkevare. Bruk av tjenesten overfører ikke disse rettighetene til deg.",
+          "Du får en begrenset, ikke-eksklusiv og ikke-overførbar rett til å bruke tjenesten innenfor din valgte plan. Du beholder rettighetene til innholdet du selv legger inn.",
+        ],
+      },
+      {
         heading: "Konto og sikkerhet",
         body: [
           "Du er ansvarlig for å holde påloggingsinformasjonen din hemmelig og for aktivitet på kontoen din.",
@@ -62,7 +69,8 @@ const content: Record<"no" | "en", LegalContent> = {
         heading: "Priser og betaling",
         body: [
           "Priser vises i norske kroner inkludert eventuell merverdiavgift, og fremgår på prissiden før kjøp.",
-          "Betaling skjer gjennom vår betalingsleverandør. Abonnement løper til det sies opp og kan avsluttes når som helst med virkning fra neste periode.",
+          "Vår bestillingsprosess gjennomføres av vår nettbaserte forhandler Paddle.com. Paddle.com er Merchant of Record (juridisk selger ved betaling) for alle våre bestillinger. Paddle håndterer betalingsrelaterte kundeservicehenvendelser, fakturering og returer/refusjoner.",
+          "Paddles kjøpsvilkår gjelder for betaling, fakturering, avgifter, oppsigelse og refusjon: https://www.paddle.com/legal/checkout-buyer-terms. Abonnement løper til det sies opp og kan avsluttes når som helst med virkning fra neste periode.",
         ],
       },
       {
@@ -86,7 +94,7 @@ const content: Record<"no" | "en", LegalContent> = {
     title: "Terms of service",
     intro:
       "These terms apply between you and KM TECH LABS (company no. 934 044 029), which provides VolumCalc at volumcalc.com.",
-    updated: "Last updated 20 September 2026",
+    updated: "Last updated 21 October 2026",
     sections: [
       {
         heading: "The service",
@@ -112,6 +120,13 @@ const content: Record<"no" | "en", LegalContent> = {
         ],
       },
       {
+        heading: "Intellectual property",
+        body: [
+          "KM TECH LABS retains ownership of VolumCalc and all intellectual property rights in the service's software, documentation, design and branding. Using the service does not transfer these rights to you.",
+          "You receive a limited, non-exclusive, non-transferable right to use the service within your selected plan. You retain the rights to content you submit.",
+        ],
+      },
+      {
         heading: "Account and security",
         body: [
           "You are responsible for keeping your credentials confidential and for activity on your account.",
@@ -122,7 +137,8 @@ const content: Record<"no" | "en", LegalContent> = {
         heading: "Prices and payment",
         body: [
           "Prices are shown in Norwegian kroner including any VAT and are stated on the pricing page before purchase.",
-          "Payment is handled by our payment provider. Subscriptions run until cancelled and can be cancelled at any time with effect from the next period.",
+          "Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle provides all payment-related customer service inquiries and handles billing and returns/refunds.",
+          "Paddle's Buyer Terms apply to payment, billing, tax, cancellation and refund mechanics: https://www.paddle.com/legal/checkout-buyer-terms. Subscriptions run until cancelled and can be cancelled at any time with effect from the next period.",
         ],
       },
       {
