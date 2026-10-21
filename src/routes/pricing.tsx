@@ -51,7 +51,7 @@ function Pricing() {
       await openCheckout({
         priceId,
         quantity: 1,
-        customerEmail: user.email ?? undefined,
+        ...(user.email ? { customerEmail: user.email } : {}),
         customData: { userId: user.id },
         successUrl: `${window.location.origin}/dashboard?checkout=success`,
       });

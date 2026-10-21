@@ -183,6 +183,7 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
 }
 
 export const Route = createFileRoute('/api/public/payments/webhook')({
+  staticData: {},
   server: {
     handlers: {
       POST: async ({ request }) => {
