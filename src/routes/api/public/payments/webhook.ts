@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { createClient } from '@supabase/supabase-js';
 import { verifyWebhook, EventName, type PaddleEnv } from '@/lib/paddle.server';
+import type { supabaseAdmin } from '@/integrations/supabase/client.server';
 
 // Credits granted per human-readable price ID (one-time purchases).
 const PRICE_CREDITS: Record<string, number> = {
@@ -8,17 +8,15 @@ const PRICE_CREDITS: Record<string, number> = {
   three_pack_nok: 3,
 };
 
-// Defer client construction until first use so env var availability is not
-// assumed at module load time.
-let _supabase: ReturnType<typeof createClient> | null = null;
-function getSupabase() {
-  if (!_supabase) {
-    _supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+// Deferred so env var availability is not assumed at module load time, and so
+// the admin client never enters the browser bundle.
+let _admin: ReturnType<typeof supabaseAdmin> | null = null;
+async function getSupabase() {
+  if (!_admin) {
+    const mod = await import('@/integrations/supabase/client.server');
+    _admin = mod.supabaseAdmin;
   }
-  return _supabase;
+  return _admin;
 }
 
 /**
@@ -32,7 +30,8 @@ async function recordPaymentEvent(
   env: PaddleEnv,
   values: Record<string, unknown>
 ): Promise<boolean> {
-  const { data, error } = await getSupabase()
+  const supabase = await getSupabase();
+  const { data, error } = await supabase
     .from('payment_events')
     .insert({ stripe_event_id: eventId, environment: env, ...values })
     .select('id')
@@ -68,7 +67,8 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
     return;
   }
 
-  await getSupabase().from('subscriptions').upsert(
+  const supabase = await getSupabase();
+  await supabase.from('subscriptions').upsert(
     {
       user_id: userId,
       paddle_subscription_id: id,
@@ -92,7 +92,8 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
 async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
   const { id, status, currentBillingPeriod, scheduledChange } = data;
 
-  await getSupabase()
+  const supabase = await getSupabase();
+  await supabase
     .from('subscriptions')
     .update({
       status: status,
@@ -106,7 +107,8 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
 }
 
 async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
-  await getSupabase()
+  const supabase = await getSupabase();
+  await supabase
     .from('subscriptions')
     .update({
       status: 'canceled',
@@ -151,7 +153,8 @@ async function handleTransactionCompleted(eventId: string, data: any, env: Paddl
   if (!inserted) return; // duplicate delivery
 
   if (credits > 0) {
-    await getSupabase().rpc('grant_estimate_credits', {
+    const supabase = await getSupabase();
+    await supabase.rpc('grant_estimate_credits', {
       _user_id: userId,
       _credits: credits,
       _unlimited_until: null,
@@ -183,7 +186,7 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
 }
 
 export const Route = createFileRoute('/api/public/payments/webhook')({
-  staticData: {},
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {
