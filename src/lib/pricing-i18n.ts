@@ -23,11 +23,15 @@ export type PriceKey =
   | "fAll"
   | "fBranches"
   | "fApi"
-  | "fContact";
+  | "fContact"
+  | "buy"
+  | "subscribe";
 
 type Table = Record<PriceKey, string>;
 
 const en: Table = {
+  buy: "Buy now",
+  subscribe: "Subscribe",
   single: "Single estimate",
   three: "3 estimates",
   oneMove: "For one move",
@@ -53,6 +57,8 @@ const en: Table = {
 };
 
 const no: Table = {
+  buy: "Kjøp nå",
+  subscribe: "Abonner",
   single: "Én beregning",
   three: "3 beregninger",
   oneMove: "For én flytting",
@@ -78,6 +84,8 @@ const no: Table = {
 };
 
 const sv: Table = {
+  buy: "Köp nu",
+  subscribe: "Prenumerera",
   single: "En beräkning",
   three: "3 beräkningar",
   oneMove: "För en flytt",
@@ -103,6 +111,8 @@ const sv: Table = {
 };
 
 const da: Table = {
+  buy: "Køb nu",
+  subscribe: "Abonnér",
   single: "Én beregning",
   three: "3 beregninger",
   oneMove: "Til én flytning",
@@ -128,6 +138,8 @@ const da: Table = {
 };
 
 const fi: Table = {
+  buy: "Osta nyt",
+  subscribe: "Tilaa",
   single: "Yksi laskelma",
   three: "3 laskelmaa",
   oneMove: "Yhteen muuttoon",
@@ -153,6 +165,8 @@ const fi: Table = {
 };
 
 const de: Table = {
+  buy: "Jetzt kaufen",
+  subscribe: "Abonnieren",
   single: "Einzelberechnung",
   three: "3 Berechnungen",
   oneMove: "Für einen Umzug",
@@ -178,6 +192,8 @@ const de: Table = {
 };
 
 const nl: Table = {
+  buy: "Nu kopen",
+  subscribe: "Abonneren",
   single: "Eén berekening",
   three: "3 berekeningen",
   oneMove: "Voor één verhuizing",
@@ -203,6 +219,8 @@ const nl: Table = {
 };
 
 const fr: Table = {
+  buy: "Acheter",
+  subscribe: "S’abonner",
   single: "Une estimation",
   three: "3 estimations",
   oneMove: "Pour un déménagement",
@@ -228,6 +246,8 @@ const fr: Table = {
 };
 
 const pl: Table = {
+  buy: "Kup teraz",
+  subscribe: "Subskrybuj",
   single: "Jedno wyliczenie",
   three: "3 wyliczenia",
   oneMove: "Na jedną przeprowadzkę",
@@ -253,6 +273,8 @@ const pl: Table = {
 };
 
 const es: Table = {
+  buy: "Comprar",
+  subscribe: "Suscribirse",
   single: "Una estimación",
   three: "3 estimaciones",
   oneMove: "Para una mudanza",
@@ -278,6 +300,8 @@ const es: Table = {
 };
 
 const it: Table = {
+  buy: "Acquista",
+  subscribe: "Abbonati",
   single: "Una stima",
   three: "3 stime",
   oneMove: "Per un trasloco",
@@ -303,6 +327,8 @@ const it: Table = {
 };
 
 const pt: Table = {
+  buy: "Comprar",
+  subscribe: "Subscrever",
   single: "Uma estimativa",
   three: "3 estimativas",
   oneMove: "Para uma mudança",
