@@ -29,7 +29,10 @@ async function getSupabase() {
 async function recordPaymentEvent(
   eventId: string,
   env: PaddleEnv,
-  values: Database['public']['Tables']['payment_events']['Insert']
+  values: Omit<
+    Database['public']['Tables']['payment_events']['Insert'],
+    'stripe_event_id' | 'environment'
+  >
 ): Promise<boolean> {
   const supabase = await getSupabase();
   const { data, error } = await supabase
