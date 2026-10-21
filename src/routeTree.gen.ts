@@ -43,6 +43,7 @@ import { Route as DashboardAdminRouteImport } from './routes/dashboard.admin'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as EnMovingVanCalculatorRouteImport } from './routes/en.moving-van-calculator'
 import { Route as EstimateIdRouteImport } from './routes/estimate.$id'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
 const IndexRoute = IndexRouteImport.update({
@@ -215,6 +216,12 @@ const EstimateIdRoute = EstimateIdRouteImport.update({
   path: '/estimate/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
@@ -257,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
   '/estimate/$id': typeof EstimateIdRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesByTo {
@@ -293,6 +301,7 @@ export interface FileRoutesByTo {
   '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
   '/estimate/$id': typeof EstimateIdRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesById {
@@ -331,6 +340,7 @@ export interface FileRoutesById {
   '/en/moving-van-calculator': typeof EnMovingVanCalculatorRoute
   '/estimate/$id': typeof EstimateIdRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRouteTypes {
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/en/moving-van-calculator'
     | '/estimate/$id'
     | '/dashboard/'
+    | '/api/public/payments/webhook'
     | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -406,6 +417,7 @@ export interface FileRouteTypes {
     | '/en/moving-van-calculator'
     | '/estimate/$id'
     | '/dashboard'
+    | '/api/public/payments/webhook'
     | '/lovable/email/transactional/preview'
   id:
     | '__root__'
@@ -443,6 +455,7 @@ export interface FileRouteTypes {
     | '/en/moving-van-calculator'
     | '/estimate/$id'
     | '/dashboard/'
+    | '/api/public/payments/webhook'
     | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
 }
@@ -477,6 +490,7 @@ export interface RootRouteChildren {
   VilkarRoute: typeof VilkarRoute
   EnMovingVanCalculatorRoute: typeof EnMovingVanCalculatorRoute
   EstimateIdRoute: typeof EstimateIdRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
 
@@ -720,6 +734,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EstimateIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
@@ -779,6 +800,7 @@ const rootRouteChildren: RootRouteChildren = {
   VilkarRoute: VilkarRoute,
   EnMovingVanCalculatorRoute: EnMovingVanCalculatorRoute,
   EstimateIdRoute: EstimateIdRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }
 export const routeTree = rootRouteImport
