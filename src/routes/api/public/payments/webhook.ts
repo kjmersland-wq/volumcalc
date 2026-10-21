@@ -29,12 +29,12 @@ async function getSupabase() {
 async function recordPaymentEvent(
   eventId: string,
   env: PaddleEnv,
-  values: Record<string, unknown>
+  values: Database['public']['Tables']['payment_events']['Insert']
 ): Promise<boolean> {
   const supabase = await getSupabase();
   const { data, error } = await supabase
     .from('payment_events')
-    .insert({ stripe_event_id: eventId, environment: env, ...values })
+    .insert({ ...values, stripe_event_id: eventId, environment: env })
     .select('id')
     .single();
   if (error) {
@@ -158,8 +158,7 @@ async function handleTransactionCompleted(eventId: string, data: any, env: Paddl
     await supabase.rpc('grant_estimate_credits', {
       _user_id: userId,
       _credits: credits,
-      _unlimited_until: null,
-      _customer_id: data.customerId ?? null,
+      ...(data.customerId ? { _customer_id: data.customerId } : {}),
     });
   }
 }
