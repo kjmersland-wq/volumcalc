@@ -1,6 +1,5 @@
 import { PADDLE_PRICE_IDS, type PlanKey } from "@/lib/paddle-prices";
-
-const clientToken = import.meta.env["VITE_PAYMENTS_CLIENT_TOKEN"];
+import { getPaddleClientToken } from "@/lib/paddle.functions";
 
 declare global {
   interface Window {
@@ -8,42 +7,41 @@ declare global {
   }
 }
 
-// Single source of truth for which Paddle environment the client is in.
-// Derived from the token prefix so it stays correct after the build-time
-// token swap. Use this everywhere a PaddleEnv is needed on the client.
+// Only the live Paddle account is used; there is no sandbox mode.
 export function getPaddleEnvironment(): "sandbox" | "live" {
-  return clientToken?.startsWith("test_") ? "sandbox" : "live";
+  return "live";
 }
 
-let paddleInitialized = false;
+let initPromise: Promise<void> | null = null;
 
-export async function initializePaddle() {
-  if (paddleInitialized) return;
-
-  if (!clientToken) {
-    throw new Error("VITE_PAYMENTS_CLIENT_TOKEN is not set");
-  }
-
+function loadPaddleScript(): Promise<void> {
+  if (typeof window !== "undefined" && window.Paddle) return Promise.resolve();
   return new Promise<void>((resolve, reject) => {
     const script = document.createElement("script");
     script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
-    script.onload = () => {
-      // Paddle.js expects "production", not "live", for Environment.set().
-      const paddleJsEnvironment = getPaddleEnvironment() === "sandbox" ? "sandbox" : "production";
-      window.Paddle.Environment.set(paddleJsEnvironment);
-      window.Paddle.Initialize({ token: clientToken });
-      paddleInitialized = true;
-      resolve();
-    };
-    script.onerror = reject;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Paddle.js could not be loaded"));
     document.head.appendChild(script);
   });
 }
 
-export function getPaddlePriceId(plan: PlanKey): string {
-  if (getPaddleEnvironment() === "sandbox") {
-    throw new Error("Paddle price IDs are configured for live only");
+export async function initializePaddle() {
+  if (!initPromise) {
+    initPromise = (async () => {
+      const [{ token }] = await Promise.all([getPaddleClientToken(), loadPaddleScript()]);
+      // Paddle.js expects "production" for the live account.
+      window.Paddle.Environment.set("production");
+      window.Paddle.Initialize({ token });
+    })();
+    // Allow a retry after a failure instead of caching the rejected promise.
+    initPromise.catch(() => {
+      initPromise = null;
+    });
   }
+  return initPromise;
+}
+
+export function getPaddlePriceId(plan: PlanKey): string {
   const id = PADDLE_PRICE_IDS[plan];
   if (!id) throw new Error(`Unknown plan: ${plan}`);
   return id;

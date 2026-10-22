@@ -187,8 +187,8 @@ export const Route = createFileRoute('/api/public/payments/webhook')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const url = new URL(request.url);
-        const env = (url.searchParams.get('env') || 'sandbox') as PaddleEnv;
+        // Live only: the ?env= query parameter is ignored so a stale sandbox URL cannot downgrade it.
+        const env: PaddleEnv = 'live';
         try {
           await handleWebhook(request, env);
           return Response.json({ received: true });
