@@ -35,7 +35,7 @@ import {
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ShareButtons } from "@/components/ShareButtons";
-import { TopMovers } from "@/components/TopMovers";
+import { PartnerMatches } from "@/components/PartnerMatches";
 import { getMoveDetails, setMoveDetails } from "@/lib/partners.functions";
 import { QuoteRequestDialog } from "@/components/QuoteRequestDialog";
 import { useI18n, translate, SUPPORTED_LANGS, LANG_LABELS, type Lang } from "@/lib/i18n";
@@ -1049,7 +1049,7 @@ function EstimatePage() {
 
           {!businessView && shareToken && (
             <div id="send-til-firmaer" className="scroll-mt-24">
-            <TopMovers
+            <PartnerMatches
               estimateId={String(estimate.id)}
               token={shareToken}
               rt={rt}
