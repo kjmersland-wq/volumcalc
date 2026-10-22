@@ -718,7 +718,7 @@ function EstimatePage() {
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      <main className="flex-1">
+      <main className="flex-1 pb-24 print:pb-0">
         <div className="mx-auto max-w-5xl px-4 py-10">
           {company && (
             <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-muted/30 p-5">
@@ -971,6 +971,26 @@ function EstimatePage() {
                 <p className="mt-2 text-xs text-muted-foreground">{rt("ins.help")}</p>
               </fieldset>
             </section>
+          )}
+
+          {/* Sticky summary: volume, items and vehicle stay visible while scrolling. */}
+          {!businessView && (
+            <div className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 backdrop-blur">
+              <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-3 text-sm sm:px-6">
+                <span className="flex items-center gap-2 font-semibold">
+                  <Boxes className="size-4 text-primary" />
+                  {m3(gross, reportLang)}
+                </span>
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  <Package className="size-4 text-primary" />
+                  {included.length} {rt("rep.itemsWord")}
+                </span>
+                <span className="flex items-center gap-2 font-semibold">
+                  <Truck className="size-4 text-primary" />
+                  {rt(recommendVehicle(gross))}
+                </span>
+              </div>
+            </div>
           )}
 
           {/* Summary cards */}

@@ -170,3 +170,93 @@ export const getCompanyByUploadToken = createServerFn({ method: "POST" })
       .maybeSingle();
     return company ?? null;
   });
+
+// ---- Partner directory (tables from migration 20261013090000) ----------------
+// The generated Supabase types do not know these tables yet, so queries use a
+// loosely typed handle until types.ts is regenerated.
+type LooseDb = { from: (table: string) => any };
+
+const isoList = z.array(z.string().trim().regex(/^[A-Z]{2}$/)).max(40);
+
+const partnerSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().trim().min(1).max(160),
+  website: z.string().trim().max(240).optional(),
+  country_code: z.string().trim().regex(/^[A-Z]{2}$/),
+  lead_email: z.string().trim().email().max(180),
+  serves_from: isoList,
+  serves_to: isoList,
+  min_m3: z.number().min(0).max(100000).nullable(),
+  max_m3: z.number().min(0).max(100000).nullable(),
+  languages: z.array(z.string().trim().regex(/^[a-z]{2}$/)).max(12),
+  priority: z.number().int().min(0).max(10000),
+  active: z.boolean(),
+  agreed: z.boolean(),
+  agreement_note: z.string().trim().max(500).optional(),
+});
+
+export type AdminPartnerRow = {
+  id: string;
+  name: string;
+  website: string | null;
+  country_code: string;
+  lead_email: string;
+  serves_from: string[];
+  serves_to: string[];
+  min_m3: number | null;
+  max_m3: number | null;
+  languages: string[];
+  priority: number;
+  active: boolean;
+  agreed_at: string | null;
+  agreement_note: string | null;
+};
+
+/** Every partner including the private lead e-mail. Admin only. */
+export const adminListPartners = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<AdminPartnerRow[]> => {
+    await assertAdmin(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin as unknown as LooseDb;
+    const { data, error } = await db
+      .from("partners")
+      .select(
+        "id,name,website,country_code,lead_email,serves_from,serves_to,min_m3,max_m3,languages,priority,active,agreed_at,agreement_note",
+      )
+      .order("active", { ascending: false })
+      .order("priority", { ascending: true })
+      .order("name", { ascending: true });
+    if (error) throw new Error("Could not load partners");
+    return (data ?? []) as AdminPartnerRow[];
+  });
+
+/** Creates a partner, or updates it when an id is given. Admin only. */
+export const adminSavePartner = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => partnerSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin as unknown as LooseDb;
+    const { id, agreed, ...fields } = data;
+
+    // Keep the original agreement date when an already-agreed partner is edited.
+    let agreedAt: string | null = null;
+    if (agreed) {
+      const existing = id ? (await db.from("partners").select("agreed_at").eq("id", id).maybeSingle()).data : null;
+      agreedAt = existing?.agreed_at ?? new Date().toISOString();
+    }
+    const row = {
+      ...fields,
+      website: fields.website || null,
+      agreement_note: fields.agreement_note || null,
+      agreed_at: agreedAt,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = id
+      ? await db.from("partners").update(row).eq("id", id)
+      : await db.from("partners").insert(row);
+    if (error) throw new Error("Could not save the partner");
+    return { ok: true };
+  });

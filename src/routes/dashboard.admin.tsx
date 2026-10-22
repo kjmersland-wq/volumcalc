@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/lib/i18n";
 import { useIsAdmin } from "@/hooks/useCompany";
+import { AdminPartners } from "@/components/AdminPartners";
 import {
   adminCreateCompany,
   adminListCompanies,
@@ -233,6 +234,8 @@ function AdminPage() {
           <Link to="/demo">{t("admin.demoLink")}</Link>
         </Button>
       </section>
+
+      <AdminPartners enabled={isAdmin} />
     </div>
   );
 }
