@@ -1,13 +1,6 @@
-<!-- LOVABLE:BEGIN -->
-> [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
-<!-- LOVABLE:END -->
+# Notes for coding agents
 
-- Pricing displays provider-independent plans with disabled purchase controls when no payment integration exists; this prevents dead checkout links while preserving plan information.
-- Retain historical payment records and existing user credits when removing a payment integration; these are account data, not active provider connections.
+- `main` is production: Vercel builds and deploys it automatically on every push.
+- Do not rewrite published git history (no force push, no rebase/amend/squash of pushed commits).
+- Read `CLAUDE.md` for what must not be changed without an explicit request, and `README.md` for the
+  full setup checklist (Supabase, Vercel, Paddle, e-mail).

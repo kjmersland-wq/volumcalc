@@ -7,8 +7,8 @@ import { accessLine, composeMail, type Facts, type MailInput } from "@/lib/outre
  *
  * The partner tables and the new estimate columns (move_*_country,
  * transport_insurance) come from migration 20261013090000. The generated
- * Supabase types are rewritten by Lovable, so until they include the new
- * tables the queries below go through this loosely typed handle.
+ * Supabase types (supabase gen types) do not include the new tables yet, so the
+ * queries below go through this loosely typed handle until they are regenerated.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type LooseDb = { from: (table: string) => any };

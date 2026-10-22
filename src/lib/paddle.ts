@@ -7,11 +7,6 @@ declare global {
   }
 }
 
-// Only the live Paddle account is used; there is no sandbox mode.
-export function getPaddleEnvironment(): "sandbox" | "live" {
-  return "live";
-}
-
 let initPromise: Promise<void> | null = null;
 
 function loadPaddleScript(): Promise<void> {

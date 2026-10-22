@@ -11,10 +11,8 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LanguageProvider, translate, type Lang } from "@/lib/i18n";
 import { Toaster } from "@/components/ui/sonner";
-import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 // Path-segment codes used by the og-volumcalc-*.jpg filenames (see
 // language-page-meta.ts) — differ from the Lang codes for Swedish/Danish,
@@ -75,7 +73,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    console.error("Root error boundary caught:", error);
   }, [error]);
 
   return (
@@ -194,7 +192,6 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <PaymentTestModeBanner />
         {children}
         <Scripts />
       </body>
