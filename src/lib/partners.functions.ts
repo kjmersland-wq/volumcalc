@@ -95,7 +95,7 @@ async function eligiblePartners(db: LooseDb, estimate: EstimateRow): Promise<Par
 }
 
 async function sentPartnerIds(db: LooseDb, estimateId: string): Promise<Set<string>> {
-  const { data } = await db.from("quote_requests").select("partner_id").eq("estimate_id", estimateId).eq("status", "sent");
+  const { data } = await db.from("partner_quote_requests").select("partner_id").eq("estimate_id", estimateId).eq("status", "sent");
   return new Set(((data ?? []) as { partner_id: string }[]).map((r) => r.partner_id));
 }
 
@@ -272,7 +272,7 @@ export const sendQuoteRequests = createServerFn({ method: "POST" })
     }
 
     if (log.length) {
-      const { error } = await db.from("quote_requests").upsert(log, { onConflict: "estimate_id,partner_id" });
+      const { error } = await db.from("partner_quote_requests").upsert(log, { onConflict: "estimate_id,partner_id" });
       if (error) console.error("Could not log quote requests", error);
     }
     return { sent: sentTo, failed };

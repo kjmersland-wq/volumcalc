@@ -31,9 +31,10 @@ CREATE POLICY "Admins manage partners"
   USING (public.has_role(auth.uid(), 'admin'))
   WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
--- One row per quote request sent to a partner: audit trail, consent record and
+-- One row per quote request sent to a partner (separate from public.quote_requests,
+-- which holds customer requests sent to a moving company account): audit trail, consent record and
 -- protection against sending the same report to the same partner twice.
-CREATE TABLE public.quote_requests (
+CREATE TABLE public.partner_quote_requests (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   estimate_id uuid NOT NULL REFERENCES public.estimates(id) ON DELETE CASCADE,
   partner_id uuid NOT NULL REFERENCES public.partners(id) ON DELETE CASCADE,
@@ -45,13 +46,13 @@ CREATE TABLE public.quote_requests (
   UNIQUE (estimate_id, partner_id)
 );
 
-CREATE INDEX quote_requests_estimate_idx ON public.quote_requests (estimate_id);
+CREATE INDEX partner_quote_requests_estimate_idx ON public.partner_quote_requests (estimate_id);
 
-GRANT ALL ON public.quote_requests TO service_role;
-GRANT SELECT ON public.quote_requests TO authenticated;
-ALTER TABLE public.quote_requests ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Admins read quote requests"
-  ON public.quote_requests FOR SELECT TO authenticated
+GRANT ALL ON public.partner_quote_requests TO service_role;
+GRANT SELECT ON public.partner_quote_requests TO authenticated;
+ALTER TABLE public.partner_quote_requests ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admins read partner quote requests"
+  ON public.partner_quote_requests FOR SELECT TO authenticated
   USING (public.has_role(auth.uid(), 'admin'));
 
 -- Route and insurance choice stored on the estimate itself so they follow the
