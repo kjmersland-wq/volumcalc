@@ -119,7 +119,34 @@ export interface SmtpMessage {
   text: string;
 }
 
+/**
+ * Sends through Resend's HTTP API (no SMTP, no extra package). Used whenever RESEND_API_KEY is set.
+ * RESEND_FROM must be an address on a domain verified in Resend; without it Resend's test sender
+ * (onboarding@resend.dev) is used, which can only deliver to the Resend account's own e-mail.
+ */
+async function sendViaResend(rawMessage: SmtpMessage): Promise<void> {
+  const apiKey = process.env["RESEND_API_KEY"];
+  if (!apiKey) throw new Error("RESEND_API_KEY is not configured");
+  const fromAddress = process.env["RESEND_FROM"] || "onboarding@resend.dev";
+  const fromName = sanitizeHeaderValue(rawMessage.fromName ?? "VolumCalc").replace(/["<>]/g, "");
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: `${fromName} <${fromAddress}>`,
+      to: [sanitizeHeaderValue(rawMessage.to)],
+      ...(rawMessage.replyTo ? { reply_to: sanitizeHeaderValue(rawMessage.replyTo) } : {}),
+      subject: sanitizeHeaderValue(rawMessage.subject),
+      text: rawMessage.text,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Resend failed: ${response.status} ${(await response.text()).slice(0, 200)}`);
+  }
+}
+
 export async function sendMailViaSmtp(rawMessage: SmtpMessage): Promise<void> {
+  if (process.env["RESEND_API_KEY"]) return sendViaResend(rawMessage);
   const message: SmtpMessage = {
     from: sanitizeHeaderValue(rawMessage.from),
     ...(rawMessage.fromName !== undefined ? { fromName: sanitizeHeaderValue(rawMessage.fromName) } : {}),
