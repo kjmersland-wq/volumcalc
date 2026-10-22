@@ -13,6 +13,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { beregn, DEFAULT_STOWAGE_FACTOR, type CalcChoices, type CalcDatabase } from "@/lib/move-calc";
 import { MOVE_DATABASE, PREDEFINED_ROOMS, type RoomDef } from "@/lib/move-data";
 import { createEstimate } from "@/lib/estimates.functions";
+import { countryOptions } from "@/lib/countries";
 import { USER_VERIFIED_SECURITY_LABEL } from "@/lib/volume-database";
 import { recommendVehicle } from "@/lib/volume";
 import { dimensionVolumeM3, type ItemStatus } from "@/lib/item-status";
@@ -85,6 +86,8 @@ type Form = {
   hentEtasje: string;
   hentHeis: boolean;
   hentBaer: string;
+  fraLand: string;
+  tilLand: string;
   hentMobil: string;
   lever: string;
   leverEtasje: string;
@@ -103,6 +106,8 @@ const emptyForm: Form = {
   hentEtasje: "",
   hentHeis: false,
   hentBaer: "",
+  fraLand: "",
+  tilLand: "",
   hentMobil: "",
   lever: "",
   leverEtasje: "",
@@ -432,6 +437,8 @@ function CalculatorPage() {
           ...(form.telefon.trim() ? { customer_phone: form.telefon.trim() } : {}),
           ...(emailOk ? { customer_email: form.epost.trim() } : {}),
           ...(form.dato ? { move_date: form.dato } : {}),
+          ...(form.fraLand ? { from_country: form.fraLand } : {}),
+          ...(form.tilLand ? { to_country: form.tilLand } : {}),
           ...(noteParts.length ? { notes: noteParts.join("\n") } : {}),
           from: {
             address: form.hent.trim(),
@@ -1075,6 +1082,35 @@ function CalculatorPage() {
                   onCarry={(v) => setField("leverBaer", v)}
                   onMobile={(v) => setField("leverMobil", v)}
                 />
+
+                <fieldset className="space-y-3">
+                  <legend className="mb-1 text-sm font-semibold text-muted-foreground">
+                    {lang === "no" ? "Hvilke land flytter du mellom?" : "Which countries are you moving between?"}
+                  </legend>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {(
+                      [
+                        ["fraLand", lang === "no" ? "Fra land" : "From country"],
+                        ["tilLand", lang === "no" ? "Til land" : "To country"],
+                      ] as const
+                    ).map(([key, label]) => (
+                      <Field key={key} T={T} label={label}>
+                        <select
+                          className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                          value={form[key]}
+                          onChange={(e) => setField(key, e.target.value)}
+                        >
+                          <option value="">{lang === "no" ? "Velg land" : "Choose country"}</option>
+                          {countryOptions(lang).map((c) => (
+                            <option key={c.code} value={c.code}>
+                              {c.name}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                    ))}
+                  </div>
+                </fieldset>
 
                 <fieldset className="space-y-3">
                   <legend className="mb-1 text-sm font-semibold text-muted-foreground">{T("dateLegend")}</legend>

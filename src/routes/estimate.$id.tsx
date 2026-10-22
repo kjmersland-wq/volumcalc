@@ -35,6 +35,8 @@ import {
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ShareButtons } from "@/components/ShareButtons";
+import { PartnerMatches } from "@/components/PartnerMatches";
+import { getMoveDetails, setMoveDetails } from "@/lib/partners.functions";
 import { QuoteRequestDialog } from "@/components/QuoteRequestDialog";
 import { useI18n, translate, SUPPORTED_LANGS, LANG_LABELS, type Lang } from "@/lib/i18n";
 import { reportLangs } from "@/lib/report-langs";
@@ -179,6 +181,9 @@ function EstimatePage() {
   // Kept in the browser only: no backend column exists yet. It is printed in the
   // report/PDF and added to the e-mail text sent to moving companies.
   const [insurance, setInsurance] = useState<boolean>(true);
+  const [partnersOff, setPartnersOff] = useState(false);
+  const loadMoveDetails = useServerFn(getMoveDetails);
+  const saveMoveDetails = useServerFn(setMoveDetails);
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(`vc-insurance-${id}`);
@@ -186,13 +191,23 @@ function EstimatePage() {
     } catch {
       /* storage unavailable */
     }
-  }, [id]);
+    // The estimate row is the source of truth once the migration is live.
+    if (!token) return;
+    loadMoveDetails({ data: { estimateId: id, token } })
+      .then((details) => {
+        if (details.transportInsurance !== null) setInsurance(details.transportInsurance);
+      })
+      .catch(() => undefined);
+  }, [id, token]);
   function changeInsurance(value: boolean) {
     setInsurance(value);
     try {
       window.localStorage.setItem(`vc-insurance-${id}`, value ? "yes" : "no");
     } catch {
       /* storage unavailable */
+    }
+    if (token) {
+      saveMoveDetails({ data: { estimateId: id, token, transportInsurance: value } }).catch(() => undefined);
     }
   }
   useEffect(() => {
@@ -1014,6 +1029,17 @@ function EstimatePage() {
 
           {!businessView && shareToken && (
             <div id="send-til-firmaer" className="scroll-mt-24">
+            <PartnerMatches
+              estimateId={String(estimate.id)}
+              token={shareToken}
+              rt={rt}
+              lang={reportLang}
+              defaultName={String(estimate.customer_name ?? "")}
+              defaultEmail={String((estimate as Record<string, unknown>)["customer_email"] ?? "")}
+              onUnavailable={() => setPartnersOff(true)}
+            />
+            <details className="no-print mt-6" open={partnersOff}>
+              <summary className="cursor-pointer text-sm font-medium text-primary">{rt("pm.other")}</summary>
             <MoverOutreach
               estimateId={String(estimate.id)}
               token={shareToken}
@@ -1031,6 +1057,7 @@ function EstimatePage() {
                   }
                 : {})}
             />
+            </details>
             </div>
           )}
 
