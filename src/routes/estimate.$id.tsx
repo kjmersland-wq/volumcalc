@@ -176,6 +176,25 @@ function EstimatePage() {
   const [includeUnpacking, setIncludeUnpacking] = useState(false);
   // Whether the time estimate is shown at all (report, PDF and mover e-mail). Remembered per report in this browser.
   const [shareTime, setShareTime] = useState(true);
+  // Kept in the browser only: no backend column exists yet. It is printed in the
+  // report/PDF and added to the e-mail text sent to moving companies.
+  const [insurance, setInsurance] = useState<boolean>(true);
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(`vc-insurance-${id}`);
+      if (saved !== null) setInsurance(saved === "yes");
+    } catch {
+      /* storage unavailable */
+    }
+  }, [id]);
+  function changeInsurance(value: boolean) {
+    setInsurance(value);
+    try {
+      window.localStorage.setItem(`vc-insurance-${id}`, value ? "yes" : "no");
+    } catch {
+      /* storage unavailable */
+    }
+  }
   useEffect(() => {
     try {
       if (window.localStorage.getItem(`volumcalc.shareTime.${id}`) === "0") setShareTime(false);
@@ -886,25 +905,56 @@ function EstimatePage() {
             <section className="no-print mt-6 rounded-xl border border-primary/30 bg-primary/5 p-5">
               <h2 className="text-lg font-bold">{rt("next.title")}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{rt("next.sub")}</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button
-                  size="lg"
-                  onClick={() =>
-                    document.getElementById("send-til-firmaer")?.scrollIntoView({ behavior: "smooth", block: "start" })
-                  }
-                >
-                  <Send className="size-4" />
-                  {rt("next.send")}
-                </Button>
-                <Button size="lg" variant="outline" onClick={() => printIn(pdfLang)}>
-                  <Download className="size-4" />
-                  {rt("next.pdf")}
-                </Button>
-                <Button size="lg" variant="outline" onClick={copySecretLink}>
-                  <Link2 className="size-4" />
-                  {rt("next.link")}
-                </Button>
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="flex flex-col gap-1.5">
+                  <Button
+                    size="lg"
+                    onClick={() =>
+                      document.getElementById("send-til-firmaer")?.scrollIntoView({ behavior: "smooth", block: "start" })
+                    }
+                  >
+                    <Send className="size-4" />
+                    {rt("next.send")}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">{rt("next.send.d")}</p>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Button size="lg" variant="outline" onClick={() => printIn(pdfLang)}>
+                    <Download className="size-4" />
+                    {rt("next.pdf")}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">{rt("next.pdf.d")}</p>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Button size="lg" variant="outline" onClick={copySecretLink}>
+                    <Link2 className="size-4" />
+                    {rt("next.link")}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">{rt("next.link.d")}</p>
+                </div>
               </div>
+              <fieldset className="mt-5 border-t border-border pt-4">
+                <legend className="sr-only">{rt("ins.title")}</legend>
+                <p className="text-sm font-semibold">{rt("ins.title")}</p>
+                <div className="mt-2 flex gap-2">
+                  {([true, false] as const).map((value) => (
+                    <button
+                      key={String(value)}
+                      type="button"
+                      aria-pressed={insurance === value}
+                      onClick={() => changeInsurance(value)}
+                      className={`rounded-lg border px-4 py-1.5 text-sm font-medium transition-colors ${
+                        insurance === value
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {rt(value ? "ins.yes" : "ins.no")}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">{rt("ins.help")}</p>
+              </fieldset>
             </section>
           )}
 
@@ -940,6 +990,9 @@ function EstimatePage() {
                 </p>
               )}
               {!businessView && (
+                <p className="mt-1 text-xs font-medium">{rt(insurance ? "ins.line.yes" : "ins.line.no")}</p>
+              )}
+              {!businessView && (
                 <p className="mt-1 text-xs text-muted-foreground">
                   {rt("rep.storage")} {storageUnitM2(gross)} m²
                 </p>
@@ -966,6 +1019,7 @@ function EstimatePage() {
               token={shareToken}
               rt={rt}
               defaultLang={reportLang}
+              insurance={insurance}
               {...(shareTime
                 ? {
                     time: {

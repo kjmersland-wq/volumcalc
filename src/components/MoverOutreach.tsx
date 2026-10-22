@@ -24,6 +24,8 @@ type Props = {
   rt: (key: string) => string;
   /** Language the report is shown in; used as the e-mail's starting language. */
   defaultLang?: string;
+  /** Customer's transport insurance choice; prepended to the e-mail text. */
+  insurance?: boolean;
   /** Time estimate from the report, included in the e-mail when present. */
   time?: { crew: number; total: number; low: number; high: number };
 };
@@ -35,8 +37,20 @@ const MAIL_LANGS = [
 ] as const;
 type MailLang = (typeof MAIL_LANGS)[number]["value"];
 
+function insuranceLine(lang: MailLang, insurance: boolean | undefined): string {
+  if (insurance === undefined) return "";
+  const text = {
+    no: insurance ? "Transportforsikring ønskes inkludert i tilbudet." : "Transportforsikring er ikke ønsket.",
+    en: insurance ? "Please include transport insurance in the quote." : "Transport insurance is not wanted.",
+    pl: insurance
+      ? "Prosimy o uwzględnienie ubezpieczenia transportu w ofercie."
+      : "Ubezpieczenie transportu nie jest wymagane.",
+  } as const;
+  return text[lang];
+}
+
 /** Catalogue of movers that accept tenders + email delivery of the report. */
-export function MoverOutreach({ estimateId, token, rt, defaultLang, time }: Props) {
+export function MoverOutreach({ estimateId, token, rt, defaultLang, insurance, time }: Props) {
   const send = useServerFn(sendEstimateToMovers);
   const [country, setCountry] = useState("all");
   const [rows, setRows] = useState<Row[]>([]);
@@ -73,7 +87,7 @@ export function MoverOutreach({ estimateId, token, rt, defaultLang, time }: Prop
           recipients,
           replyTo: replyTo.trim(),
           senderName: name.trim(),
-          message,
+          message: [insuranceLine(mailLang, insurance), message].filter(Boolean).join("\n\n"),
           reportUrl,
           lang: mailLang,
           ...(time ? { time } : {}),
