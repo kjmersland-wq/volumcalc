@@ -68,10 +68,15 @@ type ImportRow = {
   languages: string[];
 };
 
+// Country-code domains of the route countries, used when a line only has a name and an e-mail.
+const TLD_COUNTRY: Record<string, string> = { uk: "GB" };
+for (const code of ROUTE_COUNTRIES) TLD_COUNTRY[code.toLowerCase()] = code;
+
 /**
  * One partner per line: name; e-mail; country; picks up in; delivers to; min m3; max m3; languages.
- * Everything after the country is optional. Empty "picks up in" means the home country,
- * empty "delivers to" means every route country.
+ * Only the name and the e-mail are required. A missing country is taken from the e-mail's
+ * domain (.no, .pl, .de …). Empty "picks up in" means the home country, empty "delivers to"
+ * means every route country.
  */
 function parseImport(text: string): { rows: ImportRow[]; bad: number } {
   const rows: ImportRow[] = [];
@@ -81,7 +86,8 @@ function parseImport(text: string): { rows: ImportRow[]; bad: number } {
     if (!line || line.startsWith("#")) continue;
     const cols = line.split(line.includes(";") ? ";" : ",").map((c) => c.trim());
     const [name = "", email = "", country = "", from = "", to = "", min = "", max = "", langs = ""] = cols;
-    const code = country.toUpperCase();
+    const tld = email.split(".").pop()?.toLowerCase() ?? "";
+    const code = (country || TLD_COUNTRY[tld] || "").toUpperCase();
     if (!name || !/^\S+@\S+\.\S+$/.test(email) || !/^[A-Z]{2}$/.test(code)) {
       bad += 1;
       continue;
@@ -252,13 +258,13 @@ export function AdminPartners({ enabled }: { enabled: boolean }) {
         <h3 className="text-sm font-semibold">{no ? "Importer flere partnere" : "Import several partners"}</h3>
         <p className="mt-1 text-xs text-muted-foreground">
           {no
-            ? "Én partner per linje: navn; e-post; land; henter fra; leverer til; min m³; maks m³; språk. Alt etter land er valgfritt (tomt «henter fra» = hjemlandet, tomt «leverer til» = alle land). Legg bare inn firmaer og adresser du har lov til å bruke."
-            : "One partner per line: name; e-mail; country; picks up in; delivers to; min m³; max m³; languages. Everything after the country is optional (empty pick-up = home country, empty delivery = all countries). Only add companies and addresses you may use."}
+            ? "Én partner per linje. Du trenger bare navn og e-post: «Firmanavn; epost@firma.no». Landet hentes fra e-postens endelse (.no, .pl, .de …), eller skriv det som tredje kolonne. Valgfritt etterpå: henter fra; leverer til; min m³; maks m³; språk (tomt = hjemlandet og alle land). Legg bare inn firmaer og adresser du har lov til å bruke."
+            : "One partner per line. Only a name and an e-mail are needed: “Company name; mail@company.com”. The country is taken from the e-mail's ending (.no, .pl, .de …), or add it as a third column. Optional after that: picks up in; delivers to; min m³; max m³; languages (empty = home country and all countries). Only add companies and addresses you may use."}
         </p>
         <Textarea
           rows={5}
           className="mt-3 font-mono text-xs"
-          placeholder="Eksempel AS; post@eksempel.no; NO; NO,SE; PL,DE,NL; 5; 80; no,en"
+          placeholder="Eksempel AS; post@eksempel.no"
           value={importText}
           onChange={(e) => setImportText(e.target.value)}
         />
@@ -279,8 +285,8 @@ export function AdminPartners({ enabled }: { enabled: boolean }) {
           {parsed.bad > 0 && (
             <span className="text-xs text-warning-foreground">
               {no
-                ? `${parsed.bad} linjer ble ignorert (mangler navn, e-post eller landkode)`
-                : `${parsed.bad} lines skipped (missing name, e-mail or country code)`}
+                ? `${parsed.bad} linjer ble ignorert (mangler navn, e-post eller land)`
+                : `${parsed.bad} lines skipped (missing name, e-mail or country)`}
             </span>
           )}
         </div>
