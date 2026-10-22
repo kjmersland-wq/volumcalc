@@ -1,4 +1,4 @@
-import { ListChecks, Truck, Boxes, FileText, Scale, Palette, ArrowRight, Check, Lock, ScanSearch, Trash2 } from "lucide-react";
+import { ListChecks, MapPin, Send, ArrowRight, Check, Lock, ScanSearch, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -13,15 +13,8 @@ export function LandingPage() {
 
   const steps = [
     { icon: ListChecks, title: t("how.1t"), body: t("how.1d") },
-    { icon: Truck, title: t("how.2t"), body: t("how.2d") },
-    { icon: FileText, title: t("how.3t"), body: t("how.3d") },
-  ];
-
-  const features = [
-    { icon: Boxes, title: t("feat.1t"), body: t("feat.1d") },
-    { icon: Scale, title: t("feat.2t"), body: t("feat.2d") },
-    { icon: FileText, title: t("feat.3t"), body: t("feat.3d") },
-    { icon: Palette, title: t("feat.4t"), body: t("feat.4d") },
+    { icon: MapPin, title: t("how.2t"), body: t("how.2d") },
+    { icon: Send, title: t("how.3t"), body: t("how.3d") },
   ];
 
   return (
@@ -49,15 +42,12 @@ export function LandingPage() {
                     <ArrowRight className="size-4" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline">
-                  <Link to="/auth">{t("hero.cta2")}</Link>
-                </Button>
               </div>
               <dl className="mt-10 grid max-w-md grid-cols-3 gap-4">
                 {[
-                  { k: "10×", v: t("hero.stat1") },
-                  { k: "120+", v: t("hero.stat2") },
-                  { k: "−70 %", v: t("hero.stat3") },
+                  { k: "5", v: t("hero.s1") },
+                  { k: "120+", v: t("hero.s2") },
+                  { k: "12", v: t("hero.s3") },
                 ].map((s) => (
                   <div key={s.k}>
                     <dt className="text-2xl font-bold text-primary">{s.k}</dt>
@@ -104,32 +94,13 @@ export function LandingPage() {
 
         <LandingShareButtons />
 
-        <section className="bg-muted/40 py-20">
-          <div className="mx-auto max-w-6xl px-4">
-            <h2 className="text-3xl font-bold sm:text-4xl">{t("feat.title")}</h2>
-            <div className="mt-10 grid gap-6 sm:grid-cols-2">
-              {features.map((f) => (
-                <div key={f.title} className="card-soft flex gap-4 p-6">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-                    <f.icon className="size-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{f.title}</h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section className="mx-auto max-w-6xl px-4 py-20">
           <div className="card-soft flex flex-col items-start gap-6 overflow-hidden p-10 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-2xl font-bold sm:text-3xl">{t("cta.title")}</h2>
-              <p className="mt-2 text-muted-foreground">{t("cta.sub")}</p>
+              <h2 className="text-2xl font-bold sm:text-3xl">{t("cta.p.title")}</h2>
+              <p className="mt-2 text-muted-foreground">{t("cta.p.sub")}</p>
               <ul className="mt-4 space-y-1.5 text-sm text-muted-foreground">
-                {[t("feat.1t"), t("feat.3t"), t("feat.4t")].map((item) => (
+                {[t("how.1t"), t("how.2t"), t("how.3t")].map((item) => (
                   <li key={item} className="flex items-center gap-2">
                     <Check className="size-4 text-success" />
                     {item}
@@ -138,8 +109,8 @@ export function LandingPage() {
               </ul>
             </div>
             <Button asChild size="lg">
-              <Link to="/auth">
-                {t("nav.tryFree")}
+              <Link to="/upload">
+                {t("hero.cta")}
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
@@ -167,22 +138,13 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 py-20">
-          <div className="card-soft flex flex-col items-start gap-6 p-10 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-2xl font-bold sm:text-3xl">{t("agency.title")}</h2>
-              <p className="mt-2 text-muted-foreground">{t("agency.sub")}</p>
-              <ul className="mt-4 space-y-1.5 text-sm text-muted-foreground">
-                {[t("agency.b1"), t("agency.b2"), t("agency.b3")].map((item) => (
-                  <li key={item} className="flex items-start gap-2">
-                    <Check className="mt-0.5 size-4 shrink-0 text-success" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/pricing">
+        <section className="mx-auto max-w-6xl px-4 pb-12">
+          <div className="flex flex-col items-start justify-between gap-3 rounded-xl border border-border bg-muted/30 px-5 py-4 sm:flex-row sm:items-center">
+            <p className="text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">{t("agency.strip")}</span> {t("agency.sub")}
+            </p>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/for-flyttebyraer">
                 {t("agency.cta")}
                 <ArrowRight className="size-4" />
               </Link>

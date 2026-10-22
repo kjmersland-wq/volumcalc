@@ -7,6 +7,7 @@ import {
   Check,
   Download,
   Link2,
+  Send,
   Loader2,
   Minus,
   Package,
@@ -881,6 +882,32 @@ function EstimatePage() {
             </div>
           )}
 
+          {!businessView && shareToken && (
+            <section className="no-print mt-6 rounded-xl border border-primary/30 bg-primary/5 p-5">
+              <h2 className="text-lg font-bold">{rt("next.title")}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{rt("next.sub")}</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button
+                  size="lg"
+                  onClick={() =>
+                    document.getElementById("send-til-firmaer")?.scrollIntoView({ behavior: "smooth", block: "start" })
+                  }
+                >
+                  <Send className="size-4" />
+                  {rt("next.send")}
+                </Button>
+                <Button size="lg" variant="outline" onClick={() => printIn(pdfLang)}>
+                  <Download className="size-4" />
+                  {rt("next.pdf")}
+                </Button>
+                <Button size="lg" variant="outline" onClick={copySecretLink}>
+                  <Link2 className="size-4" />
+                  {rt("next.link")}
+                </Button>
+              </div>
+            </section>
+          )}
+
           {/* Summary cards */}
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             <div className="card-soft p-6">
@@ -932,6 +959,27 @@ function EstimatePage() {
             </div>
           </div>
 
+          {!businessView && shareToken && (
+            <div id="send-til-firmaer" className="scroll-mt-24">
+            <MoverOutreach
+              estimateId={String(estimate.id)}
+              token={shareToken}
+              rt={rt}
+              defaultLang={reportLang}
+              {...(shareTime
+                ? {
+                    time: {
+                      crew: moveTime.crew,
+                      total: Math.round(moveTime.total),
+                      low: Math.round(moveTime.low),
+                      high: Math.round(moveTime.high),
+                    },
+                  }
+                : {})}
+            />
+            </div>
+          )}
+
           {canEdit && (
             <div className="no-print mt-6 flex items-center gap-2">
               <Switch id="show-time" checked={shareTime} onCheckedChange={changeShareTime} />
@@ -971,25 +1019,6 @@ function EstimatePage() {
                         move_to: value.to || null,
                         move_distance_km: value.distanceKm || null,
                       }),
-                  }
-                : {})}
-            />
-          )}
-
-          {!businessView && shareToken && (
-            <MoverOutreach
-              estimateId={String(estimate.id)}
-              token={shareToken}
-              rt={rt}
-              defaultLang={reportLang}
-              {...(shareTime
-                ? {
-                    time: {
-                      crew: moveTime.crew,
-                      total: Math.round(moveTime.total),
-                      low: Math.round(moveTime.low),
-                      high: Math.round(moveTime.high),
-                    },
                   }
                 : {})}
             />

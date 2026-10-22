@@ -546,11 +546,12 @@ function CalculatorPage() {
         <div className="print:hidden">
           <h1 className="text-2xl font-bold sm:text-3xl">{T("title")}</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{T("intro")}</p>
-          <ol className="mt-5 flex flex-wrap gap-2 text-sm font-medium">
-            {[T("step1"), T("step2")].map((label, i) => (
+          <ol className="mt-5 flex flex-wrap items-center gap-2 text-sm font-medium" aria-label="Progress">
+            {[T("step1"), T("step2"), lang === "no" ? "Resultat" : "Result"].map((label, i) => (
               <li
                 key={label}
-                className={`rounded-full px-3 py-1 ${step === i + 1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                aria-current={step === i + 1 ? "step" : undefined}
+                className={`rounded-full px-3 py-1 ${step === i + 1 ? "bg-primary text-primary-foreground" : step > i + 1 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
               >
                 {i + 1}. {label}
               </li>

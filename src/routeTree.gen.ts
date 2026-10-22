@@ -21,6 +21,7 @@ import { Route as DkRouteImport } from './routes/dk'
 import { Route as EsRouteImport } from './routes/es'
 import { Route as FiRouteImport } from './routes/fi'
 import { Route as FlyttebilKalkulatorRouteImport } from './routes/flyttebil-kalkulator'
+import { Route as ForFlyttebyraerRouteImport } from './routes/for-flyttebyraer'
 import { Route as FrRouteImport } from './routes/fr'
 import { Route as HjelpRouteImport } from './routes/hjelp'
 import { Route as ItRouteImport } from './routes/it'
@@ -104,6 +105,11 @@ const FiRoute = FiRouteImport.update({
 const FlyttebilKalkulatorRoute = FlyttebilKalkulatorRouteImport.update({
   id: '/flyttebil-kalkulator',
   path: '/flyttebil-kalkulator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForFlyttebyraerRoute = ForFlyttebyraerRouteImport.update({
+  id: '/for-flyttebyraer',
+  path: '/for-flyttebyraer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FrRoute = FrRouteImport.update({
@@ -242,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/es': typeof EsRoute
   '/fi': typeof FiRoute
   '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
+  '/for-flyttebyraer': typeof ForFlyttebyraerRoute
   '/fr': typeof FrRoute
   '/hjelp': typeof HjelpRoute
   '/it': typeof ItRoute
@@ -279,6 +286,7 @@ export interface FileRoutesByTo {
   '/es': typeof EsRoute
   '/fi': typeof FiRoute
   '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
+  '/for-flyttebyraer': typeof ForFlyttebyraerRoute
   '/fr': typeof FrRoute
   '/hjelp': typeof HjelpRoute
   '/it': typeof ItRoute
@@ -318,6 +326,7 @@ export interface FileRoutesById {
   '/es': typeof EsRoute
   '/fi': typeof FiRoute
   '/flyttebil-kalkulator': typeof FlyttebilKalkulatorRoute
+  '/for-flyttebyraer': typeof ForFlyttebyraerRoute
   '/fr': typeof FrRoute
   '/hjelp': typeof HjelpRoute
   '/it': typeof ItRoute
@@ -358,6 +367,7 @@ export interface FileRouteTypes {
     | '/es'
     | '/fi'
     | '/flyttebil-kalkulator'
+    | '/for-flyttebyraer'
     | '/fr'
     | '/hjelp'
     | '/it'
@@ -395,6 +405,7 @@ export interface FileRouteTypes {
     | '/es'
     | '/fi'
     | '/flyttebil-kalkulator'
+    | '/for-flyttebyraer'
     | '/fr'
     | '/hjelp'
     | '/it'
@@ -433,6 +444,7 @@ export interface FileRouteTypes {
     | '/es'
     | '/fi'
     | '/flyttebil-kalkulator'
+    | '/for-flyttebyraer'
     | '/fr'
     | '/hjelp'
     | '/it'
@@ -472,6 +484,7 @@ export interface RootRouteChildren {
   EsRoute: typeof EsRoute
   FiRoute: typeof FiRoute
   FlyttebilKalkulatorRoute: typeof FlyttebilKalkulatorRoute
+  ForFlyttebyraerRoute: typeof ForFlyttebyraerRoute
   FrRoute: typeof FrRoute
   HjelpRoute: typeof HjelpRoute
   ItRoute: typeof ItRoute
@@ -578,6 +591,13 @@ declare module '@tanstack/react-router' {
       path: '/flyttebil-kalkulator'
       fullPath: '/flyttebil-kalkulator'
       preLoaderRoute: typeof FlyttebilKalkulatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-flyttebyraer': {
+      id: '/for-flyttebyraer'
+      path: '/for-flyttebyraer'
+      fullPath: '/for-flyttebyraer'
+      preLoaderRoute: typeof ForFlyttebyraerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fr': {
@@ -782,6 +802,7 @@ const rootRouteChildren: RootRouteChildren = {
   EsRoute: EsRoute,
   FiRoute: FiRoute,
   FlyttebilKalkulatorRoute: FlyttebilKalkulatorRoute,
+  ForFlyttebyraerRoute: ForFlyttebyraerRoute,
   FrRoute: FrRoute,
   HjelpRoute: HjelpRoute,
   ItRoute: ItRoute,

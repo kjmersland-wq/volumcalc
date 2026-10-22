@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Check, UserRound, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,11 @@ function Pricing() {
   const { user } = useAuth();
   const { openCheckout, loading } = usePaddleCheckout();
   const navigate = useNavigate();
+  const [tab, setTab] = useState<"private" | "business">("private");
+
+  useEffect(() => {
+    if (window.location.hash === "#business") setTab("business");
+  }, []);
 
   const buy = async (plan: PlanKey) => {
     if (!user) {
@@ -111,6 +117,32 @@ function Pricing() {
         </section>
 
         <section className="mx-auto max-w-6xl px-4 py-16">
+          <div role="tablist" className="mx-auto mb-10 flex w-fit gap-1 rounded-xl bg-muted p-1">
+            {(
+              [
+                { key: "private", label: t("price.private"), icon: UserRound },
+                { key: "business", label: t("price.business"), icon: Building2 },
+              ] as const
+            ).map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={tab === key}
+                onClick={() => setTab(key)}
+                className={cn(
+                  "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                  tab === key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon className="size-4" />
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {tab === "private" && (
+            <>
           <div className="flex items-center gap-3">
             <span className="flex size-10 items-center justify-center rounded-lg bg-primary-soft text-primary">
               <UserRound className="size-5" />
@@ -154,7 +186,12 @@ function Pricing() {
             })}
           </div>
 
-          <div className="mt-20 flex items-center gap-3 border-t border-border pt-16">
+            </>
+          )}
+
+          {tab === "business" && (
+            <>
+          <div className="flex items-center gap-3">
             <span className="flex size-10 items-center justify-center rounded-lg bg-primary-soft text-primary">
               <Building2 className="size-5" />
             </span>
@@ -217,6 +254,8 @@ function Pricing() {
               );
             })}
           </div>
+            </>
+          )}
         </section>
       </main>
       <SiteFooter />

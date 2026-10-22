@@ -15,9 +15,10 @@ export function SiteHeader() {
   const { data: company } = useCompany();
   const [menuOpen, setMenuOpen] = useState(false);
   const navLinks = [
+    { to: "/upload", label: t("nav.calc") },
     { to: "/pricing", label: t("nav.pricing") },
     { to: "/hjelp", label: t("nav.help") },
-    { to: "/contact", label: t("nav.contact") },
+    { to: "/for-flyttebyraer", label: t("hero.cta2") },
   ] as const;
 
   return (
@@ -38,6 +39,9 @@ export function SiteHeader() {
         </div>
 
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
+          <Link to="/upload" className="transition-colors hover:text-foreground">
+            {t("nav.calc")}
+          </Link>
           <Link to="/" hash="how" className="transition-colors hover:text-foreground">
             {t("nav.how")}
           </Link>
@@ -47,12 +51,15 @@ export function SiteHeader() {
           <Link to="/hjelp" className="transition-colors hover:text-foreground">
             {t("nav.help")}
           </Link>
-          <Link to="/contact" className="transition-colors hover:text-foreground">
-            {t("nav.contact")}
-          </Link>
         </nav>
 
         <div className="flex items-center gap-2">
+          <Link
+            to="/for-flyttebyraer"
+            className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground lg:inline"
+          >
+            {t("hero.cta2")}
+          </Link>
           <LanguageToggle />
           {session ? (
             <Button asChild size="sm">

@@ -64,25 +64,29 @@ export const dict: Dict = {
   "nav.pricing": { no: "Priser", en: "Pricing" },
   "nav.login": { no: "Logg inn", en: "Log in" },
   "nav.dashboard": { no: "Dashbord", en: "Dashboard" },
-  "nav.tryFree": { no: "Prøv gratis", en: "Try for free" },
+  "nav.tryFree": { no: "Få tilbud", en: "Get quotes" },
+  "nav.calc": { no: "Beregn volum", en: "Calculate volume" },
 
   "hero.badge": {
-    no: "Volumkalkulator med sjekkliste",
-    en: "Checklist-based volume calculator",
+    no: "Gratis volumberegning for flytting",
+    en: "Free moving volume calculator",
   },
   "hero.title1": {
-    no: "Klar flyttevolum på minutter",
-    en: "Clear moving volume in minutes",
+    no: "Få flyttetilbud på 5 minutter.",
+    en: "Get moving quotes in 5 minutes.",
   },
   "hero.title2": {
-    no: "– rom for rom",
-    en: "– room by room",
+    no: "Vi regner ut volumet for deg.",
+    en: "We work out the volume for you.",
   },
   "hero.sub": {
-    no: "Velg gjenstander fra sjekklisten, få nøyaktig m³-estimat og delbar rapport. Perfekt for privatpersoner og flyttefirmaer.",
-    en: "Pick items from the checklist, get an accurate m³ estimate and a shareable report. Perfect for households and moving companies.",
+    no: "Velg det du skal ha med, rom for rom. Du ser hvor stor bil du trenger, og kan sende forespørselen videre til flyttefirmaer med adresser og dato klare.",
+    en: "Pick what you are taking, room by room. You see what size of van you need and can send your request on to moving companies, with addresses and date ready.",
   },
-  "hero.cta": { no: "Start en gratis beregning", en: "Start a free estimate" },
+  "hero.s1": { no: "minutter til volumet er klart", en: "minutes until your volume is ready" },
+  "hero.s2": { no: "gjenstander å velge mellom", en: "items to choose from" },
+  "hero.s3": { no: "språk i rapporten", en: "languages in the report" },
+  "hero.cta": { no: "Beregn volum og få tilbud", en: "Calculate volume and get quotes" },
   "hero.cta2": { no: "For flyttebyråer", en: "For moving companies" },
   "hero.stat1": { no: "raskere enn befaring", en: "faster than a survey" },
   "hero.stat2": {
@@ -96,32 +100,32 @@ export const dict: Dict = {
   },
 
   "how.title": {
-    no: "Fra sjekkliste til rapport i tre steg",
-    en: "From checklist to report in three steps",
+    no: "Fra «jeg skal flytte» til tilbud i tre steg",
+    en: "From “I'm moving” to quotes in three steps",
   },
   "how.1t": {
-    no: "Velg rom og gjenstander",
-    en: "Choose rooms and items",
+    no: "Velg gjenstander",
+    en: "Choose your items",
   },
   "how.1d": {
-    no: "Gå gjennom rommene og kryss av det som skal flyttes, eller legg til egne gjenstander med mål. Ingen app og ingen innlogging.",
-    en: "Go through the rooms and tick off what you are moving, or add your own items with dimensions. No app and no login needed.",
+    no: "Gå gjennom rommene og kryss av det som skal med, eller legg til egne ting med mål. Du ser volumet og hvor stor bil du trenger underveis. Ingen app.",
+    en: "Go through the rooms and tick off what is coming with you, or add your own things with dimensions. You see the volume and the van size you need as you go. No app.",
   },
   "how.2t": {
-    no: "Se volum og anbefalt bil",
-    en: "See volume and recommended vehicle",
+    no: "Legg inn adresser og dato",
+    en: "Add addresses and date",
   },
   "how.2d": {
-    no: "Få nettovolum, anbefalt volum med 25 % pakkebuffer og forslag til bilstørrelse, oppdatert underveis.",
-    en: "Get net volume, recommended volume with a 25 % packing buffer and a suggested vehicle size, updated as you go.",
+    no: "Fortell hvor du flytter fra og til, når du vil flytte og hvordan firmaene kan nå deg. Etasje og heis hjelper dem å gi riktig pris.",
+    en: "Tell us where you are moving from and to, when, and how companies can reach you. Floor and lift details help them quote the right price.",
   },
   "how.3t": {
-    no: "Del rapporten eller send til flyttefirma",
-    en: "Share the report or send it to a moving company",
+    no: "Få tilbud eller last ned rapport",
+    en: "Get quotes or download the report",
   },
   "how.3d": {
-    no: "Last ned PDF på ditt språk, del en privat lenke eller send forespørselen rett til et flyttefirma med adresser og kontaktinfo.",
-    en: "Download a PDF in your language, share a private link, or send the request straight to a moving company with addresses and contact details.",
+    no: "Send forespørselen til flyttefirmaer, last ned en PDF på ditt språk eller del en privat lenke.",
+    en: "Send your request to moving companies, download a PDF in your language, or share a private link.",
   },
 
   "feat.title": { no: "Bygget for flyttebransjen", en: "Built for the moving industry" },
@@ -154,6 +158,20 @@ export const dict: Dict = {
     no: "Opprett konto og del din første kundelenke i dag.",
     en: "Create an account and share your first customer link today.",
   },
+  "cta.p.title": { no: "Klar til å få tilbud på flyttingen?", en: "Ready to get quotes for your move?" },
+  "cta.p.sub": {
+    no: "Det tar noen minutter å regne ut volumet. Deretter velger du selv hvilke firmaer som får forespørselen.",
+    en: "Working out the volume takes a few minutes. Then you choose which companies receive your request.",
+  },
+  "agency.strip": { no: "Er du flyttebyrå?", en: "Are you a moving company?" },
+  "next.title": { no: "Neste steg", en: "Next steps" },
+  "next.sub": {
+    no: "Volumet er klart. Slik kommer du videre med flyttingen:",
+    en: "Your volume is ready. Here is how to move on with your move:",
+  },
+  "next.send": { no: "Send til flyttefirmaer", en: "Send to moving companies" },
+  "next.pdf": { no: "Last ned PDF", en: "Download PDF" },
+  "next.link": { no: "Kopier privat lenke", en: "Copy private link" },
 
 
   "upload.failed": {
@@ -348,7 +366,7 @@ export const dict: Dict = {
   "rep.saved": { no: "Lagret", en: "Saved" },
 
   "rep.viewCustomer": { no: "Kunde-visning", en: "Customer view" },
-  "rep.viewBusiness": { no: "Bedrifts-visning", en: "Business view" },
+  "rep.viewBusiness": { no: "Byrå-visning", en: "Agency view" },
   "rep.internalTitle": { no: "Intern kalkyle & notater", en: "Internal calculation & notes" },
   "rep.hourly": { no: "Timepris", en: "Hourly rate" },
   "rep.hours": { no: "Estimerte timer", en: "Estimated hours" },
