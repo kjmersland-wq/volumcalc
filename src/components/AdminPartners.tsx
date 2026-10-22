@@ -8,7 +8,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { adminListPartners, adminSavePartner, type AdminPartnerRow } from "@/lib/admin.functions";
+import {
+  adminImportPartners,
+  adminListPartners,
+  adminSavePartner,
+  type AdminPartnerRow,
+} from "@/lib/admin.functions";
 import { ROUTE_COUNTRIES } from "@/lib/countries";
 import { useI18n } from "@/lib/i18n";
 
@@ -52,6 +57,49 @@ const splitList = (value: string, upper: boolean) =>
     .map((v) => (upper ? v.toUpperCase() : v.toLowerCase()).trim())
     .filter(Boolean);
 
+type ImportRow = {
+  name: string;
+  lead_email: string;
+  country_code: string;
+  serves_from: string[];
+  serves_to: string[];
+  min_m3: number | null;
+  max_m3: number | null;
+  languages: string[];
+};
+
+/**
+ * One partner per line: name; e-mail; country; picks up in; delivers to; min m3; max m3; languages.
+ * Everything after the country is optional. Empty "picks up in" means the home country,
+ * empty "delivers to" means every route country.
+ */
+function parseImport(text: string): { rows: ImportRow[]; bad: number } {
+  const rows: ImportRow[] = [];
+  let bad = 0;
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const cols = line.split(line.includes(";") ? ";" : ",").map((c) => c.trim());
+    const [name = "", email = "", country = "", from = "", to = "", min = "", max = "", langs = ""] = cols;
+    const code = country.toUpperCase();
+    if (!name || !/^\S+@\S+\.\S+$/.test(email) || !/^[A-Z]{2}$/.test(code)) {
+      bad += 1;
+      continue;
+    }
+    rows.push({
+      name,
+      lead_email: email,
+      country_code: code,
+      serves_from: from ? splitList(from, true) : [code],
+      serves_to: to ? splitList(to, true) : [...ROUTE_COUNTRIES],
+      min_m3: min === "" || Number.isNaN(Number(min)) ? null : Number(min),
+      max_m3: max === "" || Number.isNaN(Number(max)) ? null : Number(max),
+      languages: langs ? splitList(langs, false) : [],
+    });
+  }
+  return { rows, bad };
+}
+
 const toForm = (p: AdminPartnerRow): PartnerForm => ({
   id: p.id,
   name: p.name,
@@ -79,6 +127,24 @@ export function AdminPartners({ enabled }: { enabled: boolean }) {
   const [form, setForm] = useState<PartnerForm>(emptyPartner);
   const set = <K extends keyof PartnerForm>(key: K, value: PartnerForm[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+
+  const importFn = useServerFn(adminImportPartners);
+  const [importText, setImportText] = useState("");
+  const [importActive, setImportActive] = useState(true);
+  const parsed = parseImport(importText);
+  const importMutation = useMutation({
+    mutationFn: () => importFn({ data: { rows: parsed.rows.slice(0, 300), active: importActive } }),
+    onSuccess: (result) => {
+      toast.success(
+        no
+          ? `${result.inserted} lagt til, ${result.skipped} fantes fra før`
+          : `${result.inserted} added, ${result.skipped} already existed`,
+      );
+      setImportText("");
+      void queryClient.invalidateQueries({ queryKey: ["admin-partners"] });
+    },
+    onError: () => toast.error(no ? "Importen feilet. Sjekk radene." : "Import failed. Check the rows."),
+  });
 
   const partners = useQuery({
     queryKey: ["admin-partners"],
@@ -181,6 +247,44 @@ export function AdminPartners({ enabled }: { enabled: boolean }) {
           )}
         </div>
       </form>
+
+      <div className="mt-8 rounded-lg border border-border p-4">
+        <h3 className="text-sm font-semibold">{no ? "Importer flere partnere" : "Import several partners"}</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {no
+            ? "Én partner per linje: navn; e-post; land; henter fra; leverer til; min m³; maks m³; språk. Alt etter land er valgfritt (tomt «henter fra» = hjemlandet, tomt «leverer til» = alle land). Legg bare inn firmaer og adresser du har lov til å bruke."
+            : "One partner per line: name; e-mail; country; picks up in; delivers to; min m³; max m³; languages. Everything after the country is optional (empty pick-up = home country, empty delivery = all countries). Only add companies and addresses you may use."}
+        </p>
+        <Textarea
+          rows={5}
+          className="mt-3 font-mono text-xs"
+          placeholder="Eksempel AS; post@eksempel.no; NO; NO,SE; PL,DE,NL; 5; 80; no,en"
+          value={importText}
+          onChange={(e) => setImportText(e.target.value)}
+        />
+        <div className="mt-3 flex flex-wrap items-center gap-4">
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox checked={importActive} onCheckedChange={(on) => setImportActive(on === true)} />
+            {no ? "Aktiver direkte" : "Activate immediately"}
+          </label>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={parsed.rows.length === 0 || importMutation.isPending}
+            onClick={() => importMutation.mutate()}
+          >
+            {importMutation.isPending && <Loader2 className="size-4 animate-spin" />}
+            {no ? `Importer ${parsed.rows.length} partnere` : `Import ${parsed.rows.length} partners`}
+          </Button>
+          {parsed.bad > 0 && (
+            <span className="text-xs text-warning-foreground">
+              {no
+                ? `${parsed.bad} linjer ble ignorert (mangler navn, e-post eller landkode)`
+                : `${parsed.bad} lines skipped (missing name, e-mail or country code)`}
+            </span>
+          )}
+        </div>
+      </div>
 
       <div className="mt-8">
         {partners.isLoading ? (

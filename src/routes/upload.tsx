@@ -768,14 +768,21 @@ function CalculatorPage() {
 
             <div className="sticky bottom-0 -mx-4 mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border">
               <div className="text-sm">
-                <p className="font-semibold">
-                  {T("netRec", { a: fmt(total.nettoM3), b: fmt(total.anbefaltM3), c: total.totalKg })}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {T("itemsChosen", { n: chosenCount })}
-                  {total.detaljer.length > 0 && <> · {translate(vehicleKey, lang)}</>}
-                  {maybeTotal.nettoM3 > 0 && <> · {T("ofWhichMaybe", { n: fmt(maybeTotal.nettoM3) })}</>}
-                </p>
+                <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+                  <p className="font-semibold">
+                    {fmt(total.anbefaltM3)} m³{" "}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      {T("netShort")} {fmt(total.nettoM3)} · {total.totalKg} kg
+                    </span>
+                  </p>
+                  <p>{T("itemsChosen", { n: chosenCount })}</p>
+                  <p className="font-semibold">
+                    {T("recVehicle")}: {total.detaljer.length > 0 ? translate(vehicleKey, lang) : "—"}
+                  </p>
+                </div>
+                {maybeTotal.nettoM3 > 0 && (
+                  <p className="text-xs text-muted-foreground">{T("ofWhichMaybe", { n: fmt(maybeTotal.nettoM3) })}</p>
+                )}
               </div>
               <div className="flex gap-2">
                 {chosenCount > 0 && (

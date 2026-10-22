@@ -260,3 +260,56 @@ export const adminSavePartner = createServerFn({ method: "POST" })
     if (error) throw new Error("Could not save the partner");
     return { ok: true };
   });
+
+const importRowSchema = z.object({
+  name: z.string().trim().min(1).max(160),
+  lead_email: z.string().trim().email().max(180),
+  country_code: z.string().trim().regex(/^[A-Z]{2}$/),
+  serves_from: isoList,
+  serves_to: isoList,
+  min_m3: z.number().min(0).max(100000).nullable(),
+  max_m3: z.number().min(0).max(100000).nullable(),
+  languages: z.array(z.string().trim().regex(/^[a-z]{2}$/)).max(12),
+});
+
+const importSchema = z.object({
+  rows: z.array(importRowSchema).min(1).max(300),
+  active: z.boolean(),
+});
+
+/**
+ * Bulk-adds partners (e.g. from a CSV). Rows whose lead e-mail already exists
+ * are skipped. Imported rows carry no agreement date: that is set per partner
+ * once the company has actually agreed to receive requests. Admin only.
+ */
+export const adminImportPartners = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => importSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as any);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const db = supabaseAdmin as unknown as LooseDb;
+
+    const { data: existing, error: readError } = await db.from("partners").select("lead_email");
+    if (readError) throw new Error("Could not read existing partners");
+    const known = new Set(((existing ?? []) as { lead_email: string }[]).map((r) => r.lead_email.toLowerCase()));
+
+    const fresh: typeof data.rows = [];
+    let skipped = 0;
+    for (const row of data.rows) {
+      const key = row.lead_email.toLowerCase();
+      if (known.has(key)) {
+        skipped += 1;
+        continue;
+      }
+      known.add(key);
+      fresh.push(row);
+    }
+    if (fresh.length) {
+      const { error } = await db
+        .from("partners")
+        .insert(fresh.map((row) => ({ ...row, active: data.active, priority: 100 })));
+      if (error) throw new Error("Could not import the partners");
+    }
+    return { inserted: fresh.length, skipped };
+  });
