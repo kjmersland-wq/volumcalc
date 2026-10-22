@@ -179,6 +179,23 @@ export const dict: Dict = {
   "ins.line.yes": { no: "Transportforsikring: Ja", en: "Transport insurance: Yes" },
   "ins.line.no": { no: "Transportforsikring: Nei", en: "Transport insurance: No" },
   "next.send": { no: "Send til flyttefirmaer", en: "Send to moving companies" },
+  "tm.title": { no: "Best vurderte flyttefirmaer for ruten din", en: "Best-rated movers for your route" },
+  "tm.sub": {
+    no: "De fem høyest vurderte firmaene som tar internasjonale flyttinger fra stedet ditt. Velg hvem som skal få rapporten, så sender vi forespørselen for deg.",
+    en: "The five highest-rated companies that handle international moves from where you live. Choose who gets the report and we send the request for you.",
+  },
+  "tm.loading": { no: "Finner de beste firmaene …", en: "Finding the best companies …" },
+  "tm.none": {
+    no: "Vi fant ingen godt vurderte firmaer for denne ruten ennå. Prøv et annet land, eller bruk «Send til et annet firma» under.",
+    en: "We found no well-rated companies for this route yet. Try another country, or use “Send to another company” below.",
+  },
+  "tm.reviews": { no: "omtaler", en: "reviews" },
+  "tm.website": { no: "Nettside", en: "Website" },
+  "tm.contact": { no: "Kontakt firmaet", en: "Contact the company" },
+  "tm.source": {
+    no: "Vurderinger fra Google. Firmaer uten e-post på sin nettside kontakter du selv via kontaktsiden deres.",
+    en: "Ratings from Google. For companies without an e-mail on their site, use their own contact page.",
+  },
   "pm.title": { no: "Relevante firmaer", en: "Relevant companies" },
   "pm.sub": {
     no: "Firmaer som flytter på din rute og tar et volum som ditt. Velg hvem som skal få rapporten.",

@@ -11,7 +11,7 @@ import { accessLine, composeMail, type Facts, type MailInput } from "@/lib/outre
  * tables the queries below go through this loosely typed handle.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type LooseDb = { from: (table: string) => any };
+export type LooseDb = { from: (table: string) => any };
 
 const MAX_MATCHES = 5;
 const MAX_REQUESTS_PER_ESTIMATE = 10;
@@ -39,7 +39,7 @@ type PartnerRow = {
   priority: number;
 };
 
-type EstimateRow = {
+export type EstimateRow = {
   id: string;
   share_token: string;
   total_volume_m3: number | string | null;
@@ -62,12 +62,12 @@ type EstimateRow = {
 const ESTIMATE_COLUMNS =
   "id,share_token,total_volume_m3,report_title,customer_name,move_from,move_to,move_distance_km,access_floor,has_elevator,carry_distance_m,delivery_floor,delivery_elevator,delivery_carry_distance,move_from_country,move_to_country,transport_insurance";
 
-async function getDb(): Promise<LooseDb> {
+export async function getDb(): Promise<LooseDb> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   return supabaseAdmin as unknown as LooseDb;
 }
 
-async function loadEstimate(db: LooseDb, id: string, token: string): Promise<EstimateRow> {
+export async function loadEstimate(db: LooseDb, id: string, token: string): Promise<EstimateRow> {
   const { data } = await db.from("estimates").select(ESTIMATE_COLUMNS).eq("id", id).maybeSingle();
   if (!data || data.share_token !== token) throw new Error("Invalid report link");
   return data as EstimateRow;
@@ -178,7 +178,7 @@ const sendSchema = z.object({
   consent: z.literal(true),
 });
 
-function insuranceLine(lang: MailInput["lang"], insurance: boolean | null): string | null {
+export function insuranceLine(lang: MailInput["lang"], insurance: boolean | null): string | null {
   if (insurance === null) return null;
   const text = {
     no: insurance ? "Transportforsikring ønskes inkludert i tilbudet." : "Transportforsikring er ikke ønsket.",
