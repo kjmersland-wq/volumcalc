@@ -22,10 +22,10 @@ const schema = z.object({
     .optional(),
 });
 
-type MailInput = z.infer<typeof schema>;
+export type MailInput = z.infer<typeof schema>;
 type MailLang = MailInput["lang"];
 
-type Facts = {
+export type Facts = {
   title: string;
   volume: number;
   from: string | null;
@@ -44,7 +44,7 @@ function liftText(lang: MailLang, value: boolean | null | undefined) {
   return value ? "with a lift" : "no lift";
 }
 
-function accessLine(
+export function accessLine(
   lang: MailLang,
   floor: string | number | null | undefined,
   elevator: boolean | null | undefined,
@@ -68,7 +68,7 @@ function accessLine(
  * Plain, friendly wording written by hand in each language — deliberately not
  * a stiff form letter. The customer is a person asking for help with a move.
  */
-function composeMail(lang: MailLang, facts: Facts, input: MailInput): { subject: string; text: string } {
+export function composeMail(lang: MailLang, facts: Facts, input: MailInput): { subject: string; text: string } {
   const fmt = (n: number) => formatDuration(n, HOURS[lang], "min");
   const m3 = `${Math.round(facts.volume * 10) / 10} m³`;
   const route = facts.from && facts.to ? `${facts.from} → ${facts.to}` : facts.from || facts.to;

@@ -110,6 +110,9 @@ const createSchema = z.object({
   from: siteSchema.optional(),
   to: siteSchema.optional(),
   report_language: z.string().trim().max(5).optional(),
+  from_country: z.string().trim().regex(/^[A-Z]{2}$/).optional(),
+  to_country: z.string().trim().regex(/^[A-Z]{2}$/).optional(),
+  transport_insurance: z.boolean().optional(),
   move_date: z
     .string()
     .trim()
@@ -220,6 +223,12 @@ export const createEstimate = createServerFn({ method: "POST" })
         delivery_carry_distance: to.carry_m != null ? String(to.carry_m) : null,
         delivery_notes: withMobile(to.mobile, undefined),
         ...(data.report_language ? { report_language: data.report_language } : {}),
+        // Columns from migration 20261013090000; not in the generated types yet.
+        ...({
+          ...(data.from_country ? { move_from_country: data.from_country } : {}),
+          ...(data.to_country ? { move_to_country: data.to_country } : {}),
+          ...(data.transport_insurance !== undefined ? { transport_insurance: data.transport_insurance } : {}),
+        } as Record<string, unknown>),
       })
       .select("id,share_token")
       .single();
