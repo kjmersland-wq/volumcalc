@@ -2,7 +2,7 @@
 -- quote requests, matched on route (from/to country) and volume.
 -- lead_email is only ever read server-side with the service role.
 
-CREATE TABLE public.partners (
+CREATE TABLE IF NOT EXISTS public.partners (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
   website text,
@@ -21,11 +21,12 @@ CREATE TABLE public.partners (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX partners_active_idx ON public.partners (active, priority);
+CREATE INDEX IF NOT EXISTS partners_active_idx ON public.partners (active, priority);
 
 GRANT ALL ON public.partners TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.partners TO authenticated;
 ALTER TABLE public.partners ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Admins manage partners" ON public.partners;
 CREATE POLICY "Admins manage partners"
   ON public.partners FOR ALL TO authenticated
   USING (public.has_role(auth.uid(), 'admin'))
@@ -34,7 +35,7 @@ CREATE POLICY "Admins manage partners"
 -- One row per quote request sent to a partner (separate from public.quote_requests,
 -- which holds customer requests sent to a moving company account): audit trail, consent record and
 -- protection against sending the same report to the same partner twice.
-CREATE TABLE public.partner_quote_requests (
+CREATE TABLE IF NOT EXISTS public.partner_quote_requests (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   estimate_id uuid NOT NULL REFERENCES public.estimates(id) ON DELETE CASCADE,
   partner_id uuid NOT NULL REFERENCES public.partners(id) ON DELETE CASCADE,
@@ -46,11 +47,12 @@ CREATE TABLE public.partner_quote_requests (
   UNIQUE (estimate_id, partner_id)
 );
 
-CREATE INDEX partner_quote_requests_estimate_idx ON public.partner_quote_requests (estimate_id);
+CREATE INDEX IF NOT EXISTS partner_quote_requests_estimate_idx ON public.partner_quote_requests (estimate_id);
 
 GRANT ALL ON public.partner_quote_requests TO service_role;
 GRANT SELECT ON public.partner_quote_requests TO authenticated;
 ALTER TABLE public.partner_quote_requests ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Admins read partner quote requests" ON public.partner_quote_requests;
 CREATE POLICY "Admins read partner quote requests"
   ON public.partner_quote_requests FOR SELECT TO authenticated
   USING (public.has_role(auth.uid(), 'admin'));
@@ -58,6 +60,6 @@ CREATE POLICY "Admins read partner quote requests"
 -- Route and insurance choice stored on the estimate itself so they follow the
 -- report to every device and into the request sent to movers.
 ALTER TABLE public.estimates
-  ADD COLUMN move_from_country char(2) CHECK (move_from_country IS NULL OR move_from_country = upper(move_from_country)),
-  ADD COLUMN move_to_country char(2) CHECK (move_to_country IS NULL OR move_to_country = upper(move_to_country)),
-  ADD COLUMN transport_insurance boolean;
+  ADD COLUMN IF NOT EXISTS move_from_country char(2) CHECK (move_from_country IS NULL OR move_from_country = upper(move_from_country)),
+  ADD COLUMN IF NOT EXISTS move_to_country char(2) CHECK (move_to_country IS NULL OR move_to_country = upper(move_to_country)),
+  ADD COLUMN IF NOT EXISTS transport_insurance boolean;

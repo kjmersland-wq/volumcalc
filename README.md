@@ -16,14 +16,25 @@ cp .env.example .env   # fyll ut verdiene
 bun run dev
 ```
 
-## Oppsett fra bunnen av (sjekkliste)
+## Oppsett fra bunnen av
 
-Gjør dette i rekkefølge første gang. Alt under er nødvendig for at hele appen skal virke.
+### Automatisk (anbefalt): Supabase via Vercel
+
+1. I Vercel: **Storage → Create Database → Supabase** (eller `vercel integration add supabase`). Godta vilkårene. Vercel oppretter Supabase-prosjektet og legger variablene inn i prosjektet selv (`SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `POSTGRES_URL_NON_POOLING` med flere). Appen godtar disse navnene, så du trenger ikke `VITE_`-variablene.
+2. **Redeploy.** Under byggingen kjører `scripts/apply-schema.mjs` og lager alle tabeller, policyer og funksjoner hvis databasen er tom. Den gjør ingenting hvis alt allerede finnes, så den kan kjøre ved hvert bygg.
+3. Gjør resten manuelt: punkt 1.4–1.7 under (Google, e-post, administrator), Paddle (punkt 3) og e-post (punkt 4).
+4. Legg inn Paddle og e-post i Vercel (se tabellen): `PADDLE_*`, `RESEND_*` eller `MIGADU_SMTP_*`, `PUBLIC_SITE_URL`.
+
+Merk: Supabase-prosjekter på gratis-planen pauses etter en uke uten aktivitet, og Vercel Hobby tillater ikke kommersiell bruk. For en ekte butikk trengs betalte planer.
+
+### Manuelt (alternativ)
+
+Bruk dette hvis du vil styre Supabase selv. Gjør det i rekkefølge første gang.
 
 ### 1. Supabase
 
 1. Lag et nytt prosjekt på supabase.com.
-2. Åpne **SQL Editor**, lim inn hele `supabase/schema_from_scratch.sql` og kjør den **én gang**. Den lager alle tabeller, policyer og funksjoner (inkludert `has_role`). Ikke kjør filene i `supabase/migrations` i tillegg.
+2. Åpne **SQL Editor**, lim inn hele `supabase/schema_from_scratch.sql` og kjør den **én gang** (ikke nødvendig hvis du bruker den automatiske veien, da lager byggingen skjemaet). Den lager alle tabeller, policyer og funksjoner (inkludert `has_role`). Ikke kjør filene i `supabase/migrations` i tillegg.
 3. **Project Settings → API:** kopier prosjekt-URL, `publishable`-nøkkelen og `service_role`-nøkkelen (hemmelig).
 4. **Authentication → URL Configuration:** sett *Site URL* til `https://www.volumcalc.com` og legg til `https://www.volumcalc.com/**` og `http://localhost:3000/**` under *Redirect URLs*.
 5. **Authentication → Providers → Google:** slå på og lim inn Client ID og Secret fra en OAuth-klient i Google Cloud (autorisert redirect-URI står i Supabase-skjermbildet). Uten dette virker ikke «Logg inn med Google».
@@ -59,7 +70,7 @@ Gjør dette i rekkefølge første gang. Alt under er nødvendig for at hele appe
 | `MIGADU_SMTP_HOST` / `_PORT` / `_USER` / `_PASSWORD` | Alternativ til Resend (brukes hvis `RESEND_API_KEY` mangler) | Passord: **Ja** |
 | `CONTACT_RECIPIENT_EMAIL` | Mottaker for kontaktskjemaet (standard `kjmersland@gmail.com`) | Nei |
 
-Bygget **feiler med vilje** hvis `VITE_SUPABASE_URL` eller `VITE_SUPABASE_PUBLISHABLE_KEY` mangler, i stedet for å bruke feil database. Den forrige live-versjonen blir da stående.
+Bygget **feiler med vilje** hvis Supabase-URL og nøkkel mangler (enten `VITE_SUPABASE_*` eller integrasjonens variabler), i stedet for å bruke feil database. Den forrige live-versjonen blir da stående.
 
 ### 3. Paddle
 
@@ -96,6 +107,6 @@ Logg inn som admin og åpne `/dashboard/admin`. Der legger du inn flyttefirmaer 
 ## Utvikling
 
 - `main` er produksjon og bygges automatisk av Vercel. Ikke skriv om historikk som er pushet.
-- Databaseendringer legges som nye filer i `supabase/migrations`. `supabase/schema_from_scratch.sql` er alle migrasjonene samlet for et tomt prosjekt; lag den på nytt etter at du har lagt til en migrasjon.
+- Databaseendringer legges som nye filer i `supabase/migrations`. `supabase/schema_from_scratch.sql` er alle migrasjonene samlet for et tomt prosjekt og brukes av `scripts/apply-schema.mjs`; lag den på nytt etter at du har lagt til en migrasjon.
 - Typer: `src/integrations/supabase/types.ts` genereres med `supabase gen types typescript`. Partnertabellene er ikke med ennå, og koden bruker en løst typet håndtering til de er regenerert.
 - Se `CLAUDE.md` for regler om hva som ikke skal endres uten eksplisitt beskjed.

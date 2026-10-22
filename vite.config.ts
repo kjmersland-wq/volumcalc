@@ -9,13 +9,21 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 // Public (publishable) Supabase values, baked into the browser bundle at build time.
 // They must come from the hosting environment (Vercel: Settings -> Environment Variables);
 // there is deliberately no fallback, so a build can never silently talk to the wrong project.
-const SUPABASE_URL = process.env["VITE_SUPABASE_URL"];
-const SUPABASE_PUBLISHABLE_KEY = process.env["VITE_SUPABASE_PUBLISHABLE_KEY"];
+// The Vercel Supabase integration provides NEXT_PUBLIC_SUPABASE_URL / *_ANON_KEY (and SUPABASE_URL /
+// SUPABASE_ANON_KEY); all of these names are accepted, so nothing has to be copied by hand.
+const SUPABASE_URL =
+  process.env["VITE_SUPABASE_URL"] || process.env["NEXT_PUBLIC_SUPABASE_URL"] || process.env["SUPABASE_URL"];
+const SUPABASE_PUBLISHABLE_KEY =
+  process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ||
+  process.env["NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"] ||
+  process.env["NEXT_PUBLIC_SUPABASE_ANON_KEY"] ||
+  process.env["SUPABASE_PUBLISHABLE_KEY"] ||
+  process.env["SUPABASE_ANON_KEY"];
 
 if ((process.env["VERCEL"] || process.env["CI"]) && (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY)) {
   throw new Error(
-    "Missing VITE_SUPABASE_URL and/or VITE_SUPABASE_PUBLISHABLE_KEY. Add them in Vercel -> Settings -> " +
-      "Environment Variables (Production and Preview), then redeploy. See README.md.",
+    "Missing the Supabase URL and/or publishable key. Install the Supabase integration in Vercel (Storage), or add " +
+      "VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY under Settings -> Environment Variables. See README.md.",
   );
 }
 
