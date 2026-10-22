@@ -66,15 +66,6 @@ function AuthPage() {
     }
   }
 
-  async function google() {
-    // Needs the Google provider enabled in Supabase (Authentication -> Providers).
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/dashboard` },
-    });
-    if (error) toast.error(error.message ?? "Google sign-in failed");
-  }
-
   return (
     <div className="surface-hero flex min-h-screen items-center justify-center px-4 py-12">
       <div className="card-soft w-full max-w-md p-8">
@@ -118,16 +109,6 @@ function AuthPage() {
             {mode === "signin" ? t("auth.signin") : t("auth.signup")}
           </Button>
         </form>
-
-        <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="h-px flex-1 bg-border" />
-          or
-          <span className="h-px flex-1 bg-border" />
-        </div>
-
-        <Button variant="outline" className="w-full" onClick={google}>
-          {t("auth.google")}
-        </Button>
 
         <button
           type="button"
