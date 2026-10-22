@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ExternalLink, Loader2, Mail, Plus, Trash2 } from "lucide-react";
+import { Loader2, Mail, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MOVERS, MOVER_COUNTRIES } from "@/lib/movers";
 import { sendEstimateToMovers } from "@/lib/outreach.functions";
 
 type Row = { company: string; email: string };
@@ -49,11 +48,10 @@ function insuranceLine(lang: MailLang, insurance: boolean | undefined): string {
   return text[lang];
 }
 
-/** Catalogue of movers that accept tenders + email delivery of the report. */
+/** E-mail delivery of the report to any moving company the customer found and typed in. */
 export function MoverOutreach({ estimateId, token, rt, defaultLang, insurance, time }: Props) {
   const send = useServerFn(sendEstimateToMovers);
-  const [country, setCountry] = useState("all");
-  const [rows, setRows] = useState<Row[]>([]);
+  const [rows, setRows] = useState<Row[]>([{ company: "", email: "" }]);
   const [name, setName] = useState("");
   const [replyTo, setReplyTo] = useState("");
   const [message, setMessage] = useState("");
@@ -61,15 +59,6 @@ export function MoverOutreach({ estimateId, token, rt, defaultLang, insurance, t
   const [mailLang, setMailLang] = useState<MailLang>(
     MAIL_LANGS.some((l) => l.value === defaultLang) ? (defaultLang as MailLang) : "en",
   );
-
-  const list = useMemo(
-    () => (country === "all" ? MOVERS : MOVERS.filter((m) => m.country === country)),
-    [country],
-  );
-
-  function addRow(company: string) {
-    setRows((prev) => (prev.some((r) => r.company === company) ? prev : [...prev, { company, email: "" }]));
-  }
 
   async function submit() {
     const recipients = rows.map((r) => r.email.trim()).filter(Boolean);
@@ -110,55 +99,20 @@ export function MoverOutreach({ estimateId, token, rt, defaultLang, insurance, t
       </div>
       <p className="mt-1 text-sm text-muted-foreground">{rt("mov.sub")}</p>
 
-      <div className="mt-4 max-w-xs">
-        <Label htmlFor="mov-country">{rt("mov.country")}</Label>
-        <Select value={country} onValueChange={setCountry}>
-          <SelectTrigger id="mov-country" className="mt-1.5">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{rt("mov.allCountries")}</SelectItem>
-            {MOVER_COUNTRIES.map((c) => (
-              <SelectItem key={c} value={c}>
-                {c}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        {list.map((mover) => (
-          <div
-            key={mover.name}
-            className="flex items-center justify-between gap-3 rounded-lg border border-border p-3"
-          >
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">
-                {mover.flag} {mover.name}
-              </p>
-              <p className="text-xs text-muted-foreground">{mover.country}</p>
-            </div>
-            <div className="flex shrink-0 items-center gap-1">
-              <Button asChild variant="ghost" size="sm">
-                <a href={mover.url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="size-4" />
-                </a>
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => addRow(mover.name)}>
-                <Plus className="size-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
-
       <div className="mt-6 space-y-3">
         <p className="text-sm font-medium">{rt("mov.listTitle")}</p>
         <p className="text-xs text-muted-foreground">{rt("mov.listHelp")}</p>
         {rows.map((row, index) => (
           <div key={row.company + index} className="flex items-center gap-2">
-            <span className="w-44 shrink-0 truncate text-sm">{row.company}</span>
+            <Input
+              className="w-44 shrink-0"
+              placeholder={rt("mov.company")}
+              value={row.company}
+              maxLength={120}
+              onChange={(e) =>
+                setRows((prev) => prev.map((r, i) => (i === index ? { ...r, company: e.target.value } : r)))
+              }
+            />
             <Input
               type="email"
               placeholder="post@firma.no"
@@ -176,7 +130,7 @@ export function MoverOutreach({ estimateId, token, rt, defaultLang, insurance, t
             </Button>
           </div>
         ))}
-        <Button variant="outline" size="sm" onClick={() => setRows((prev) => [...prev, { company: rt("mov.manual"), email: "" }])}>
+        <Button variant="outline" size="sm" onClick={() => setRows((prev) => [...prev, { company: "", email: "" }])}>
           <Plus className="size-4" />
           {rt("mov.addManual")}
         </Button>
