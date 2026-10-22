@@ -27,8 +27,8 @@ export const dict: Dict = {
   },
   "contact.send": { no: "Send melding", en: "Send message" },
   "contact.sent": {
-    no: "Takk! Meldingen er sendt til support@volumcalc.com. Vi svarer vanligvis innen én virkedag.",
-    en: "Thanks! Your message was sent to support@volumcalc.com. We usually reply within one business day.",
+    no: "Takk! Meldingen er sendt. Vi svarer vanligvis innen én virkedag.",
+    en: "Thanks! Your message was sent. We usually reply within one business day.",
   },
   "contact.sentTitle": { no: "Melding sendt", en: "Message sent" },
   "contact.another": { no: "Send en ny melding", en: "Send another message" },

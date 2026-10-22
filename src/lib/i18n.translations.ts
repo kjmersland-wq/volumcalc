@@ -417,7 +417,7 @@ export const extraTranslations: Record<
     "contact.message": "Besked",
     "contact.placeholder": "Fortæl os kort, hvad du har brug for – f.eks. månedlig flyttevolumen, en demovizning eller et teknisk spørgsmål.",
     "contact.send": "Send besked",
-    "contact.sent": "Tak! Din besked blev sendt til support@volumcalc.com. Vi svarer normalt inden for én arbejdsdag.",
+    "contact.sent": "Tak! Din besked blev sendt. Vi svarer normalt inden for én arbejdsdag.",
     "contact.sentTitle": "Besked sendt",
     "contact.another": "Send endnu en besked",
     "contact.error": "Der gik noget galt. Prøv igen eller send os en e-mail direkte.",
